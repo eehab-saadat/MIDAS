@@ -1,9 +1,20 @@
 // app/page.tsx
+"use client";
+
+import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PatientInfo } from "@/components/patient-info";
 import { ArrowLeft } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { AssetsTable } from "@/components/assets-table";
+import { AiSummary } from "@/components/ai-summary";
+import { PreviousSessionsTable } from "@/components/previous-sessions-table";
+import { SDOHForm } from "@/components/sdoh-form";
 
 export default function Home() {
+  const [selectedTab, setSelectedTab] = useState("assets");
+
   const greyBoxClasses =
     "bg-muted rounded-lg flex items-center justify-center p-[0.5vh] text-foreground text-sm";
   const blackBackgroundClasses =
@@ -51,8 +62,27 @@ export default function Home() {
                 email="john.doe@email.com"
               />
             </div>
-            <div className="flex-1 bg-card rounded-tl-lg rounded-tr-lg flex items-center justify-center p-[0.5vh] text-foreground text-sm">
-              Bottom Half
+            <div className="flex-1 bg-card rounded-tl-lg rounded-tr-lg p-[0.5vh]">
+              <Tabs
+                value={selectedTab}
+                onValueChange={setSelectedTab}
+                className="w-full h-full"
+              >
+                <TabsList className="grid w-full grid-cols-4 text-xs">
+                  <TabsTrigger className=" text-xs" value="ai-summary">
+                    Summary
+                  </TabsTrigger>
+                  <TabsTrigger className=" text-xs" value="previous-sessions">
+                    History
+                  </TabsTrigger>
+                  <TabsTrigger className=" text-xs" value="assets">
+                    Assets
+                  </TabsTrigger>
+                  <TabsTrigger className=" text-xs" value="sdoh">
+                    SDOH
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 
@@ -71,11 +101,14 @@ export default function Home() {
         {/* Bottom Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr mt-0 h-[33.5vh]">
           {/* Bottom Left Large Box (span 1 col on small, span 1 md, span 2 lg) */}
-          <div
-            className={`${greyBoxClasses} rounded-tl-none col-span-full md:col-span-1 lg:col-span-2 mr-1`}
-          >
-            Bottom Left Content
-          </div>
+          <Card className="rounded-tl-none col-span-full md:col-span-1 lg:col-span-2 mr-1 h-full p-0">
+            <CardContent className="h-full p-0">
+              {selectedTab === "assets" && <AssetsTable />}
+              {selectedTab === "ai-summary" && <AiSummary />}
+              {selectedTab === "previous-sessions" && <PreviousSessionsTable />}
+              {selectedTab === "sdoh" && <SDOHForm />}
+            </CardContent>
+          </Card>
 
           {/* Bottom Right Stacked Boxes (span 1 col on small, span 1 md, span 1 lg) */}
           {/* <div className="col-span-full md:col-span-1 flex flex-col gap-0 h-full self-end">
