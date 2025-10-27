@@ -62,15 +62,14 @@ export default function Home() {
           ></div>
 
           {/* Right Box (span 1 col on small, span 1 md, span 1 lg) */}
-          <div
-            className={`${greyBoxClasses} col-span-full md:col-span-1 h-[68vh]`}
-          >
-            Right Sidebar
+          <div className="col-span-full md:col-span-1 gap-0">
+            <div className={`${greyBoxClasses} h-[6vh] mb-1`}>Top Right</div>
+            <div className={`${greyBoxClasses} h-[86vh]`}>Bottom Right</div>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr mt-0 h-[35vh]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr mt-0 h-[33.5vh]">
           {/* Bottom Left Large Box (span 1 col on small, span 1 md, span 2 lg) */}
           <div
             className={`${greyBoxClasses} rounded-tl-none col-span-full md:col-span-1 lg:col-span-2 mr-1`}
@@ -79,14 +78,14 @@ export default function Home() {
           </div>
 
           {/* Bottom Right Stacked Boxes (span 1 col on small, span 1 md, span 1 lg) */}
-          <div className="col-span-full md:col-span-1 flex flex-col gap-0 h-[25vh] self-end">
+          {/* <div className="col-span-full md:col-span-1 flex flex-col gap-0 h-full self-end">
             <div className={`${greyBoxClasses} flex-1 mb-1`}>
               Bottom Right Top
             </div>
             <div className={`${greyBoxClasses} flex-1`}>
               Bottom Right Bottom
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
