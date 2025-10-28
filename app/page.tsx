@@ -13,6 +13,7 @@ import { PreviousSessionsTable } from "@/components/previous-sessions-table";
 import { SDOHForm } from "@/components/sdoh-form";
 import { SessionInstance } from "@/components/session-instance";
 import { AIDiagnosis } from "@/components/ai-diagnosis";
+import Link from "next/link";
 
 interface MedicalEntry {
   id: string;
@@ -46,9 +47,12 @@ export default function Home() {
         {/* Top Header Section */}
         <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
           <div className="flex items-center">
-            <div className="bg-card rounded-full p-1 mr-4 border">
-              <ArrowLeft className="h-4 w-4" />
-            </div>
+            <Link
+              href="/patients"
+              className="bg-card rounded-full p-1 mr-4 border hover:bg-muted transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
             <div>
               <div className="text-sm">Patient List</div>
               {/* <div className="text-sm">NRN: 123456789</div> */}

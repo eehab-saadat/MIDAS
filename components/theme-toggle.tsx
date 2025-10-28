@@ -32,13 +32,29 @@ export function ThemeToggle() {
   };
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme}>
+    // <Button
+    //   variant="default"
+    //   size="icon"
+    //   onClick={toggleTheme}
+    //   className="bg-card dark:bg-card rounded-br-none rounded-bl-none"
+    // >
+    //   {theme === "light" ? (
+    //     <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+    //   ) : (
+    //     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+    //   )}
+    //   <span className="sr-only">Toggle theme</span>
+    // </Button>
+    <div
+      className="bg-card rounded-full p-1 mr-4 hover:bg-muted transition-colors"
+      onClick={toggleTheme}
+    >
+      {/* <ArrowLeft className="h-4 w-4" /> */}
       {theme === "light" ? (
-        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Sun className="h-5 w-5" />
       ) : (
-        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <Moon className="h-5 w-5" />
       )}
-      <span className="sr-only">Toggle theme</span>
-    </Button>
+    </div>
   );
 }
