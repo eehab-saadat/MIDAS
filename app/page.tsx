@@ -11,9 +11,20 @@ import { AssetsTable } from "@/components/assets-table";
 import { AiSummary } from "@/components/ai-summary";
 import { PreviousSessionsTable } from "@/components/previous-sessions-table";
 import { SDOHForm } from "@/components/sdoh-form";
+import { SessionInstance } from "@/components/session-instance";
+import { AIDiagnosis } from "@/components/ai-diagnosis";
+
+interface MedicalEntry {
+  id: string;
+  type: "imaging" | "lab" | "note";
+  title: string;
+  content: string | File;
+  date: string;
+}
 
 export default function Home() {
   const [selectedTab, setSelectedTab] = useState("assets");
+  const [entries, setEntries] = useState<MedicalEntry[]>([]);
 
   const greyBoxClasses =
     "bg-muted rounded-lg flex items-center justify-center p-[0.5vh] text-foreground text-sm";
@@ -35,7 +46,7 @@ export default function Home() {
         {/* Top Header Section */}
         <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
           <div className="flex items-center">
-            <div className="bg-background rounded-full p-1 mr-4 border">
+            <div className="bg-card rounded-full p-1 mr-4 border">
               <ArrowLeft className="h-4 w-4" />
             </div>
             <div>
@@ -93,8 +104,12 @@ export default function Home() {
 
           {/* Right Box (span 1 col on small, span 1 md, span 1 lg) */}
           <div className="col-span-full md:col-span-1 gap-0">
-            <div className={`${greyBoxClasses} h-[6vh] mb-1`}>Top Right</div>
-            <div className={`${greyBoxClasses} h-[86vh]`}>Bottom Right</div>
+            <Card className="h-[58.25vh] p-3 mb-1">
+              <SessionInstance entries={entries} setEntries={setEntries} />
+            </Card>
+            <Card className="h-[33.5vh] p-3 pr-0 z-10">
+              <AIDiagnosis entries={entries} />
+            </Card>
           </div>
         </div>
 

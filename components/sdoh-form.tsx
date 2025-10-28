@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export const SDOHForm = () => (
   <div className="h-full overflow-hidden">
-    <div className="h-full overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full">
+    <div className="h-full overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {/* Housing */}
         <Card>
