@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Patient {
@@ -114,7 +113,7 @@ export default function PatientsPage() {
 
   return (
     <div className="h-screen w-screen px-[1vw] py-[1vh] text-foreground relative overflow-hidden">
-      <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
+      <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1 relative">
         <div className="flex items-center">
           {/* <Link
             href="/patients"
@@ -128,14 +127,10 @@ export default function PatientsPage() {
           </div> */}
         </div>
         {/* MIDAS Logo */}
-        <div className="flex items-center">
-          <Image
-            src="/midas-logo.png"
-            alt="MIDAS Logo"
-            className="h-8 w-auto"
-            width={32}
-            height={32}
-          />
+        <div className="flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
+          <span className="text-2xl font-bold bg-primary bg-clip-text text-transparent">
+            MIDAS
+          </span>
         </div>
         <ThemeToggle />
       </div>
