@@ -116,5 +116,25 @@
     "known_medical_history": [
         "Family history of asthma",
         "No known diabetes or cardiac disease"
-    ]
+    ],
+    "diagnosis": {
+        "probable_conditions": [
+            "Asthma (mild persistent)",
+            "Allergic airway inflammation"
+        ],
+        "treatment_suggestions": [
+            "Continue beclometasone dipropionate inhaler (corticosteroid) for maintenance",
+            "Consider nebulization with Clenil or inhaled corticosteroids during flare-ups",
+            "Add long-acting beta-agonist (LABA) if symptoms remain uncontrolled",
+            "Use short-acting rescue inhaler (e.g., salbutamol) for acute wheezing episodes"
+        ],
+        "medical_advice": [
+            "Avoid exposure to smog, smoke, dust, and pollen",
+            "Keep rescue inhaler accessible at all times",
+            "Do not smoke or stay near smokers",
+            "Use air purifiers indoors during pollution season",
+            "Engage in mild regular exercise to improve lung capacity",
+            "Follow up with a pulmonologist every 3–6 months for spirometry and treatment adjustment"
+        ]
+    }
 }

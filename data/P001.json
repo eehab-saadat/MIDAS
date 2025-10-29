@@ -109,5 +109,21 @@
         "Possible osteoarthritis",
         "Recurrent ear infections",
         "Hearing aid user"
-    ]
+    ],
+    "diagnosis": {
+        "probable_conditions": [
+            "Osteoarthritis (Right Knee)",
+            "Mild Hypertension (well-controlled)"
+        ],
+        "treatment_suggestions": [
+            "Consider cortisone (intra-articular corticosteroid) injections for pain relief",
+            "If symptoms progress or mobility severely limited, evaluate for knee replacement surgery"
+        ],
+        "medical_advice": [
+            "Sit with knees at right angles to avoid strain",
+            "Do mild daily knee exercises and stretching",
+            "Avoid lifting or moving heavy weights",
+            "Maintain balanced diet and healthy weight"
+        ]
+    }
 }
