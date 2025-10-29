@@ -1,144 +1,133 @@
-// app/page.tsx
 "use client";
 
 import { useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { PatientInfo } from "@/components/patient-info";
-import { ArrowLeft } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { AssetsTable } from "@/components/assets-table";
-import { AiSummary } from "@/components/ai-summary";
-import { PreviousSessionsTable } from "@/components/previous-sessions-table";
-import { SDOHForm } from "@/components/sdoh-form";
-import { SessionInstance } from "@/components/session-instance";
-import { AIDiagnosis } from "@/components/ai-diagnosis";
+import { Search, ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Patient, mockPatients } from "@/lib/patients";
 
-interface MedicalEntry {
-  id: string;
-  type: "imaging" | "lab" | "note";
-  title: string;
-  content: string | File;
-  date: string;
-}
+export default function PatientsPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredPatients, setFilteredPatients] = useState(mockPatients);
 
-export default function Home() {
-  const [selectedTab, setSelectedTab] = useState("assets");
-  const [entries, setEntries] = useState<MedicalEntry[]>([]);
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    const filtered = mockPatients.filter(
+      (patient) =>
+        patient.name.toLowerCase().includes(term.toLowerCase()) ||
+        patient.id.toLowerCase().includes(term.toLowerCase()) ||
+        patient.email.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredPatients(filtered);
+  };
 
-  const greyBoxClasses =
-    "bg-muted rounded-lg flex items-center justify-center p-[0.5vh] text-foreground text-sm";
-  const blackBackgroundClasses =
-    "bg-transparent rounded-lg flex items-center justify-center p-[0.5vh] text-white text-sm";
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
 
   return (
-    <div
-      className="h-screen w-screen px-[1vw] py-[1vh] text-foreground relative overflow-hidden"
-      style={{
-        backgroundImage: "url('/anatomy-bg.png')",
-        backgroundSize: "auto 150vh",
-        backgroundPosition: "center 1vh",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      {/* Main Grid Container */}
-      <div className="grid gap-0 grid-template-rows-[5vh_60vh_35vh] h-full">
-        {/* Top Header Section */}
-        <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
-          <div className="flex items-center">
-            <Link
-              href="/patients"
-              className="bg-card rounded-full p-1 mr-4 border hover:bg-muted transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <div>
-              <div className="text-sm">Patient List</div>
-              {/* <div className="text-sm">NRN: 123456789</div> */}
-            </div>
-          </div>
-          <ThemeToggle />
-        </div>
-
-        {/* Main Content Area */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-0 auto-rows-fr h-[59vh]">
-          {/* Left Box (span 1 col on small, span 1 md, span 1 lg) */}
-          <div className="col-span-full md:col-span-1 flex flex-col mr-1">
-            <div className="flex-12 mb-1">
-              <PatientInfo
-                name="John Doe"
-                age={35}
-                gender="Male"
-                id="PAT-001234"
-                dob="January 15, 1990"
-                phone="(555) 123-4567"
-                address="123 Main Street, Anytown, USA 12345"
-                email="john.doe@email.com"
-              />
-            </div>
-            <div className="flex-1 bg-card rounded-tl-lg rounded-tr-lg p-[0.5vh]">
-              <Tabs
-                value={selectedTab}
-                onValueChange={setSelectedTab}
-                className="w-full h-full"
-              >
-                <TabsList className="grid w-full grid-cols-4 text-xs">
-                  <TabsTrigger className=" text-xs" value="ai-summary">
-                    Summary
-                  </TabsTrigger>
-                  <TabsTrigger className=" text-xs" value="previous-sessions">
-                    History
-                  </TabsTrigger>
-                  <TabsTrigger className=" text-xs" value="assets">
-                    Assets
-                  </TabsTrigger>
-                  <TabsTrigger className=" text-xs" value="sdoh">
-                    SDOH
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-
-          {/* Center Black Area (span 1 col on small, span 1 md, span 1 lg) */}
-          <div
-            className={`${blackBackgroundClasses} col-span-full md:col-span-1 lg:col-span-1 mr-1 mb-1`}
-          ></div>
-
-          {/* Right Box (span 1 col on small, span 1 md, span 1 lg) */}
-          <div className="col-span-full md:col-span-1 gap-0">
-            <Card className="h-[58.25vh] p-3 mb-1">
-              <SessionInstance entries={entries} setEntries={setEntries} />
-            </Card>
-            <Card className="h-[33.5vh] p-3 pr-0 z-10">
-              <AIDiagnosis entries={entries} />
-            </Card>
-          </div>
-        </div>
-
-        {/* Bottom Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 auto-rows-fr mt-0 h-[33.5vh]">
-          {/* Bottom Left Large Box (span 1 col on small, span 1 md, span 2 lg) */}
-          <Card className="rounded-tl-none col-span-full md:col-span-1 lg:col-span-2 mr-1 h-full p-0">
-            <CardContent className="h-full p-0">
-              {selectedTab === "assets" && <AssetsTable />}
-              {selectedTab === "ai-summary" && <AiSummary />}
-              {selectedTab === "previous-sessions" && <PreviousSessionsTable />}
-              {selectedTab === "sdoh" && <SDOHForm />}
-            </CardContent>
-          </Card>
-
-          {/* Bottom Right Stacked Boxes (span 1 col on small, span 1 md, span 1 lg) */}
-          {/* <div className="col-span-full md:col-span-1 flex flex-col gap-0 h-full self-end">
-            <div className={`${greyBoxClasses} flex-1 mb-1`}>
-              Bottom Right Top
-            </div>
-            <div className={`${greyBoxClasses} flex-1`}>
-              Bottom Right Bottom
-            </div>
+    <div className="h-screen w-screen px-[1vw] py-[1vh] text-foreground relative overflow-hidden">
+      <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
+        <div className="flex items-center">
+          {/* <Link
+            href="/patients"
+            className="bg-card rounded-full p-1 mr-4 border hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <div className="text-sm">Patient List</div>
+            <div className="text-sm">NRN: 123456789</div>
           </div> */}
         </div>
+        {/* MIDAS Logo */}
+        <div className="flex items-center">
+          <span className="absolute left-1/2 transform -translate-x-1/2 text-lg font-bold">
+            MIDAS
+          </span>
+        </div>
+        <ThemeToggle />
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-4 mt-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search patients by name, ID, or email..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      {/* Patients Grid */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
+        {filteredPatients.map((patient) => (
+          <Card
+            key={patient.id}
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={patient.image} alt={patient.name} />
+                  <AvatarFallback>{getInitials(patient.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base truncate">
+                    {patient.name}
+                  </CardTitle>
+                  <div className="text-xs text-muted-foreground">
+                    {patient.id}
+                  </div>
+                </div>
+                <Badge
+                  variant={
+                    patient.status === "active" ? "default" : "secondary"
+                  }
+                >
+                  {patient.status}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Age:</span>
+                  <span>{patient.age} years</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Gender:</span>
+                  <span>{patient.gender}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Last Visit:</span>
+                  <span>
+                    {new Date(patient.lastVisit).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="pt-2">
+                  <Button size="sm" className="w-full text-xs" asChild>
+                    <Link href={`/patient?patient=${patient.id}`}>
+                      View Details
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
