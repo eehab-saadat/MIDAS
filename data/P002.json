@@ -24,7 +24,7 @@
         "blood_pressure_mmHg": "120/80",
         "heart_rate_bpm": 84,
         "spo2_percent": 92,
-        "temperature_c": "Normal",
+        "temperature": "98.6",
         "blood_glucose": "Unknown"
     },
     "lab_results": [
