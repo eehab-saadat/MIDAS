@@ -12,6 +12,105 @@ export interface Patient {
   image?: string;
 }
 
+// New API response types for list endpoint
+export interface PersonalInformationList {
+  salutation: string;
+  name: string;
+  age: number;
+  sex: string;
+}
+
+export interface PatientData {
+  patient_id: string;
+  personal_information: PersonalInformationList;
+  last_visit: string;
+}
+
+// Detailed patient response types for [id] endpoint
+export interface FamilyHistory {
+  hypertension: boolean;
+  osteoarthritis: boolean;
+  [key: string]: boolean;
+}
+
+export interface SocialDeterminants {
+  smoking_status: string;
+  physical_activity: string;
+  diet: string;
+  hearing_impairment: string;
+  access_to_healthcare: string;
+}
+
+export interface PersonalInformationDetail {
+  salutation: string;
+  name: string;
+  age: number;
+  sex: string;
+  ethnicity: string;
+  occupation: string;
+  family_history: FamilyHistory;
+  social_determinants: SocialDeterminants;
+}
+
+export interface Vitals {
+  weight_kg: number;
+  bmi_estimate: number;
+  blood_pressure_mmHg: string;
+  heart_rate_bpm: number;
+  spo2_percent: number;
+  temperature: string;
+  blood_glucose: string;
+}
+
+export interface LabResult {
+  date: string;
+  results: {
+    [key: string]: any;
+  };
+}
+
+export interface MedicalImagery {
+  id: string;
+  name: string;
+  type: string;
+  date: string;
+  description: string;
+  imagePath?: string;
+}
+
+export interface ClinicalNotes {
+  summary: string;
+  examination: string;
+  assessment: string;
+  plan: string[];
+}
+
+export interface Medication {
+  name: string;
+  dose: string;
+  frequency: string;
+  indication: string;
+}
+
+export interface Diagnosis {
+  probable_conditions: string[];
+  treatment_suggestions: string[];
+  medical_advice: string[];
+}
+
+export interface PatientDetail {
+  patient_id: string;
+  personal_information: PersonalInformationDetail;
+  vitals: Vitals;
+  lab_results: LabResult[];
+  medical_imagery: MedicalImagery[];
+  clinical_notes: ClinicalNotes;
+  medications: Medication[];
+  current_symptoms: string[];
+  known_medical_history: string[];
+  diagnosis: Diagnosis;
+}
+
 export const mockPatients: Patient[] = [
   {
     id: "PAT-001234",

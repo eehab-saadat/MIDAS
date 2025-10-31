@@ -3,41 +3,174 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PatientDetail } from "@/lib/patients";
 
 interface MedicalEntry {
   id: string;
-  type: "imaging" | "lab" | "note";
-  title: string;
-  content: string | File;
+  type: "imaging" | "lab" | "note" | "meds" | "symptoms" | "audio";
   date: string;
+  content: any;
+  audio_file?: {
+    file_name: string;
+    file_type: string;
+    base64_data: string;
+    duration: number;
+  };
 }
 
 interface AIDiagnosisProps {
   entries: MedicalEntry[];
+  patientData?: PatientDetail;
 }
 
-export const AIDiagnosis = ({ entries }: AIDiagnosisProps) => {
+export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
   const [showAIDiagnosis, setShowAIDiagnosis] = useState(false);
   const [aiDiagnosis, setAiDiagnosis] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const generateAIDiagnosis = async () => {
     setIsLoading(true);
-    // Simulate API wait time of 3 seconds
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      // Merge session entries into their respective places in the patient data
+      const mergedData: any = {
+        ...patientData,
+      };
 
-    // Simulate AI diagnosis generation
-    const diagnosis = `Based on the patient's medical history and current entries, the AI analysis suggests: ${
-      entries.length > 0
-        ? "Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided. Further evaluation recommended based on the imaging and lab results provided."
-        : "Insufficient data for comprehensive diagnosis. Additional tests may be required."
-    }`;
-    setAiDiagnosis(diagnosis);
-    setShowAIDiagnosis(true);
-    setIsLoading(false);
+      if (patientData) {
+        // Initialize lab_report_imgs and audio_file arrays if they don't exist
+        if (!mergedData.lab_report_imgs) {
+          mergedData.lab_report_imgs = [];
+        }
+        if (!mergedData.audio_files) {
+          mergedData.audio_files = [];
+        }
+
+        // Process each entry type and add to appropriate sections
+        entries.forEach((entry) => {
+          if (entry.type === "meds") {
+            // Add to medications array
+            mergedData.medications = [
+              ...(mergedData.medications || []),
+              entry.content,
+            ];
+          } else if (entry.type === "symptoms") {
+            // Add to current_symptoms array
+            mergedData.current_symptoms = [
+              ...(mergedData.current_symptoms || []),
+              ...entry.content.symptoms,
+            ];
+          } else if (entry.type === "note") {
+            // Add to clinical_notes
+            if (mergedData.clinical_notes) {
+              // Append session note to the summary
+              mergedData.clinical_notes.summary = `${
+                mergedData.clinical_notes.summary || ""
+              }\n\n[Session Entry] ${entry.content.summary}`;
+            }
+          } else if (entry.type === "imaging") {
+            // Add to medical_imagery array
+            mergedData.medical_imagery = [
+              ...(mergedData.medical_imagery || []),
+              {
+                id: entry.id,
+                name: entry.content.file_name,
+                type: "Imaging",
+                date: entry.date,
+                description: "Session imaging result",
+                imagePath: entry.content.base64_data,
+              },
+            ];
+          } else if (entry.type === "lab") {
+            // Add to lab_report_imgs array
+            mergedData.lab_report_imgs.push({
+              id: entry.id,
+              file_name: entry.content.file_name,
+              file_type: entry.content.file_type,
+              base64_data: entry.content.base64_data,
+              date: entry.date,
+            });
+          } else if (entry.type === "audio" && entry.audio_file) {
+            // Add to audio_files array
+            mergedData.audio_files.push({
+              id: entry.id,
+              file_name: entry.audio_file.file_name,
+              file_type: entry.audio_file.file_type,
+              base64_data: entry.audio_file.base64_data,
+              duration: entry.audio_file.duration,
+              date: entry.date,
+            });
+          }
+        });
+      }
+
+      // Generate and download JSON file
+      const generateJsonFile = (data: any) => {
+        try {
+          const jsonString = JSON.stringify(data, null, 2);
+          const blob = new Blob([jsonString], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+          link.download = `patient_data_${patientData?.patient_id || "unknown"}_${timestamp}.json`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          console.log("JSON file downloaded successfully");
+        } catch (error) {
+          console.error("Error generating JSON file:", error);
+        }
+      };
+
+      // Generate and download the merged data JSON
+      generateJsonFile(mergedData);
+
+      const response = await fetch("/api/ai-diagnosis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mergedData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate AI diagnosis");
+      }
+
+      const data = await response.json();
+      setAiDiagnosis(data.diagnosis);
+      setShowAIDiagnosis(true);
+    } catch (error) {
+      console.error("Error generating AI diagnosis:", error);
+      setAiDiagnosis(
+        "Error generating diagnosis. Please try again."
+      );
+      setShowAIDiagnosis(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const downloadReport = () => {
+    const getEntryDisplay = (entry: MedicalEntry) => {
+      switch (entry.type) {
+        case "meds":
+          return `${entry.content.name} - ${entry.content.dose}, ${entry.content.frequency}`;
+        case "symptoms":
+          return entry.content.symptoms.join(", ");
+        case "note":
+          return entry.content.summary;
+        case "imaging":
+        case "lab":
+          return entry.content.file_name;
+        case "audio":
+          return `Audio recording - ${entry.content.file_name} (${entry.content.duration}s)`;
+        default:
+          return "Entry";
+      }
+    };
+
     const reportContent = `
 MEDICAL SESSION REPORT
 Date: ${new Date().toLocaleDateString()}
@@ -46,9 +179,9 @@ PATIENT ENTRIES:
 ${entries
   .map(
     (entry) => `
-${entry.type.toUpperCase()}: ${entry.title}
+${entry.type.toUpperCase()}:
+${getEntryDisplay(entry)}
 Date: ${entry.date}
-${typeof entry.content === "string" ? entry.content : entry.content.name}
 `
   )
   .join("\n")}

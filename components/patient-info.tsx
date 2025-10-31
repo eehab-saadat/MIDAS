@@ -1,31 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Phone, MapPin, Calendar, User, Hash, Mail } from "lucide-react";
+import {
+  Phone,
+  MapPin,
+  Calendar,
+  User,
+  Hash,
+  Mail,
+  Briefcase,
+  Globe,
+} from "lucide-react";
+import { PersonalInformationDetail } from "@/lib/patients";
 
 interface PatientInfoProps {
-  name: string;
-  image?: string;
-  age: number;
-  gender: string;
-  id: string;
-  dob: string;
-  phone: string;
-  address: string;
-  email?: string;
+  personalInfo: PersonalInformationDetail;
 }
 
-export function PatientInfo({
-  name,
-  image,
-  age,
-  gender,
-  id,
-  dob,
-  phone,
-  address,
-  email,
-}: PatientInfoProps) {
+export function PatientInfo({ personalInfo }: PatientInfoProps) {
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -34,84 +26,107 @@ export function PatientInfo({
       .toUpperCase();
   };
 
+  const fullName = `${personalInfo.salutation} ${personalInfo.name}`;
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={image} alt={name} />
-            <AvatarFallback>
-              {name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()}
-            </AvatarFallback>
+            <AvatarFallback>{getInitials(personalInfo.name)}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1">
-            <CardTitle className="text-lg">{name}</CardTitle>
+            <CardTitle className="text-lg">{fullName}</CardTitle>
 
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <User className="h-3 w-3" />
-              <span>{age} years old</span>
+              <span>{personalInfo.age} years old</span>
               <Badge variant="secondary" className="text-xs">
-                {gender}
+                {personalInfo.sex}
               </Badge>
             </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-4 text-xs">
-          {/* Left Column - ID and DOB */}
-          <div className="space-y-3">
-            <div className="space-y-0.5">
-              <div className="flex items-center space-x-2">
-                <Hash className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground font-medium">ID</span>
-              </div>
-              <div className="ml-6 font-medium">{id}</div>
+      <CardContent className="space-y-3 text-xs max-h-[calc(100%-80px)] overflow-y-auto">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground font-medium">
+                Ethnicity
+              </span>
             </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground font-medium">DOB</span>
-              </div>
-              <div className="ml-6 font-medium">{dob}</div>
+            <div className="ml-6 font-medium text-xs">{personalInfo.ethnicity}</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground font-medium">
+                Occupation
+              </span>
+            </div>
+            <div className="ml-6 font-medium text-xs">{personalInfo.occupation}</div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground font-medium">
+                Smoking Status
+              </span>
+            </div>
+            <div className="ml-6 font-medium text-xs">
+              {personalInfo.social_determinants.smoking_status}
             </div>
           </div>
 
-          {/* Right Column - Phone and Email */}
-          <div className="space-y-3">
-            <div className="space-y-0.5">
-              <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground font-medium">Phone</span>
-              </div>
-              <div className="ml-6 font-medium">{phone}</div>
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground font-medium">
+                Physical Activity
+              </span>
             </div>
-            {email && (
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground font-medium">
-                    Email
-                  </span>
-                </div>
-                <div className="ml-6 font-medium">{email}</div>
-              </div>
-            )}
+            <div className="ml-6 font-medium text-xs text-wrap">
+              {personalInfo.social_determinants.physical_activity}
+            </div>
           </div>
-        </div>
 
-        {/* Address - spans both columns */}
-        <div className="space-y-0.5 text-xs">
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground font-medium">Address</span>
+          <div className="col-span-2 space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground font-medium">
+                Hearing Status
+              </span>
+            </div>
+            <div className="ml-6 font-medium text-xs text-wrap">
+              {personalInfo.social_determinants.hearing_impairment}
+            </div>
           </div>
-          <div className="ml-6 font-medium">{address}</div>
+
+          {Object.keys(personalInfo.family_history).length > 0 && (
+            <div className="col-span-2 space-y-0.5 pt-2 border-t">
+              <span className="text-muted-foreground font-medium">
+                Family History
+              </span>
+              <div className="ml-2 space-y-1 flex flex-wrap gap-1">
+                {Object.entries(personalInfo.family_history).map(
+                  ([condition, present]) => (
+                    <Badge
+                      key={condition}
+                      variant={present ? "default" : "secondary"}
+                      className="text-xs capitalize"
+                    >
+                      {condition.replace(/_/g, " ")}: {present ? "Yes" : "No"}
+                    </Badge>
+                  )
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
