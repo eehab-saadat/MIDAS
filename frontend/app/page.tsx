@@ -274,13 +274,6 @@ export default function PatientsPage() {
                     {patient.patient_id}
                   </div>
                 </div>
-                <Badge
-                  variant={
-                    patient.status === "active" ? "default" : "secondary"
-                  }
-                >
-                  {patient.status}
-                </Badge>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
