@@ -27,6 +27,7 @@ interface MedicalEntry {
     base64_data: string;
     duration: number;
   };
+  audio_transcription?: string;
 }
 
 interface SessionInstanceProps {
@@ -242,6 +243,27 @@ export const SessionInstance = ({
       try {
         const base64Audio = await convertBlobToBase64(audioBlob);
 
+        // Call transcription API
+        let transcription = "";
+        try {
+          const formData = new FormData();
+          formData.append("audio", audioBlob, "recording.webm");
+
+          const transcribeResponse = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (transcribeResponse.ok) {
+            const transcribeData = await transcribeResponse.json();
+            transcription = transcribeData.transcription || "";
+          } else {
+            console.error("Failed to transcribe audio");
+          }
+        } catch (transcribeError) {
+          console.error("Error calling transcribe API:", transcribeError);
+        }
+
         const newEntry: MedicalEntry = {
           id: Date.now().toString(),
           type: "audio",
@@ -257,6 +279,7 @@ export const SessionInstance = ({
             base64_data: base64Audio,
             duration: recordingTime,
           },
+          audio_transcription: transcription,
         };
         setEntries([...entries, newEntry]);
         // cleanup audio URL and blob after saving

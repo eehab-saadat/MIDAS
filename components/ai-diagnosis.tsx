@@ -16,6 +16,7 @@ interface MedicalEntry {
     base64_data: string;
     duration: number;
   };
+  audio_transcription?: string;
 }
 
 interface AIDiagnosisProps {
@@ -37,12 +38,15 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
       };
 
       if (patientData) {
-        // Initialize lab_report_imgs and audio_file arrays if they don't exist
+        // Initialize lab_report_imgs, audio_file and audio_transcriptions arrays if they don't exist
         if (!mergedData.lab_report_imgs) {
           mergedData.lab_report_imgs = [];
         }
         if (!mergedData.audio_files) {
           mergedData.audio_files = [];
+        }
+        if (!mergedData.audio_transcriptions) {
+          mergedData.audio_transcriptions = [];
         }
 
         // Process each entry type and add to appropriate sections
@@ -99,6 +103,11 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
               duration: entry.audio_file.duration,
               date: entry.date,
             });
+            
+            // Add to audio_transcriptions array if transcription exists
+            if (entry.audio_transcription) {
+              mergedData.audio_transcriptions.push(entry.audio_transcription);
+            }
           }
         });
       }
@@ -165,6 +174,9 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
         case "lab":
           return entry.content.file_name;
         case "audio":
+          if (entry.audio_transcription) {
+            return `Audio recording (${entry.content.duration}s)\nTranscription: ${entry.audio_transcription}`;
+          }
           return `Audio recording - ${entry.content.file_name} (${entry.content.duration}s)`;
         default:
           return "Entry";
