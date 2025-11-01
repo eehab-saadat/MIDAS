@@ -33,7 +33,7 @@ interface MedicalEntry {
 export default function PatientPage() {
   const searchParams = useSearchParams();
   const patientId = searchParams.get("patient");
-  
+
   const [patientData, setPatientData] = useState<PatientDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +68,9 @@ export default function PatientPage() {
         setError(null);
       } catch (err) {
         console.error("Error fetching patient:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch patient");
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch patient"
+        );
       } finally {
         setLoading(false);
       }
@@ -88,7 +90,9 @@ export default function PatientPage() {
   if (error || !patientData) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
-        <div className="text-red-500">Error: {error || "Patient not found"}</div>
+        <div className="text-red-500">
+          Error: {error || "Patient not found"}
+        </div>
       </div>
     );
   }
@@ -141,6 +145,9 @@ export default function PatientPage() {
                 className="w-full h-full"
               >
                 <TabsList className="grid w-full grid-cols-6 text-xs">
+                  <TabsTrigger className=" text-xs" value="ai-summary">
+                    Summary
+                  </TabsTrigger>
                   <TabsTrigger className=" text-xs" value="vitals">
                     Vitals
                   </TabsTrigger>
@@ -156,9 +163,6 @@ export default function PatientPage() {
                   <TabsTrigger className=" text-xs" value="history">
                     History
                   </TabsTrigger>
-                  <TabsTrigger className=" text-xs" value="ai-summary">
-                    Summary
-                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -171,10 +175,10 @@ export default function PatientPage() {
 
           {/* Right Box (span 1 col on small, span 1 md, span 1 lg) */}
           <div className="col-span-full md:col-span-1 gap-0">
-            <Card className="h-[58.25vh] p-3 mb-1">
+            <Card className="h-[59vh] p-3 mb-1 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
               <SessionInstance entries={entries} setEntries={setEntries} />
             </Card>
-            <Card className="h-[33.5vh] p-3 pr-0 z-10">
+            <Card className="h-[33.5vh] p-3 pr-0 z-10 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
               <AIDiagnosis entries={entries} patientData={patientData} />
             </Card>
           </div>
@@ -195,8 +199,8 @@ export default function PatientPage() {
                 <SymptomsDisplay symptoms={patientData.current_symptoms} />
               )}
               {selectedTab === "lab" && (
-                <LabAssetsTable 
-                  labResults={patientData.lab_results} 
+                <LabAssetsTable
+                  labResults={patientData.lab_results}
                   clinicalNotes={patientData.clinical_notes}
                   medicalImagery={patientData.medical_imagery}
                 />
@@ -206,18 +210,16 @@ export default function PatientPage() {
                   medicalHistory={patientData.known_medical_history}
                 />
               )}
-              {selectedTab === "ai-summary" && (
-                <AiSummary />
-              )}
+              {selectedTab === "ai-summary" && <AiSummary />}
             </CardContent>
           </Card>
 
           {/* Bottom Right Box */}
-          <Card className="rounded-tl-none col-span-full md:col-span-1 lg:col-span-1 h-full p-0 mr-1">
+          {/* <Card className="rounded-tl-none col-span-full md:col-span-1 lg:col-span-1 h-full p-0 mr-1">
             <CardContent className="h-full p-0">
               <DiagnosisDisplay diagnosis={patientData.diagnosis} />
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>

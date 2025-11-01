@@ -1,12 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft, Plus, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PatientData } from "@/lib/patients";
@@ -17,10 +25,32 @@ interface PatientDisplay extends PatientData {
 
 export default function PatientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredPatients, setFilteredPatients] = useState<PatientDisplay[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<PatientDisplay[]>(
+    []
+  );
   const [patients, setPatients] = useState<PatientDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAddPatientModal, setShowAddPatientModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    salutation: "",
+    age: "",
+    sex: "",
+    email: "",
+    phone: "",
+    // SDOH (optional)
+    smoking_status: "",
+    physical_activity: "",
+    diet: "",
+    // Vitals (optional)
+    weight_kg: "",
+    blood_pressure_mmHg: "",
+    heart_rate_bpm: "",
+    spo2_percent: "",
+    temperature: "",
+  });
 
   // Fetch patients from API on component mount
   useEffect(() => {
@@ -67,6 +97,70 @@ export default function PatientsPage() {
     setFilteredPatients(filtered);
   };
 
+  const handleAddPatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/patients/demo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          salutation: formData.salutation,
+          age: parseInt(formData.age),
+          sex: formData.sex,
+          email: formData.email,
+          phone: formData.phone,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add patient");
+      }
+
+      // Refresh patients list
+      const patientsResponse = await fetch("/api/patients");
+      if (patientsResponse.ok) {
+        const data: PatientData[] = await patientsResponse.json();
+        const transformedData: PatientDisplay[] = data.map((patient) => ({
+          ...patient,
+          status: "active" as const,
+        }));
+        setPatients(transformedData);
+        setFilteredPatients(transformedData);
+      }
+
+      // Reset form and close modal
+      setFormData({
+        name: "",
+        salutation: "",
+        age: "",
+        sex: "",
+        email: "",
+        phone: "",
+        smoking_status: "",
+        physical_activity: "",
+        diet: "",
+        weight_kg: "",
+        blood_pressure_mmHg: "",
+        heart_rate_bpm: "",
+        spo2_percent: "",
+        temperature: "",
+      });
+      setShowAddPatientModal(false);
+    } catch (err) {
+      console.error("Error adding patient:", err);
+      alert(
+        "Failed to add patient: " +
+          (err instanceof Error ? err.message : "Unknown error")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -100,8 +194,8 @@ export default function PatientsPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4 mt-4">
-        <div className="relative max-w-md">
+      <div className="mb-4 mt-4 flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search patients by name, ID, or email..."
@@ -110,12 +204,24 @@ export default function PatientsPage() {
             className="pl-10"
           />
         </div>
+        <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Patient
+        </Button>
       </div>
 
       {/* Patients Grid */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
-        {loading && <div className="col-span-full text-center py-8">Loading patients...</div>}
-        {error && <div className="col-span-full text-center py-8 text-red-500">Error: {error}</div>}
+        {loading && (
+          <div className="col-span-full text-center py-8">
+            Loading patients...
+          </div>
+        )}
+        {error && (
+          <div className="col-span-full text-center py-8 text-red-500">
+            Error: {error}
+          </div>
+        )}
         {!loading && filteredPatients.length === 0 && (
           <div className="col-span-full text-center py-8 text-muted-foreground">
             No patients found
@@ -147,7 +253,9 @@ export default function PatientsPage() {
                   </div>
                 </div>
                 <Badge
-                  variant={patient.status === "active" ? "default" : "secondary"}
+                  variant={
+                    patient.status === "active" ? "default" : "secondary"
+                  }
                 >
                   {patient.status}
                 </Badge>
@@ -181,6 +289,286 @@ export default function PatientsPage() {
           </Card>
         ))}
       </div>
+
+      {/* Add Patient Modal */}
+      {showAddPatientModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle>Add New Patient</CardTitle>
+              <button
+                onClick={() => setShowAddPatientModal(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddPatient} className="space-y-4">
+                <div>
+                  <Label htmlFor="salutation">Salutation</Label>
+                  <Select
+                    value={formData.salutation}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, salutation: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select salutation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Mr">Mr</SelectItem>
+                      <SelectItem value="Mrs">Mrs</SelectItem>
+                      <SelectItem value="Ms">Ms</SelectItem>
+                      <SelectItem value="Dr">Dr</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="name">Full Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Patient name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="age">Age *</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      placeholder="Age"
+                      value={formData.age}
+                      onChange={(e) =>
+                        setFormData({ ...formData, age: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="sex">Gender *</Label>
+                    <Select
+                      value={formData.sex}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, sex: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="patient@example.com"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="Phone number"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                  />
+                </div>
+
+                {/* SDOH Section - Optional */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="text-sm font-semibold mb-3">
+                    Social Determinants of Health (Optional)
+                  </div>
+                  <div>
+                    <Label htmlFor="smoking_status">Smoking Status</Label>
+                    <Select
+                      value={formData.smoking_status}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, smoking_status: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select smoking status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Non-smoker">Non-smoker</SelectItem>
+                        <SelectItem value="Former smoker">
+                          Former smoker
+                        </SelectItem>
+                        <SelectItem value="Current smoker">
+                          Current smoker
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="mt-3">
+                    <Label htmlFor="physical_activity">Physical Activity</Label>
+                    <Select
+                      value={formData.physical_activity}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, physical_activity: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select activity level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sedentary">Sedentary</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Moderate">Moderate</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="mt-3">
+                    <Label htmlFor="diet">Diet</Label>
+                    <Input
+                      id="diet"
+                      placeholder="e.g., Balanced, High fat, Vegetarian"
+                      value={formData.diet}
+                      onChange={(e) =>
+                        setFormData({ ...formData, diet: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Vitals Section - Optional */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="text-sm font-semibold mb-3">
+                    Vitals (Optional)
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="weight_kg">Weight (kg)</Label>
+                      <Input
+                        id="weight_kg"
+                        type="number"
+                        step="0.1"
+                        placeholder="Weight in kg"
+                        value={formData.weight_kg}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            weight_kg: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="blood_pressure_mmHg">
+                        Blood Pressure
+                      </Label>
+                      <Input
+                        id="blood_pressure_mmHg"
+                        placeholder="e.g., 120/80"
+                        value={formData.blood_pressure_mmHg}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            blood_pressure_mmHg: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="heart_rate_bpm">Heart Rate (bpm)</Label>
+                      <Input
+                        id="heart_rate_bpm"
+                        type="number"
+                        placeholder="Heart rate"
+                        value={formData.heart_rate_bpm}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            heart_rate_bpm: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="spo2_percent">SpO2 (%)</Label>
+                      <Input
+                        id="spo2_percent"
+                        type="number"
+                        step="0.1"
+                        placeholder="Oxygen saturation"
+                        value={formData.spo2_percent}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            spo2_percent: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="temperature">Temperature (°F)</Label>
+                      <Input
+                        id="temperature"
+                        type="number"
+                        step="0.1"
+                        placeholder="Temperature"
+                        value={formData.temperature}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            temperature: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowAddPatientModal(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  >
+                    {isSubmitting ? "Adding..." : "Add Patient"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

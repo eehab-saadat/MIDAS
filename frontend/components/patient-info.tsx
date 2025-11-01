@@ -49,7 +49,7 @@ export function PatientInfo({ personalInfo }: PatientInfoProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 text-xs max-h-[calc(100%-80px)] overflow-y-auto">
+      <CardContent className="space-y-3 text-xs max-h-[calc(100%-80px)] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-0.5">
             <div className="flex items-center space-x-2">
@@ -58,7 +58,9 @@ export function PatientInfo({ personalInfo }: PatientInfoProps) {
                 Ethnicity
               </span>
             </div>
-            <div className="ml-6 font-medium text-xs">{personalInfo.ethnicity}</div>
+            <div className="ml-6 font-medium text-xs">
+              {personalInfo.ethnicity}
+            </div>
           </div>
 
           <div className="space-y-0.5">
@@ -68,7 +70,9 @@ export function PatientInfo({ personalInfo }: PatientInfoProps) {
                 Occupation
               </span>
             </div>
-            <div className="ml-6 font-medium text-xs">{personalInfo.occupation}</div>
+            <div className="ml-6 font-medium text-xs">
+              {personalInfo.occupation}
+            </div>
           </div>
 
           <div className="space-y-0.5">
