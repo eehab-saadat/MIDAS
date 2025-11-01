@@ -9,6 +9,7 @@ import os
 import tempfile
 import logging
 import time
+import json
 from datetime import datetime
 
 # Configure logging
@@ -60,6 +61,38 @@ def ping():
     return jsonify({"status": "ok", "message": "pong"}), 200
 
 
+@app.route('/health/ollama', methods=['GET'])
+def check_ollama():
+    """Check if Ollama service is reachable."""
+    logger.info("Checking Ollama health")
+    try:
+        import requests
+        response = requests.get("http://localhost:11434/api/tags", timeout=5)
+        if response.status_code == 200:
+            models = response.json().get("models", [])
+            model_names = [m.get("name", "") for m in models]
+            logger.info(f"  ✅ Ollama is running with {len(models)} model(s)")
+            return jsonify({
+                "status": "ok",
+                "ollama_running": True,
+                "models": model_names
+            }), 200
+        else:
+            logger.warning(f"  ⚠️ Ollama returned status {response.status_code}")
+            return jsonify({
+                "status": "degraded",
+                "ollama_running": False,
+                "error": f"Ollama returned status {response.status_code}"
+            }), 200
+    except Exception as e:
+        logger.error(f"  ❌ Ollama is not running: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "ollama_running": False,
+            "error": str(e)
+        }), 200
+
+
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     """Transcribe audio file to text."""
@@ -103,13 +136,20 @@ def diagnose():
     """Generate diagnosis from text and image."""
     logger.info("Starting AI diagnosis generation")
     try:
+        # Log request details
+        logger.info(f"  Content-Type: {request.content_type}")
+        logger.info(f"  Form keys: {list(request.form.keys())}")
+        logger.info(f"  Files keys: {list(request.files.keys())}")
+        
         data_json = request.form.get('data', '')
         if not data_json:
             logger.warning("No data provided in request")
             return jsonify({"error": "No data provided"}), 400
         
-        logger.info("Parsing patient data...")
+        logger.info(f"  Data JSON length: {len(data_json)} chars")
+        logger.info("  Parsing patient data...")
         data = parse_data(data_json)
+        logger.info(f"  Parsed data keys: {list(data.keys())}")
         
         if 'image' not in request.files:
             logger.warning("No image file provided in request")
@@ -120,20 +160,25 @@ def diagnose():
             logger.warning("Empty filename provided")
             return jsonify({"error": "Empty filename"}), 400
         
-        logger.info(f"Processing image: {image_file.filename}")
+        logger.info(f"  Processing image: {image_file.filename}")
         image_base64 = encode_image_to_base64(image_file)
+        logger.info(f"  Base64 image length: {len(image_base64)} chars")
         
-        logger.info("Generating diagnosis with MedGemma model...")
+        logger.info("  Generating diagnosis with MedGemma model...")
         diagnosis_result = generate_diagnosis(data, image_base64)
         
         if "error" in diagnosis_result:
-            logger.error(f"Diagnosis generation failed: {diagnosis_result['error']}")
+            logger.error(f"  ❌ Diagnosis generation failed: {diagnosis_result['error']}")
             return jsonify(diagnosis_result), 500
         
-        logger.info("✅ Diagnosis generated successfully")
+        logger.info("  ✅ Diagnosis generated successfully")
+        logger.info(f"  Response keys: {list(diagnosis_result.keys())}")
         return jsonify(diagnosis_result), 200
+    except json.JSONDecodeError as e:
+        logger.error(f"  ❌ JSON parsing error: {str(e)}", exc_info=True)
+        return jsonify({"error": f"Invalid JSON data: {str(e)}"}), 400
     except Exception as e:
-        logger.error(f"❌ Diagnosis error: {str(e)}", exc_info=True)
+        logger.error(f"  ❌ Diagnosis error: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 

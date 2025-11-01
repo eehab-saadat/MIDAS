@@ -210,7 +210,7 @@ export default function PatientPage() {
                   medicalHistory={patientData.known_medical_history}
                 />
               )}
-              {selectedTab === "ai-summary" && <AiSummary />}
+              {selectedTab === "ai-summary" && <AiSummary summary={patientData.summary} />}
             </CardContent>
           </Card>
 

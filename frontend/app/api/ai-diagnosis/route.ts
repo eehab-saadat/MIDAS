@@ -3,14 +3,18 @@ import { NextResponse } from "next/server";
 const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || "http://localhost:5000";
 
 export async function POST(request: Request) {
+  console.log("=== AI DIAGNOSIS API REQUEST ===");
+  
   try {
     const body = await request.json();
 
     // Log the received patient data with session entries for debugging
-    console.log("=== AI DIAGNOSIS API REQUEST ===");
-    console.log("Patient Data with Session Entries:");
-    console.log(JSON.stringify(body, null, 2));
-    console.log("================================");
+    console.log("Patient Data Keys:", Object.keys(body));
+    console.log("Patient ID:", body.patient_id);
+    console.log("Has medical_imagery:", !!body.medical_imagery);
+    console.log("Has lab_report_imgs:", !!body.lab_report_imgs);
+    console.log("Medical imagery count:", body.medical_imagery?.length || 0);
+    console.log("Lab reports count:", body.lab_report_imgs?.length || 0);
 
     // Find the first lab report image from the merged data
     let imageBase64 = null;
@@ -68,6 +72,9 @@ export async function POST(request: Request) {
     formData.append('image', blob, 'medical-image.jpg');
 
     console.log("Calling Flask backend at:", `${FLASK_BACKEND_URL}/diagnose`);
+    console.log("FormData contents:");
+    console.log("  - data field length:", diagnosisData ? JSON.stringify(diagnosisData).length : 0);
+    console.log("  - image blob size:", blob.size, "bytes");
 
     // Call Flask backend
     const backendResponse = await fetch(`${FLASK_BACKEND_URL}/diagnose`, {
@@ -75,14 +82,31 @@ export async function POST(request: Request) {
       body: formData,
     });
 
+    console.log("Backend response status:", backendResponse.status);
+
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text();
-      console.error("Flask backend error:", errorText);
-      throw new Error(`Backend returned ${backendResponse.status}: ${errorText}`);
+      console.error("Flask backend error:", backendResponse.status, errorText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText };
+      }
+      
+      throw new Error(`Backend returned ${backendResponse.status}: ${errorData.error || errorText}`);
     }
 
     const diagnosisResult = await backendResponse.json();
-    console.log("Diagnosis result from backend:", diagnosisResult);
+    console.log("Diagnosis result from backend:");
+    console.log("  - Has diagnosis:", !!diagnosisResult.diagnosis);
+    console.log("  - Has reasoning:", !!diagnosisResult.reasoning);
+    console.log("  - Has error:", !!diagnosisResult.error);
+    
+    if (diagnosisResult.diagnosis) {
+      console.log("  - Diagnosis preview:", diagnosisResult.diagnosis.substring(0, 100) + "...");
+    }
 
     // Check if there's an error in the diagnosis result
     if (diagnosisResult.error) {

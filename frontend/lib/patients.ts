@@ -109,6 +109,10 @@ export interface PatientDetail {
   current_symptoms: string[];
   known_medical_history: string[];
   diagnosis: Diagnosis;
+  summary?: string;
+  last_visit?: string;
+  lab_report_imgs?: any[];
+  audio_transcriptions?: string[];
 }
 
 export const mockPatients: Patient[] = [
