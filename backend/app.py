@@ -23,6 +23,8 @@ app = Flask(__name__)
 CORS(app)
 
 # Request logging middleware
+
+
 @app.before_request
 def log_request():
     request.start_time = time.time()
@@ -40,11 +42,13 @@ def log_request():
         elif 'multipart/form-data' in content_type:
             logger.info(f"  Form Data: {list(request.files.keys())}")
 
+
 @app.after_request
 def log_response(response):
     if hasattr(request, 'start_time'):
         duration = (time.time() - request.start_time) * 1000  # Convert to ms
-        logger.info(f"← RESPONSE: {response.status_code} | Duration: {duration:.2f}ms")
+        logger.info(
+            f"← RESPONSE: {response.status_code} | Duration: {duration:.2f}ms")
     logger.info(f"{'='*60}\n")
     return response
 
@@ -60,11 +64,11 @@ def ping():
 def transcribe():
     """Transcribe audio file to text."""
     logger.info("Starting audio transcription")
-    
+
     if 'audio' not in request.files:
         logger.warning("No audio file provided in request")
         return jsonify({"error": "No audio file provided"}), 400
-    
+
     audio_file = request.files['audio']
     if audio_file.filename == '':
         logger.warning("Empty filename provided")
@@ -75,21 +79,24 @@ def transcribe():
         with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as temp_file:
             audio_file.save(temp_file.name)
             temp_path = temp_file.name
-        
+
         file_size = os.path.getsize(temp_path)
-        logger.info(f"  Audio file saved: {temp_path} (Size: {file_size/1024:.2f}KB)")
-        
+        logger.info(
+            f"  Audio file saved: {temp_path} (Size: {file_size/1024:.2f}KB)")
+
         # Transcribe
         logger.info("  Processing transcription...")
         transcription = transcribe_audio(temp_path)
-        logger.info(f"  ✅ Transcription successful (Length: {len(transcription)} chars)")
-        
+        logger.info(
+            f"  ✅ Transcription successful (Length: {len(transcription)} chars)")
+
         # Cleanup
         os.unlink(temp_path)
-        
+
         return jsonify({"transcription": transcription}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
@@ -138,7 +145,8 @@ def get_patients():
         patients = get_all_patients()
         logger.info(f"  Retrieved {len(patients)} patients")
         for patient in patients:
-            logger.debug(f"    - {patient['patient_id']}: {patient['personal_information']['name']}")
+            logger.debug(
+                f"    - {patient['patient_id']}: {patient['personal_information']['name']}")
         return jsonify(patients), 200
     except Exception as e:
         logger.error(f"Error fetching patients: {str(e)}", exc_info=True)
@@ -155,11 +163,14 @@ def get_patient(patient_id):
             logger.warning(f"  Patient not found: {patient_id}")
             return jsonify({"error": "Patient not found"}), 404
 
-        logger.info(f"  Retrieved patient: {patient['personal_information']['name']}")
-        logger.debug(f"    Age: {patient['personal_information']['age']}, Sex: {patient['personal_information']['sex']}")
+        logger.info(
+            f"  Retrieved patient: {patient['personal_information']['name']}")
+        logger.debug(
+            f"    Age: {patient['personal_information']['age']}, Sex: {patient['personal_information']['sex']}")
         return jsonify(patient), 200
     except Exception as e:
-        logger.error(f"Error fetching patient {patient_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error fetching patient {patient_id}: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 
@@ -172,18 +183,22 @@ def add_patient():
         if not data:
             logger.warning("No data provided")
             return jsonify({"error": "No data provided"}), 400
-        
-        logger.info(f"  Patient data received: {data.get('name', 'N/A')}, Age: {data.get('age', 'N/A')}, Sex: {data.get('sex', 'N/A')}")
-        
+
+        logger.info(
+            f"  Patient data received: {data.get('name', 'N/A')}, Age: {data.get('age', 'N/A')}, Sex: {data.get('sex', 'N/A')}")
+
         # Validate required fields
         required_fields = ['name', 'age', 'sex']
-        missing_fields = [field for field in required_fields if field not in data]
+        missing_fields = [
+            field for field in required_fields if field not in data]
         if missing_fields:
-            logger.warning(f"  Missing required fields: {', '.join(missing_fields)}")
+            logger.warning(
+                f"  Missing required fields: {', '.join(missing_fields)}")
             return jsonify({"error": f"Missing required field: {missing_fields[0]}"}), 400
-        
+
         new_patient = create_patient(data)
-        logger.info(f"  Patient created successfully: {new_patient['patient_id']} - {new_patient['personal_information']['name']}")
+        logger.info(
+            f"  Patient created successfully: {new_patient['patient_id']} - {new_patient['personal_information']['name']}")
         return jsonify(new_patient), 201
     except Exception as e:
         logger.error(f"Error creating patient: {str(e)}", exc_info=True)
@@ -199,18 +214,20 @@ def update_patient_endpoint(patient_id):
         if not data:
             logger.warning("No data provided")
             return jsonify({"error": "No data provided"}), 400
-        
+
         logger.info(f"  Update fields: {list(data.keys())}")
-        
+
         updated_patient = update_patient(patient_id, data)
         if updated_patient is None:
             logger.warning(f"  Patient not found: {patient_id}")
             return jsonify({"error": "Patient not found"}), 404
-        
-        logger.info(f"  Patient updated successfully: {updated_patient['personal_information']['name']}")
+
+        logger.info(
+            f"  Patient updated successfully: {updated_patient['personal_information']['name']}")
         return jsonify(updated_patient), 200
     except Exception as e:
-        logger.error(f"Error updating patient {patient_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error updating patient {patient_id}: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 
