@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Brain, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PatientDetail } from "@/lib/patients";
+import jsPDF from "jspdf";
 
 interface MedicalEntry {
   id: string;
@@ -28,6 +29,7 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
   const [showAIDiagnosis, setShowAIDiagnosis] = useState(false);
   const [aiDiagnosis, setAiDiagnosis] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mergedData, setMergedData] = useState<any>(null);
 
   const generateAIDiagnosis = async () => {
     setIsLoading(true);
@@ -118,6 +120,7 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
 
       const data = await response.json();
       setAiDiagnosis(data.diagnosis);
+      setMergedData(mergedData);
       setShowAIDiagnosis(true);
     } catch (error) {
       console.error("Error generating AI diagnosis:", error);
@@ -129,55 +132,209 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
   };
 
   const downloadReport = () => {
-    const getEntryDisplay = (entry: MedicalEntry) => {
-      switch (entry.type) {
-        case "meds":
-          return `${entry.content.name} - ${entry.content.dose}, ${entry.content.frequency}`;
-        case "symptoms":
-          return entry.content.symptoms.join(", ");
-        case "note":
-          return entry.content.summary;
-        case "imaging":
-        case "lab":
-          return entry.content.file_name;
-        case "audio":
-          if (entry.audio_transcription) {
-            return `Audio recording (${entry.content.duration}s)\nTranscription: ${entry.audio_transcription}`;
+    if (!mergedData) {
+      console.error("No merged data available for PDF generation");
+      return;
+    }
+
+    try {
+      const doc = new jsPDF();
+      let yPosition = 10;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      const lineHeight = 5;
+      const maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+
+      // Helper function to add text with automatic pagination
+      const addText = (
+        text: string,
+        size: number = 11,
+        isBold: boolean = false
+      ) => {
+        doc.setFontSize(size);
+        if (isBold) {
+          doc.setFont("helvetica", "bold");
+        } else {
+          doc.setFont("helvetica", "normal");
+        }
+
+        const lines = doc.splitTextToSize(text, maxWidth);
+        lines.forEach((line: string) => {
+          if (yPosition + lineHeight > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
           }
-          return `Audio recording - ${entry.content.file_name} (${entry.content.duration}s)`;
-        default:
-          return "Entry";
+          doc.text(line, margin, yPosition);
+          yPosition += lineHeight;
+        });
+      };
+
+      // Title
+      addText("MEDICAL REPORT", 16, true);
+      yPosition += 3;
+
+      // Patient Information
+      addText("PATIENT INFORMATION", 12, true);
+      yPosition += 2;
+      addText(`Patient ID: ${mergedData.patient_id || "N/A"}`, 10, false);
+      addText(
+        `Name: ${mergedData.personal_information?.salutation || ""} ${
+          mergedData.personal_information?.name || "N/A"
+        }`,
+        10,
+        false
+      );
+      addText(
+        `Age: ${mergedData.personal_information?.age || "N/A"} years`,
+        10,
+        false
+      );
+      addText(
+        `Gender: ${mergedData.personal_information?.sex || "N/A"}`,
+        10,
+        false
+      );
+      addText(
+        `Ethnicity: ${mergedData.personal_information?.ethnicity || "N/A"}`,
+        10,
+        false
+      );
+      addText(
+        `Occupation: ${mergedData.personal_information?.occupation || "N/A"}`,
+        10,
+        false
+      );
+      yPosition += 3;
+
+      // Vitals
+      if (mergedData.vitals) {
+        addText("VITALS", 12, true);
+        yPosition += 2;
+        addText(
+          `Weight: ${mergedData.vitals.weight_kg || "N/A"} kg`,
+          10,
+          false
+        );
+        addText(
+          `Blood Pressure: ${
+            mergedData.vitals.blood_pressure_mmHg || "N/A"
+          } mmHg`,
+          10,
+          false
+        );
+        addText(
+          `Heart Rate: ${mergedData.vitals.heart_rate_bpm || "N/A"} bpm`,
+          10,
+          false
+        );
+        addText(`SpO2: ${mergedData.vitals.spo2_percent || "N/A"}%`, 10, false);
+        addText(
+          `Temperature: ${mergedData.vitals.temperature || "N/A"}°F`,
+          10,
+          false
+        );
+        yPosition += 3;
       }
-    };
 
-    const reportContent = `
-MEDICAL SESSION REPORT
-Date: ${new Date().toLocaleDateString()}
+      // Current Symptoms
+      if (
+        mergedData.current_symptoms &&
+        mergedData.current_symptoms.length > 0
+      ) {
+        addText("CURRENT SYMPTOMS", 12, true);
+        yPosition += 2;
+        mergedData.current_symptoms.forEach((symptom: string) => {
+          addText(`• ${symptom}`, 10, false);
+        });
+        yPosition += 3;
+      }
 
-PATIENT ENTRIES:
-${entries
-  .map(
-    (entry) => `
-${entry.type.toUpperCase()}:
-${getEntryDisplay(entry)}
-Date: ${entry.date}
-`
-  )
-  .join("\n")}
+      // Medications
+      if (mergedData.medications && mergedData.medications.length > 0) {
+        addText("MEDICATIONS", 12, true);
+        yPosition += 2;
+        mergedData.medications.forEach(
+          (med: {
+            name: string;
+            dose: string;
+            frequency: string;
+            indication: string;
+          }) => {
+            addText(`${med.name} - ${med.dose}, ${med.frequency}`, 10, false);
+            addText(`  Indication: ${med.indication}`, 9, false);
+          }
+        );
+        yPosition += 3;
+      }
 
-AI DIAGNOSIS:
-${aiDiagnosis}
-    `.trim();
+      // Clinical Notes
+      if (mergedData.clinical_notes) {
+        addText("CLINICAL NOTES", 12, true);
+        yPosition += 2;
+        if (mergedData.clinical_notes.summary) {
+          addText(`Summary: ${mergedData.clinical_notes.summary}`, 10, false);
+        }
+        if (mergedData.clinical_notes.examination) {
+          addText(
+            `Examination: ${mergedData.clinical_notes.examination}`,
+            10,
+            false
+          );
+        }
+        if (mergedData.clinical_notes.assessment) {
+          addText(
+            `Assessment: ${mergedData.clinical_notes.assessment}`,
+            10,
+            false
+          );
+        }
+        yPosition += 3;
+      }
 
-    const blob = new Blob([reportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `medical-report-${new Date().toISOString().split("T")[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      // AI Diagnosis
+      addText("AI DIAGNOSIS", 12, true);
+      yPosition += 2;
+      addText(aiDiagnosis, 10, false);
+      yPosition += 3;
+
+      // Social Determinants of Health
+      if (mergedData.personal_information?.social_determinants) {
+        addText("SOCIAL DETERMINANTS OF HEALTH", 12, true);
+        yPosition += 2;
+        const sdoh = mergedData.personal_information.social_determinants;
+        addText(`Smoking Status: ${sdoh.smoking_status || "N/A"}`, 10, false);
+        addText(
+          `Physical Activity: ${sdoh.physical_activity || "N/A"}`,
+          10,
+          false
+        );
+        addText(`Diet: ${sdoh.diet || "N/A"}`, 10, false);
+        addText(
+          `Access to Healthcare: ${sdoh.access_to_healthcare || "N/A"}`,
+          10,
+          false
+        );
+        yPosition += 3;
+      }
+
+      // Footer with date
+      doc.setFontSize(8);
+      doc.setTextColor(128);
+      doc.text(
+        `Generated on ${new Date().toLocaleString()}`,
+        margin,
+        pageHeight - 5
+      );
+
+      // Download the PDF
+      const fileName = `medical-report-${mergedData.patient_id || "patient"}-${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    }
   };
 
   return (

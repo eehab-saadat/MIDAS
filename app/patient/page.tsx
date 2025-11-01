@@ -145,6 +145,9 @@ export default function PatientPage() {
                 className="w-full h-full"
               >
                 <TabsList className="grid w-full grid-cols-6 text-xs">
+                  <TabsTrigger className=" text-xs" value="ai-summary">
+                    Summary
+                  </TabsTrigger>
                   <TabsTrigger className=" text-xs" value="vitals">
                     Vitals
                   </TabsTrigger>
@@ -159,9 +162,6 @@ export default function PatientPage() {
                   </TabsTrigger>
                   <TabsTrigger className=" text-xs" value="history">
                     History
-                  </TabsTrigger>
-                  <TabsTrigger className=" text-xs" value="ai-summary">
-                    Summary
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
