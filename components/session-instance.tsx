@@ -47,6 +47,9 @@ export const SessionInstance = ({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [transcription, setTranscription] = useState<string | null>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [tempAudioBlob, setTempAudioBlob] = useState<Blob | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -86,6 +89,44 @@ export const SessionInstance = ({
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
+  };
+
+  const convertBlobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const transcribeAudio = async (blob: Blob) => {
+    setIsTranscribing(true);
+    setTempAudioBlob(blob);
+    try {
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.webm");
+
+      const transcribeResponse = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (transcribeResponse.ok) {
+        const transcribeData = await transcribeResponse.json();
+        const transcriptionText = transcribeData.transcription || "";
+        console.log("Transcription received:", transcriptionText);
+        setTranscription(transcriptionText);
+      } else {
+        console.error("Failed to transcribe audio:", transcribeResponse.status);
+        setTranscription("Failed to transcribe audio");
+      }
+    } catch (transcribeError) {
+      console.error("Error calling transcribe API:", transcribeError);
+      setTranscription("Error during transcription");
+    } finally {
+      setIsTranscribing(false);
+    }
   };
 
   // Audio recording functions
@@ -132,6 +173,9 @@ export const SessionInstance = ({
         setAudioUrl(url);
         setAudioBlob(blob);
         stream.getTracks().forEach((track) => track.stop());
+        
+        // Start transcription after audio blob is ready
+        transcribeAudio(blob);
       };
 
       mediaRecorder.start();
@@ -229,40 +273,10 @@ export const SessionInstance = ({
     mediaRecorderRef.current = null;
   };
 
-  const convertBlobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const saveAudio = async () => {
     if (audioBlob) {
       try {
         const base64Audio = await convertBlobToBase64(audioBlob);
-
-        // Call transcription API
-        let transcription = "";
-        try {
-          const formData = new FormData();
-          formData.append("audio", audioBlob, "recording.webm");
-
-          const transcribeResponse = await fetch("/api/transcribe", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (transcribeResponse.ok) {
-            const transcribeData = await transcribeResponse.json();
-            transcription = transcribeData.transcription || "";
-          } else {
-            console.error("Failed to transcribe audio");
-          }
-        } catch (transcribeError) {
-          console.error("Error calling transcribe API:", transcribeError);
-        }
 
         const newEntry: MedicalEntry = {
           id: Date.now().toString(),
@@ -279,12 +293,14 @@ export const SessionInstance = ({
             base64_data: base64Audio,
             duration: recordingTime,
           },
-          audio_transcription: transcription,
+          audio_transcription: transcription || undefined,
         };
+        console.log("Creating audio entry with transcription:", { transcription, entry: newEntry });
         setEntries([...entries, newEntry]);
         // cleanup audio URL and blob after saving
         setAudioBlob(null);
         setRecordingTime(0);
+        setTranscription(null);
         if (prevAudioUrlRef.current) {
           try {
             URL.revokeObjectURL(prevAudioUrlRef.current);
@@ -502,19 +518,44 @@ export const SessionInstance = ({
               onEnded={() => setIsPlayingAudio(false)}
             />
 
+            {/* Transcription Section */}
+            <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-200 dark:border-green-800">
+              {isTranscribing ? (
+                <div className="text-sm text-gray-500">
+                  <p className="font-semibold mb-2">Transcribing...</p>
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-2 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
+                    <div className="h-2 bg-gray-300 dark:bg-gray-600 rounded w-5/6"></div>
+                    <div className="h-2 bg-gray-300 dark:bg-gray-600 rounded w-4/5"></div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-semibold text-xs text-green-700 dark:text-green-300 mb-2">
+                    Transcription:
+                  </p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    {transcription || "No transcription available"}
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-2">
               <Button
                 size="sm"
                 onClick={saveAudio}
+                disabled={isTranscribing}
                 className="h-7 text-xs flex-1 bg-green-600 hover:bg-green-700"
               >
-                Save Audio
+                {isTranscribing ? "Transcribing..." : "Save Audio"}
               </Button>
               <Button
                 size="sm"
                 onClick={() => {
                   setAudioBlob(null);
                   setRecordingTime(0);
+                  setTranscription(null);
                 }}
                 variant="outline"
                 className="h-7 text-xs"

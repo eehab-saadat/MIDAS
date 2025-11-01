@@ -38,19 +38,18 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
       };
 
       if (patientData) {
-        // Initialize lab_report_imgs, audio_file and audio_transcriptions arrays if they don't exist
+        // Initialize lab_report_imgs and audio_transcriptions arrays if they don't exist
         if (!mergedData.lab_report_imgs) {
           mergedData.lab_report_imgs = [];
-        }
-        if (!mergedData.audio_files) {
-          mergedData.audio_files = [];
         }
         if (!mergedData.audio_transcriptions) {
           mergedData.audio_transcriptions = [];
         }
 
         // Process each entry type and add to appropriate sections
+        console.log("Processing entries:", entries);
         entries.forEach((entry) => {
+          console.log(`Processing entry type: ${entry.type}`, entry);
           if (entry.type === "meds") {
             // Add to medications array
             mergedData.medications = [
@@ -94,19 +93,12 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
               date: entry.date,
             });
           } else if (entry.type === "audio" && entry.audio_file) {
-            // Add to audio_files array
-            mergedData.audio_files.push({
-              id: entry.id,
-              file_name: entry.audio_file.file_name,
-              file_type: entry.audio_file.file_type,
-              base64_data: entry.audio_file.base64_data,
-              duration: entry.audio_file.duration,
-              date: entry.date,
-            });
-            
             // Add to audio_transcriptions array if transcription exists
             if (entry.audio_transcription) {
+              console.log("Adding transcription:", entry.audio_transcription);
               mergedData.audio_transcriptions.push(entry.audio_transcription);
+            } else {
+              console.log("No transcription found for audio entry:", entry.id);
             }
           }
         });
