@@ -101,7 +101,7 @@ export default function PatientsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/patients/demo", {
+      const response = await fetch("/api/patients", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

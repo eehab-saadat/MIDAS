@@ -14,40 +14,6 @@ interface PatientData {
   last_visit: string;
 }
 
-// Mock data - replace with actual API call or database query
-const mockPatientData: PatientData[] = [
-  {
-    patient_id: "P001",
-    personal_information: {
-      salutation: "Mrs",
-      name: "Yasmeen Pervaiz",
-      age: 65,
-      sex: "Female",
-    },
-    last_visit: "2025-07-11",
-  },
-  {
-    patient_id: "P002",
-    personal_information: {
-      salutation: "Mr",
-      name: "Ahmed Khan",
-      age: 45,
-      sex: "Male",
-    },
-    last_visit: "2025-10-15",
-  },
-  {
-    patient_id: "P003",
-    personal_information: {
-      salutation: "Mrs",
-      name: "Fatima Ali",
-      age: 52,
-      sex: "Female",
-    },
-    last_visit: "2025-10-20",
-  },
-];
-
 export async function GET() {
   try {
     // Forward request to Flask backend
@@ -116,3 +82,4 @@ export async function POST(request: Request) {
     );
   }
 }
+
