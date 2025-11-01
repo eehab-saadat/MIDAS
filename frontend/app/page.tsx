@@ -40,10 +40,14 @@ export default function PatientsPage() {
     sex: "",
     email: "",
     phone: "",
+    ethnicity: "",
+    occupation: "",
     // SDOH (optional)
     smoking_status: "",
     physical_activity: "",
     diet: "",
+    hearing_impairment: "",
+    access_to_healthcare: "",
     // Vitals (optional)
     weight_kg: "",
     blood_pressure_mmHg: "",
@@ -111,8 +115,22 @@ export default function PatientsPage() {
           salutation: formData.salutation,
           age: parseInt(formData.age),
           sex: formData.sex,
-          email: formData.email,
-          phone: formData.phone,
+          email: formData.email || undefined,
+          phone: formData.phone || undefined,
+          ethnicity: formData.ethnicity || undefined,
+          occupation: formData.occupation || undefined,
+          // SDOH fields
+          smoking_status: formData.smoking_status || undefined,
+          physical_activity: formData.physical_activity || undefined,
+          diet: formData.diet || undefined,
+          hearing_impairment: formData.hearing_impairment || undefined,
+          access_to_healthcare: formData.access_to_healthcare || undefined,
+          // Vitals fields
+          weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : undefined,
+          blood_pressure_mmHg: formData.blood_pressure_mmHg || undefined,
+          heart_rate_bpm: formData.heart_rate_bpm ? parseInt(formData.heart_rate_bpm) : undefined,
+          spo2_percent: formData.spo2_percent ? parseFloat(formData.spo2_percent) : undefined,
+          temperature: formData.temperature || undefined,
         }),
       });
 
@@ -140,9 +158,13 @@ export default function PatientsPage() {
         sex: "",
         email: "",
         phone: "",
+        ethnicity: "",
+        occupation: "",
         smoking_status: "",
         physical_activity: "",
         diet: "",
+        hearing_impairment: "",
+        access_to_healthcare: "",
         weight_kg: "",
         blood_pressure_mmHg: "",
         heart_rate_bpm: "",
@@ -398,6 +420,34 @@ export default function PatientsPage() {
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="ethnicity">Ethnicity</Label>
+                    <Input
+                      id="ethnicity"
+                      placeholder="e.g., South Asian"
+                      value={formData.ethnicity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, ethnicity: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input
+                      id="occupation"
+                      placeholder="e.g., Teacher"
+                      value={formData.occupation}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          occupation: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
                 {/* SDOH Section - Optional */}
                 <div className="border-t pt-4 mt-4">
                   <div className="text-sm font-semibold mb-3">
@@ -456,6 +506,48 @@ export default function PatientsPage() {
                         setFormData({ ...formData, diet: e.target.value })
                       }
                     />
+                  </div>
+
+                  <div className="mt-3">
+                    <Label htmlFor="hearing_impairment">
+                      Hearing Impairment
+                    </Label>
+                    <Input
+                      id="hearing_impairment"
+                      placeholder="e.g., None, Uses hearing aids"
+                      value={formData.hearing_impairment}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          hearing_impairment: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="mt-3">
+                    <Label htmlFor="access_to_healthcare">
+                      Access to Healthcare
+                    </Label>
+                    <Select
+                      value={formData.access_to_healthcare}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          access_to_healthcare: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select access level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Good">Good</SelectItem>
+                        <SelectItem value="Moderate">Moderate</SelectItem>
+                        <SelectItem value="Limited">Limited</SelectItem>
+                        <SelectItem value="Poor">Poor</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

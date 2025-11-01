@@ -1,0 +1,46 @@
+{
+    "patient_id": "P005",
+    "personal_information": {
+        "salutation": "Mrs",
+        "name": "dummy 2",
+        "age": 11,
+        "sex": "Female",
+        "ethnicity": "Unknown",
+        "occupation": "Unknown",
+        "family_history": {},
+        "social_determinants": {
+            "smoking_status": "Former smoker",
+            "physical_activity": "Moderate",
+            "diet": "balanced"
+        }
+    },
+    "vitals": {
+        "weight_kg": 88,
+        "bmi_estimate": 0,
+        "blood_pressure_mmHg": "120/80",
+        "heart_rate_bpm": 99,
+        "spo2_percent": 98,
+        "temperature": "98.6",
+        "blood_glucose": "Unknown"
+    },
+    "lab_results": [],
+    "medical_imagery": [],
+    "clinical_notes": {
+        "summary": "",
+        "examination": "",
+        "assessment": "",
+        "plan": []
+    },
+    "medications": [],
+    "current_symptoms": [],
+    "known_medical_history": [],
+    "diagnosis": {
+        "probable_conditions": [],
+        "treatment_suggestions": [],
+        "medical_advice": []
+    },
+    "lab_report_imgs": [],
+    "audio_transcriptions": [],
+    "summary": "",
+    "last_visit": "2025-11-01"
+}

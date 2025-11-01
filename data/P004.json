@@ -1,0 +1,48 @@
+{
+    "patient_id": "P004",
+    "personal_information": {
+        "salutation": "Mrs",
+        "name": "dummy 1",
+        "age": 55,
+        "sex": "Male",
+        "ethnicity": "Unknown",
+        "occupation": "Unknown",
+        "family_history": {},
+        "social_determinants": {
+            "smoking_status": "Unknown",
+            "physical_activity": "Unknown",
+            "diet": "Unknown",
+            "hearing_impairment": "None reported",
+            "access_to_healthcare": "Unknown"
+        }
+    },
+    "vitals": {
+        "weight_kg": 0,
+        "bmi_estimate": 0,
+        "blood_pressure_mmHg": "",
+        "heart_rate_bpm": 0,
+        "spo2_percent": 0,
+        "temperature": "",
+        "blood_glucose": "Unknown"
+    },
+    "lab_results": [],
+    "medical_imagery": [],
+    "clinical_notes": {
+        "summary": "",
+        "examination": "",
+        "assessment": "",
+        "plan": []
+    },
+    "medications": [],
+    "current_symptoms": [],
+    "known_medical_history": [],
+    "diagnosis": {
+        "probable_conditions": [],
+        "treatment_suggestions": [],
+        "medical_advice": []
+    },
+    "lab_report_imgs": [],
+    "audio_transcriptions": [],
+    "summary": "",
+    "last_visit": "2025-11-01"
+}

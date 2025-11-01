@@ -106,31 +106,63 @@ def create_patient(patient_data: Dict) -> Dict:
     
     patient_id = f"P{next_id:03d}"  # Format as P001, P002, etc.
     
+    # Build contact information if email or phone provided
+    contact_info = {}
+    if patient_data.get("email"):
+        contact_info["email"] = patient_data.get("email")
+    if patient_data.get("phone"):
+        contact_info["phone"] = patient_data.get("phone")
+    
+    # Build social determinants - only include if provided, otherwise omit the field
+    social_determinants = {}
+    if patient_data.get("smoking_status"):
+        social_determinants["smoking_status"] = patient_data.get("smoking_status")
+    if patient_data.get("physical_activity"):
+        social_determinants["physical_activity"] = patient_data.get("physical_activity")
+    if patient_data.get("diet"):
+        social_determinants["diet"] = patient_data.get("diet")
+    if patient_data.get("hearing_impairment"):
+        social_determinants["hearing_impairment"] = patient_data.get("hearing_impairment")
+    if patient_data.get("access_to_healthcare"):
+        social_determinants["access_to_healthcare"] = patient_data.get("access_to_healthcare")
+    
+    # Build vitals - only include values that are provided
+    weight_kg = patient_data.get("weight_kg")
+    heart_rate_bpm = patient_data.get("heart_rate_bpm")
+    spo2_percent = patient_data.get("spo2_percent")
+    
+    # Calculate BMI if weight and height are available (for now set to 0)
+    bmi_estimate = 0
+    if weight_kg and weight_kg > 0:
+        # BMI calculation would need height, for now we skip it
+        bmi_estimate = 0
+    
+    # Build personal information - only include optional fields if provided
+    personal_info = {
+        "salutation": patient_data.get("salutation", ""),
+        "name": patient_data.get("name", ""),
+        "age": patient_data.get("age", 0),
+        "sex": patient_data.get("sex", ""),
+    }
+    
+    # Add optional fields only if provided
+    if patient_data.get("ethnicity"):
+        personal_info["ethnicity"] = patient_data.get("ethnicity")
+    if patient_data.get("occupation"):
+        personal_info["occupation"] = patient_data.get("occupation")
+    if patient_data.get("family_history"):
+        personal_info["family_history"] = patient_data.get("family_history")
+    
     # Create default patient structure
     new_patient = {
         "patient_id": patient_id,
-        "personal_information": {
-            "salutation": patient_data.get("salutation", ""),
-            "name": patient_data.get("name", ""),
-            "age": patient_data.get("age", 0),
-            "sex": patient_data.get("sex", ""),
-            "ethnicity": patient_data.get("ethnicity", "Unknown"),
-            "occupation": patient_data.get("occupation", "Unknown"),
-            "family_history": patient_data.get("family_history", {}),
-            "social_determinants": {
-                "smoking_status": patient_data.get("smoking_status", "Unknown"),
-                "physical_activity": patient_data.get("physical_activity", "Unknown"),
-                "diet": patient_data.get("diet", "Unknown"),
-                "hearing_impairment": patient_data.get("hearing_impairment", "None reported"),
-                "access_to_healthcare": patient_data.get("access_to_healthcare", "Unknown")
-            }
-        },
+        "personal_information": personal_info,
         "vitals": {
-            "weight_kg": patient_data.get("weight_kg", 0) if patient_data.get("weight_kg") else 0,
-            "bmi_estimate": 0,
+            "weight_kg": weight_kg if weight_kg is not None else 0,
+            "bmi_estimate": bmi_estimate,
             "blood_pressure_mmHg": patient_data.get("blood_pressure_mmHg", ""),
-            "heart_rate_bpm": patient_data.get("heart_rate_bpm", 0) if patient_data.get("heart_rate_bpm") else 0,
-            "spo2_percent": patient_data.get("spo2_percent", 0) if patient_data.get("spo2_percent") else 0,
+            "heart_rate_bpm": heart_rate_bpm if heart_rate_bpm is not None else 0,
+            "spo2_percent": spo2_percent if spo2_percent is not None else 0,
             "temperature": patient_data.get("temperature", ""),
             "blood_glucose": "Unknown"
         },
@@ -155,6 +187,14 @@ def create_patient(patient_data: Dict) -> Dict:
         "summary": "",
         "last_visit": datetime.now().strftime('%Y-%m-%d')
     }
+    
+    # Add social_determinants only if there are any values
+    if social_determinants:
+        new_patient["personal_information"]["social_determinants"] = social_determinants
+    
+    # Add contact info only if there are any values
+    if contact_info:
+        new_patient["personal_information"]["contact"] = contact_info
     
     # Save to JSON file
     file_path = DATA_DIR / f"{patient_id}.json"
