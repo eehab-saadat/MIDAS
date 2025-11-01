@@ -2,6 +2,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils.transcribe import transcribe_audio
 from utils.patients import get_all_patients, get_patient_by_id, create_patient, update_patient
+from utils.diagnose import generate_diagnosis
+from utils.diagnose import encode_image_to_base64
+from utils.parse_json import parse_data
 import os
 import tempfile
 import logging
@@ -85,7 +88,25 @@ def transcribe():
         os.unlink(temp_path)
         
         return jsonify({"transcription": transcription}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+@app.route('/diagnose', methods=['POST'])
+def diagnose():
+    """Generate diagnosis from text and image."""
+    try:
+        data_json = request.form.get('data', '')
+        if not data_json:
+            return jsonify({"error": "No data provided"}), 400
+        data = parse_data(data_json)
+        if 'image' not in request.files:
+            return jsonify({"error": "No image file provided"}), 400
+        image_file = request.files['image']
+        if image_file.filename == '':
+            return jsonify({"error": "Empty filename"}), 400
+        image_base64 = encode_image_to_base64(image_file)
+        diagnosis_result = generate_diagnosis(data, image_base64)
+        return jsonify(diagnosis_result), 200
     except Exception as e:
         logger.error(f"❌ Transcription error: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
