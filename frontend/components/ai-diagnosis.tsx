@@ -138,121 +138,188 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
     }
 
     try {
-      const doc = new jsPDF();
-      let yPosition = 10;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      let yPosition = 15;
       const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 10;
-      const lineHeight = 5;
-      const maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 12;
+      const lineHeight = 5.5;
+      const maxWidth = pageWidth - 2 * margin;
+      const sectionGap = 4;
+      const primaryColor = [41, 128, 185]; // Blue
+      const secondaryColor = [231, 76, 60]; // Red
 
       // Helper function to add text with automatic pagination
       const addText = (
         text: string,
-        size: number = 11,
-        isBold: boolean = false
+        size: number = 10,
+        isBold: boolean = false,
+        color: number[] = [0, 0, 0]
       ) => {
         doc.setFontSize(size);
+        doc.setTextColor(color[0], color[1], color[2]);
         if (isBold) {
           doc.setFont("helvetica", "bold");
         } else {
           doc.setFont("helvetica", "normal");
         }
 
-        const lines = doc.splitTextToSize(text, maxWidth);
+        const lines = doc.splitTextToSize(text, maxWidth - 2);
         lines.forEach((line: string) => {
-          if (yPosition + lineHeight > pageHeight - margin) {
+          if (yPosition + lineHeight > pageHeight - 10) {
             doc.addPage();
             yPosition = margin;
           }
-          doc.text(line, margin, yPosition);
+          doc.text(line, margin + 1, yPosition);
           yPosition += lineHeight;
         });
       };
 
-      // Title
-      addText("MEDICAL REPORT", 16, true);
-      yPosition += 3;
+      // Helper function to add section header with background
+      const addSectionHeader = (title: string) => {
+        if (yPosition + 2 > pageHeight - 10) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.rect(margin, yPosition - 3.5, maxWidth, 7, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text(title, pageWidth / 2, yPosition + 1, { align: "center" });
+        yPosition += sectionGap + 4;
+        doc.setTextColor(0, 0, 0);
+      };
 
-      // Patient Information
-      addText("PATIENT INFORMATION", 12, true);
-      yPosition += 2;
-      addText(`Patient ID: ${mergedData.patient_id || "N/A"}`, 10, false);
-      addText(
-        `Name: ${mergedData.personal_information?.salutation || ""} ${
+      // Helper function to add two-column key-value pairs
+      const addKeyValuePair = (
+        key: string,
+        value: string,
+        indent: number = 0
+      ) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        const keyWidth = 40;
+        const indentOffset = indent * 3;
+        doc.text(key + ":", margin + indentOffset, yPosition);
+        doc.setFont("helvetica", "normal");
+        const valueText = doc.splitTextToSize(
+          value,
+          maxWidth - keyWidth - indentOffset - 2
+        );
+        doc.text(
+          valueText[0] || "",
+          margin + keyWidth + indentOffset,
+          yPosition
+        );
+        yPosition += lineHeight;
+        if (valueText.length > 1) {
+          valueText.slice(1).forEach((line: string) => {
+            doc.text(line, margin + keyWidth + indentOffset, yPosition);
+            yPosition += lineHeight;
+          });
+        }
+      };
+
+      // Helper function to add image
+      const addImage = (imgData: string, title: string, width: number = 80) => {
+        if (yPosition + width + 5 > pageHeight - 10) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        try {
+          const xPos = pageWidth / 2 - width / 2;
+          doc.addImage(imgData, "JPEG", xPos, yPosition, width, width * 0.75);
+          yPosition += width * 0.75 + 2;
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(8);
+          doc.setTextColor(100, 100, 100);
+          doc.text(title, pageWidth / 2, yPosition, { align: "center" });
+          yPosition += lineHeight + 2;
+        } catch (error) {
+          console.error("Error adding image:", error);
+        }
+      };
+
+      // --- HEADER ---
+      doc.setFillColor(41, 128, 185);
+      doc.rect(0, 0, pageWidth, 12, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("MIDAS", pageWidth / 2, 4, { align: "center" });
+      doc.setFontSize(18);
+      doc.text("MEDICAL REPORT", pageWidth / 2, 10, { align: "center" });
+      yPosition = 15;
+
+      // --- PATIENT INFORMATION ---
+      addSectionHeader("PATIENT INFORMATION");
+      addKeyValuePair("Patient ID", mergedData.patient_id || "N/A");
+      addKeyValuePair(
+        "Name",
+        `${mergedData.personal_information?.salutation || ""} ${
           mergedData.personal_information?.name || "N/A"
-        }`,
-        10,
-        false
+        }`
       );
-      addText(
-        `Age: ${mergedData.personal_information?.age || "N/A"} years`,
-        10,
-        false
+      addKeyValuePair(
+        "Age",
+        `${mergedData.personal_information?.age || "N/A"} years`
       );
-      addText(
-        `Gender: ${mergedData.personal_information?.sex || "N/A"}`,
-        10,
-        false
+      addKeyValuePair("Gender", mergedData.personal_information?.sex || "N/A");
+      addKeyValuePair(
+        "Ethnicity",
+        mergedData.personal_information?.ethnicity || "N/A"
       );
-      addText(
-        `Ethnicity: ${mergedData.personal_information?.ethnicity || "N/A"}`,
-        10,
-        false
+      addKeyValuePair(
+        "Occupation",
+        mergedData.personal_information?.occupation || "N/A"
       );
-      addText(
-        `Occupation: ${mergedData.personal_information?.occupation || "N/A"}`,
-        10,
-        false
-      );
-      yPosition += 3;
+      yPosition += sectionGap;
 
-      // Vitals
+      // --- VITALS ---
       if (mergedData.vitals) {
-        addText("VITALS", 12, true);
-        yPosition += 2;
-        addText(
-          `Weight: ${mergedData.vitals.weight_kg || "N/A"} kg`,
-          10,
-          false
+        addSectionHeader("VITAL SIGNS");
+        addKeyValuePair("Weight", `${mergedData.vitals.weight_kg || "N/A"} kg`);
+        addKeyValuePair("BMI", `${mergedData.vitals.bmi_estimate || "N/A"}`);
+        addKeyValuePair(
+          "Blood Pressure",
+          `${mergedData.vitals.blood_pressure_mmHg || "N/A"} mmHg`
         );
-        addText(
-          `Blood Pressure: ${
-            mergedData.vitals.blood_pressure_mmHg || "N/A"
-          } mmHg`,
-          10,
-          false
+        addKeyValuePair(
+          "Heart Rate",
+          `${mergedData.vitals.heart_rate_bpm || "N/A"} bpm`
         );
-        addText(
-          `Heart Rate: ${mergedData.vitals.heart_rate_bpm || "N/A"} bpm`,
-          10,
-          false
+        addKeyValuePair("SpO₂", `${mergedData.vitals.spo2_percent || "N/A"}%`);
+        addKeyValuePair(
+          "Temperature",
+          `${mergedData.vitals.temperature || "N/A"}°F`
         );
-        addText(`SpO2: ${mergedData.vitals.spo2_percent || "N/A"}%`, 10, false);
-        addText(
-          `Temperature: ${mergedData.vitals.temperature || "N/A"}°F`,
-          10,
-          false
+        addKeyValuePair(
+          "Blood Glucose",
+          mergedData.vitals.blood_glucose || "N/A"
         );
-        yPosition += 3;
+        yPosition += sectionGap;
       }
 
-      // Current Symptoms
+      // --- CURRENT SYMPTOMS ---
       if (
         mergedData.current_symptoms &&
         mergedData.current_symptoms.length > 0
       ) {
-        addText("CURRENT SYMPTOMS", 12, true);
-        yPosition += 2;
+        addSectionHeader("CURRENT SYMPTOMS");
         mergedData.current_symptoms.forEach((symptom: string) => {
-          addText(`• ${symptom}`, 10, false);
+          addText(`  • ${symptom}`, 9, false);
         });
-        yPosition += 3;
+        yPosition += sectionGap;
       }
 
-      // Medications
+      // --- MEDICATIONS ---
       if (mergedData.medications && mergedData.medications.length > 0) {
-        addText("MEDICATIONS", 12, true);
-        yPosition += 2;
+        addSectionHeader("MEDICATIONS");
         mergedData.medications.forEach(
           (med: {
             name: string;
@@ -260,71 +327,200 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
             frequency: string;
             indication: string;
           }) => {
-            addText(`${med.name} - ${med.dose}, ${med.frequency}`, 10, false);
-            addText(`  Indication: ${med.indication}`, 9, false);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            if (yPosition + lineHeight > pageHeight - 10) {
+              doc.addPage();
+              yPosition = margin;
+            }
+            doc.text(`${med.name}`, margin + 1, yPosition);
+            yPosition += lineHeight;
+            addKeyValuePair("Dose", med.dose, 1);
+            addKeyValuePair("Frequency", med.frequency, 1);
+            addKeyValuePair("Indication", med.indication, 1);
+            yPosition += 1;
           }
         );
-        yPosition += 3;
+        yPosition += sectionGap;
       }
 
-      // Clinical Notes
+      // --- CLINICAL NOTES ---
       if (mergedData.clinical_notes) {
-        addText("CLINICAL NOTES", 12, true);
-        yPosition += 2;
+        addSectionHeader("CLINICAL NOTES");
         if (mergedData.clinical_notes.summary) {
-          addText(`Summary: ${mergedData.clinical_notes.summary}`, 10, false);
+          addKeyValuePair("Summary", mergedData.clinical_notes.summary);
         }
         if (mergedData.clinical_notes.examination) {
-          addText(
-            `Examination: ${mergedData.clinical_notes.examination}`,
-            10,
-            false
-          );
+          addKeyValuePair("Examination", mergedData.clinical_notes.examination);
         }
         if (mergedData.clinical_notes.assessment) {
-          addText(
-            `Assessment: ${mergedData.clinical_notes.assessment}`,
-            10,
-            false
+          addKeyValuePair("Assessment", mergedData.clinical_notes.assessment);
+        }
+        if (
+          mergedData.clinical_notes.plan &&
+          mergedData.clinical_notes.plan.length > 0
+        ) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          if (yPosition + lineHeight > pageHeight - 10) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          doc.text("Plan:", margin + 1, yPosition);
+          yPosition += lineHeight;
+          mergedData.clinical_notes.plan.forEach((item: string) => {
+            addText(`  • ${item}`, 9, false);
+          });
+        }
+        yPosition += sectionGap;
+      }
+
+      // --- MEDICAL IMAGERY ---
+      if (mergedData.medical_imagery && mergedData.medical_imagery.length > 0) {
+        addSectionHeader("MEDICAL IMAGERY");
+        mergedData.medical_imagery.forEach(
+          (img: {
+            id: string;
+            name: string;
+            type: string;
+            date: string;
+            description: string;
+            imagePath?: string;
+          }) => {
+            if (img.imagePath) {
+              addImage(img.imagePath, `${img.name} (${img.date})`);
+            }
+          }
+        );
+        yPosition += sectionGap;
+      }
+
+      // --- LAB REPORTS ---
+      if (mergedData.lab_report_imgs && mergedData.lab_report_imgs.length > 0) {
+        addSectionHeader("LAB REPORTS");
+        mergedData.lab_report_imgs.forEach(
+          (lab: {
+            id: string;
+            file_name: string;
+            base64_data: string;
+            date: string;
+          }) => {
+            if (lab.base64_data) {
+              addImage(lab.base64_data, `${lab.file_name} (${lab.date})`);
+            }
+          }
+        );
+        yPosition += sectionGap;
+      }
+
+      // --- AI DIAGNOSIS ---
+      addSectionHeader("AI DIAGNOSIS");
+      addText(aiDiagnosis, 9, false);
+      yPosition += sectionGap;
+
+      // --- KNOWN MEDICAL HISTORY ---
+      if (
+        mergedData.known_medical_history &&
+        mergedData.known_medical_history.length > 0
+      ) {
+        addSectionHeader("MEDICAL HISTORY");
+        mergedData.known_medical_history.forEach((item: string) => {
+          addText(`  • ${item}`, 9, false);
+        });
+        yPosition += sectionGap;
+      }
+
+      // --- DIAGNOSIS DETAILS ---
+      if (mergedData.diagnosis) {
+        addSectionHeader("DIAGNOSIS & RECOMMENDATIONS");
+        if (
+          mergedData.diagnosis.probable_conditions &&
+          mergedData.diagnosis.probable_conditions.length > 0
+        ) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          if (yPosition + lineHeight > pageHeight - 10) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          doc.text("Probable Conditions:", margin + 1, yPosition);
+          yPosition += lineHeight;
+          mergedData.diagnosis.probable_conditions.forEach((cond: string) => {
+            addText(`  • ${cond}`, 9, false);
+          });
+        }
+        if (
+          mergedData.diagnosis.treatment_suggestions &&
+          mergedData.diagnosis.treatment_suggestions.length > 0
+        ) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          if (yPosition + lineHeight > pageHeight - 10) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          doc.text("Treatment Suggestions:", margin + 1, yPosition);
+          yPosition += lineHeight;
+          mergedData.diagnosis.treatment_suggestions.forEach((sug: string) => {
+            addText(`  • ${sug}`, 9, false);
+          });
+        }
+        if (
+          mergedData.diagnosis.medical_advice &&
+          mergedData.diagnosis.medical_advice.length > 0
+        ) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          if (yPosition + lineHeight > pageHeight - 10) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          doc.text("Medical Advice:", margin + 1, yPosition);
+          yPosition += lineHeight;
+          mergedData.diagnosis.medical_advice.forEach((advice: string) => {
+            addText(`  • ${advice}`, 9, false);
+          });
+        }
+      }
+
+      // --- SOCIAL DETERMINANTS OF HEALTH ---
+      if (mergedData.personal_information?.social_determinants) {
+        addSectionHeader("SOCIAL DETERMINANTS OF HEALTH");
+        const sdoh = mergedData.personal_information.social_determinants;
+        addKeyValuePair("Smoking Status", sdoh.smoking_status || "N/A");
+        addKeyValuePair("Physical Activity", sdoh.physical_activity || "N/A");
+        addKeyValuePair("Diet", sdoh.diet || "N/A");
+        addKeyValuePair(
+          "Access to Healthcare",
+          sdoh.access_to_healthcare || "N/A"
+        );
+        if (sdoh.hearing_impairment) {
+          addKeyValuePair(
+            "Hearing Impairment",
+            sdoh.hearing_impairment || "N/A"
           );
         }
-        yPosition += 3;
       }
 
-      // AI Diagnosis
-      addText("AI DIAGNOSIS", 12, true);
-      yPosition += 2;
-      addText(aiDiagnosis, 10, false);
-      yPosition += 3;
-
-      // Social Determinants of Health
-      if (mergedData.personal_information?.social_determinants) {
-        addText("SOCIAL DETERMINANTS OF HEALTH", 12, true);
-        yPosition += 2;
-        const sdoh = mergedData.personal_information.social_determinants;
-        addText(`Smoking Status: ${sdoh.smoking_status || "N/A"}`, 10, false);
-        addText(
-          `Physical Activity: ${sdoh.physical_activity || "N/A"}`,
-          10,
-          false
+      // --- FOOTER ---
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.setFont("helvetica", "italic");
+        doc.text(
+          `Generated on ${new Date().toLocaleString()}`,
+          margin,
+          pageHeight - 5
         );
-        addText(`Diet: ${sdoh.diet || "N/A"}`, 10, false);
-        addText(
-          `Access to Healthcare: ${sdoh.access_to_healthcare || "N/A"}`,
-          10,
-          false
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          pageWidth - margin - 20,
+          pageHeight - 5
         );
-        yPosition += 3;
       }
-
-      // Footer with date
-      doc.setFontSize(8);
-      doc.setTextColor(128);
-      doc.text(
-        `Generated on ${new Date().toLocaleString()}`,
-        margin,
-        pageHeight - 5
-      );
 
       // Download the PDF
       const fileName = `medical-report-${mergedData.patient_id || "patient"}-${
