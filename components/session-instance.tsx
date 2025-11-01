@@ -704,8 +704,8 @@ export const SessionInstance = ({
 
       {/* Entries List - Scrollable area (hidden while add form open) */}
       {!showAddForm && (
-        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
-          <div className="space-y-2 pr-1 mt-3">
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full min-h-0">
+          <div className="space-y-2 pr-2 mt-3">
             {entries.length === 0 ? (
               <div className="text-center text-muted-foreground text-sm py-8">
                 No entries yet. Click "Add" to create your first entry.

@@ -1,0 +1,129 @@
+{
+    "patient_id": "P001",
+    "personal_information": {
+        "salutation": "Mrs",
+        "name": "Yasmeen Pervaiz",
+        "age": 65,
+        "sex": "Female",
+        "ethnicity": "South Asian/punjabi",
+        "occupation": "Retired school teacher",
+        "family_history": {
+            "hypertension": true,
+            "osteoarthritis": true
+        },
+        "social_determinants": {
+            "smoking_status": "Non-smoker",
+            "physical_activity": "Low to moderate (limited by knee stiffness)",
+            "diet": "Balanced, low in protein",
+            "hearing_impairment": "Uses hearing aids, recurrent ear infections",
+            "access_to_healthcare": "unknown"
+        }
+    },
+    "vitals": {
+        "weight_kg": 67,
+        "bmi_estimate": 26,
+        "blood_pressure_mmHg": "127/82",
+        "heart_rate_bpm": 72,
+        "spo2_percent": 97,
+        "temperature": "98.6",
+        "blood_glucose": "Normal"
+    },
+    "lab_results": [
+        {
+            "date": "2025-07-11",
+            "results": {
+                "CBC": {
+                    "WBC_Count_per_mm3": 6800,
+                    "RBC_Count_mil_per_mm3": 4.42,
+                    "Hemoglobin_g_per_dL": 13.2,
+                    "Hematocrit_percent": 40,
+                    "MCV_fL": 90,
+                    "MCH_pg": 30,
+                    "MCHC_g_per_dL": 33,
+                    "RDW_CV_percent": 13,
+                    "Platelet_Count_per_mm3": 131000,
+                    "Differential_Count_percent": {
+                        "Neutrophils": 59,
+                        "Lymphocytes": 32,
+                        "Monocytes": 6,
+                        "Eosinophils": 3
+                    }
+                },
+                "ESR_mm_per_hr": 6
+            }
+        },
+        {
+            "date": "2025-07-12",
+            "results": {
+                "Synovial_Fluid": {
+                    "Color": "Light Yellow",
+                    "Appearance": "Transparent",
+                    "WBC_Count": "<5",
+                    "Neutrophils_percent": "--",
+                    "Lymphocytes_percent": "--",
+                    "Gram_Stain": "No Micro-organisms Seen",
+                    "AFB_Stain": "No Acid Fast Bacilli Seen",
+                    "Comments": "Too low for DLC. Please correlate clinically."
+                }
+            }
+        }
+    ],
+    "medical_imagery": [],
+    "clinical_notes": {
+        "summary": "Patient presents with chronic right knee pain, swelling, and stiffness that worsens with activity and prolonged sitting. Reports occasional sensations of something stuck in the knee and difficulty walking after rest.",
+        "examination": "Mild effusion and tenderness over medial joint line of right knee; no signs of acute inflammation or infection.",
+        "assessment": "Likely early-to-moderate osteoarthritis of the right knee; mild hypertension well-controlled.",
+        "plan": [
+            "Recommend knee X-ray to confirm degenerative changes",
+            "Consider intra-articular corticosteroid injection if pain persists",
+            "Encourage low-impact exercise (swimming, cycling)",
+            "Suggest weight management and physiotherapy referral",
+            "Continue Nifedipine and monitor blood pressure regularly"
+        ]
+    },
+    "medications": [
+        {
+            "name": "Nifedipine",
+            "dose": "20 mg",
+            "frequency": "once daily",
+            "indication": "Hypertension"
+        },
+        {
+            "name": "Paracetamol",
+            "dose": "500 mg",
+            "frequency": "as needed",
+            "indication": "Pain relief"
+        }
+    ],
+    "current_symptoms": [
+        "Right knee pain",
+        "Swelling in right knee joint",
+        "Leg stiffness and freezing after immobility",
+        "Fatigue after moderate activity",
+        "Sensation of obstruction in knee joint",
+        "Difficulty walking",
+        "No fever or systemic infection signs"
+    ],
+    "known_medical_history": [
+        "Mild hypertension",
+        "Possible osteoarthritis",
+        "Recurrent ear infections",
+        "Hearing aid user"
+    ],
+    "diagnosis": {
+        "probable_conditions": [
+            "Osteoarthritis (Right Knee)",
+            "Mild Hypertension (well-controlled)"
+        ],
+        "treatment_suggestions": [
+            "Consider cortisone (intra-articular corticosteroid) injections for pain relief",
+            "If symptoms progress or mobility severely limited, evaluate for knee replacement surgery"
+        ],
+        "medical_advice": [
+            "Sit with knees at right angles to avoid strain",
+            "Do mild daily knee exercises and stretching",
+            "Avoid lifting or moving heavy weights",
+            "Maintain balanced diet and healthy weight"
+        ]
+    }
+}

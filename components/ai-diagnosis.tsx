@@ -104,34 +104,6 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
         });
       }
 
-      // Generate and download JSON file
-      const generateJsonFile = (data: any) => {
-        try {
-          const jsonString = JSON.stringify(data, null, 2);
-          const blob = new Blob([jsonString], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          const timestamp = new Date()
-            .toISOString()
-            .replace(/[:.]/g, "-")
-            .slice(0, -5);
-          link.download = `patient_data_${
-            patientData?.patient_id || "unknown"
-          }_${timestamp}.json`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-          console.log("JSON file downloaded successfully");
-        } catch (error) {
-          console.error("Error generating JSON file:", error);
-        }
-      };
-
-      // Generate and download the merged data JSON
-      generateJsonFile(mergedData);
-
       const response = await fetch("/api/ai-diagnosis", {
         method: "POST",
         headers: {
