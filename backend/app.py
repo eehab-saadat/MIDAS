@@ -94,21 +94,39 @@ def transcribe():
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
     """Generate diagnosis from text and image."""
+    logger.info("Starting AI diagnosis generation")
     try:
         data_json = request.form.get('data', '')
         if not data_json:
+            logger.warning("No data provided in request")
             return jsonify({"error": "No data provided"}), 400
+        
+        logger.info("Parsing patient data...")
         data = parse_data(data_json)
+        
         if 'image' not in request.files:
+            logger.warning("No image file provided in request")
             return jsonify({"error": "No image file provided"}), 400
+        
         image_file = request.files['image']
         if image_file.filename == '':
+            logger.warning("Empty filename provided")
             return jsonify({"error": "Empty filename"}), 400
+        
+        logger.info(f"Processing image: {image_file.filename}")
         image_base64 = encode_image_to_base64(image_file)
+        
+        logger.info("Generating diagnosis with MedGemma model...")
         diagnosis_result = generate_diagnosis(data, image_base64)
+        
+        if "error" in diagnosis_result:
+            logger.error(f"Diagnosis generation failed: {diagnosis_result['error']}")
+            return jsonify(diagnosis_result), 500
+        
+        logger.info("✅ Diagnosis generated successfully")
         return jsonify(diagnosis_result), 200
     except Exception as e:
-        logger.error(f"❌ Transcription error: {str(e)}", exc_info=True)
+        logger.error(f"❌ Diagnosis error: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 

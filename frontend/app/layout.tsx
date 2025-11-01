@@ -6,8 +6,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Next.js Shadcn Layout",
-  description: "Responsive and theme-toggleable layout",
+  title: "MIDAS - Medical Intelligence Diagnosis and Assessment System",
+  description: "AI-powered medical diagnosis and patient management system",
 };
 
 export default function RootLayout({

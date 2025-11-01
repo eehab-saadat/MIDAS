@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Mic, Square, Pause, Play } from "lucide-react";
+import { Plus, X, Mic, Square, Pause, Play, Smartphone, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 interface MedicalEntry {
   id: string;
@@ -50,6 +51,13 @@ export const SessionInstance = ({
   const [transcription, setTranscription] = useState<string | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [tempAudioBlob, setTempAudioBlob] = useState<Blob | null>(null);
+  const [showMobileQR, setShowMobileQR] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
+  const [mobileUrl, setMobileUrl] = useState<string>("");
+  const [customBaseUrl, setCustomBaseUrl] = useState<string>("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [detectedLocalIp, setDetectedLocalIp] = useState<string>("");
+  const [isDetectingIp, setIsDetectingIp] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -61,7 +69,130 @@ export const SessionInstance = ({
   // Ensure component is mounted on client before using browser APIs
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    // Generate unique session ID
+    const uniqueId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setSessionId(uniqueId);
+    
+    // Set mobile URL - default to window origin
+    if (typeof window !== "undefined") {
+      const baseUrl = customBaseUrl || "https://nonpedagogical-cris-epizootically.ngrok-free.dev";
+      setMobileUrl(`${baseUrl}/mobile-camera?session=${uniqueId}`);
+    }
+  }, [customBaseUrl]);
+  
+  // Update mobile URL when custom base URL changes
+  const updateMobileUrl = (newBaseUrl: string) => {
+    setCustomBaseUrl(newBaseUrl);
+  };
+
+  // Detect local IP address using WebRTC
+  const detectLocalIp = async () => {
+    setIsDetectingIp(true);
+    try {
+      // Create a dummy peer connection
+      const pc = new RTCPeerConnection({
+        iceServers: []
+      });
+
+      // Create a dummy data channel
+      pc.createDataChannel('');
+
+      // Create an offer
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      // Wait for ICE candidate
+      return new Promise<string>((resolve) => {
+        pc.onicecandidate = (ice) => {
+          if (!ice || !ice.candidate || !ice.candidate.candidate) {
+            return;
+          }
+
+          const candidate = ice.candidate.candidate;
+          
+          // Extract IP address from candidate string
+          // Format: "candidate:... typ host" contains local IP
+          const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
+          const match = candidate.match(ipRegex);
+          
+          if (match && match[1]) {
+            const ip = match[1];
+            // Filter out localhost
+            if (!ip.startsWith('127.') && !ip.startsWith('0.')) {
+              pc.close();
+              setDetectedLocalIp(ip);
+              setIsDetectingIp(false);
+              resolve(ip);
+            }
+          }
+        };
+
+        // Timeout after 3 seconds
+        setTimeout(() => {
+          pc.close();
+          setIsDetectingIp(false);
+          resolve('');
+        }, 3000);
+      });
+    } catch (error) {
+      console.error('Error detecting local IP:', error);
+      setIsDetectingIp(false);
+      return '';
+    }
+  };
+
+  // Auto-detect IP when QR modal opens
+  useEffect(() => {
+    if (showMobileQR && !detectedLocalIp && !customBaseUrl) {
+      detectLocalIp();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showMobileQR, detectedLocalIp, customBaseUrl]);
+
+  // Poll for new images from mobile
+  useEffect(() => {
+    if (!sessionId || !showMobileQR) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/mobile-upload?session_id=${sessionId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.images && data.images.length > 0) {
+            // Add new images as entries
+            const newImages = data.images.filter(
+              (img: any) => !entries.find((e) => e.id === img.id)
+            );
+
+            newImages.forEach((img: any) => {
+              const newEntry: MedicalEntry = {
+                id: img.id,
+                type: "imaging",
+                date: new Date(img.timestamp).toISOString(),
+                content: {
+                  file_name: img.fileName,
+                  file_type: img.fileType,
+                  base64_data: img.base64Data,
+                },
+              };
+              setEntries([...entries, newEntry]);
+            });
+
+            // Clear consumed images
+            if (newImages.length > 0) {
+              await fetch(`/api/mobile-upload?session_id=${sessionId}`, {
+                method: "DELETE",
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error polling for mobile images:", error);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [sessionId, showMobileQR, entries, setEntries]);
 
   const [entryType, setEntryType] = useState<
     "imaging" | "lab" | "note" | "meds" | "symptoms"
@@ -414,8 +545,160 @@ export const SessionInstance = ({
           >
             <Mic className="h-3 w-3" />
           </Button>
+          <Button
+            size="sm"
+            onClick={() => setShowMobileQR(!showMobileQR)}
+            className="h-7 px-2 text-xs"
+            variant={showMobileQR ? "default" : "outline"}
+            title="Use mobile camera"
+          >
+            <Smartphone className="h-3 w-3" />
+          </Button>
         </div>
       </div>
+
+      {/* Mobile QR Code Modal */}
+      {showMobileQR && (
+        <Card className="p-4 mb-2 border-2 border-blue-500 bg-blue-50 dark:bg-blue-950">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-blue-600" />
+              <h4 className="text-sm font-semibold text-blue-600">
+                Scan with Mobile Device
+              </h4>
+            </div>
+            
+            {/* URL Configuration */}
+            <div className="w-full space-y-2">
+              <div className="bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 rounded p-2 text-xs">
+                <p className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
+                  📱 For Localhost Development:
+                </p>
+                <ol className="list-decimal ml-4 space-y-1 text-yellow-700 dark:text-yellow-300">
+                  <li>Mobile device must be on the same WiFi network</li>
+                  <li>Click the button below to use your local IP</li>
+                  <li>Make sure your Next.js dev server is accessible on your network</li>
+                </ol>
+              </div>
+
+              {/* Auto-detected IP Section */}
+              {isDetectingIp && (
+                <div className="bg-blue-50 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded p-3 text-xs">
+                  <p className="text-blue-700 dark:text-blue-300 animate-pulse">
+                    🔍 Detecting your local IP address...
+                  </p>
+                </div>
+              )}
+
+              {detectedLocalIp && !customBaseUrl && (
+                <div className="bg-green-50 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded p-3 text-xs space-y-2">
+                  <p className="font-semibold text-green-800 dark:text-green-200">
+                    ✅ Detected Local IP: <span className="font-mono">{detectedLocalIp}</span>
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const port = typeof window !== "undefined" ? window.location.port || "3000" : "3000";
+                      updateMobileUrl(`http://${detectedLocalIp}:${port}`);
+                    }}
+                    className="h-7 text-xs w-full bg-green-600 hover:bg-green-700"
+                  >
+                    Use This IP for QR Code
+                  </Button>
+                </div>
+              )}
+
+              {customBaseUrl && (
+                <div className="bg-green-50 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded p-2 text-xs">
+                  <p className="font-semibold text-green-800 dark:text-green-200">
+                    ✅ Using: <span className="font-mono">{customBaseUrl}</span>
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => setCustomBaseUrl("")}
+                    variant="outline"
+                    className="h-6 text-xs w-full mt-2"
+                  >
+                    Reset to Default
+                  </Button>
+                </div>
+              )}
+
+              {!showUrlInput && (
+                <Button
+                  size="sm"
+                  onClick={() => setShowUrlInput(true)}
+                  variant="outline"
+                  className="h-7 text-xs w-full"
+                >
+                  Enter Custom URL (Tunnel/Different IP)
+                </Button>
+              )}
+
+              {showUrlInput && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-blue-700 dark:text-blue-300">
+                    Base URL (without /mobile-camera):
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g., http://192.168.1.100:3000"
+                    value={customBaseUrl}
+                    onChange={(e) => updateMobileUrl(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Leave empty to use: {typeof window !== "undefined" ? window.location.origin : ""}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {mobileUrl && (
+              <>
+                <div className="bg-white p-3 rounded-lg">
+                  <QRCodeSVG value={mobileUrl} size={150} />
+                </div>
+                
+                <div className="text-center text-xs break-all bg-white dark:bg-gray-800 p-2 rounded w-full">
+                  <p className="font-mono text-gray-700 dark:text-gray-300">
+                    {mobileUrl}
+                  </p>
+                </div>
+              </>
+            )}
+
+            <div className="text-center text-xs text-blue-600 dark:text-blue-300">
+              <p className="font-semibold mb-1">Capture images from your phone</p>
+              <p className="text-xs opacity-75">Images will appear automatically</p>
+            </div>
+
+            <div className="bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded p-2 text-xs w-full">
+              <p className="font-semibold text-blue-800 dark:text-blue-200 mb-1">
+                💡 Finding Your Local IP:
+              </p>
+              <ul className="list-disc ml-4 space-y-1 text-blue-700 dark:text-blue-300 text-xs">
+                <li><strong>Windows:</strong> Open CMD, type <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">ipconfig</code></li>
+                <li><strong>Mac/Linux:</strong> Open Terminal, type <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">ifconfig</code></li>
+                <li>Look for IPv4 Address (usually starts with 192.168.x.x)</li>
+              </ul>
+            </div>
+
+            <Button
+              size="sm"
+              onClick={() => {
+                setShowMobileQR(false);
+                setShowUrlInput(false);
+              }}
+              variant="outline"
+              className="h-7 text-xs"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Close
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Audio Recording Modal */}
       {isRecording && (
@@ -708,7 +991,7 @@ export const SessionInstance = ({
           <div className="space-y-2 pr-2 mt-3">
             {entries.length === 0 ? (
               <div className="text-center text-muted-foreground text-sm py-8">
-                No entries yet. Click "Add" to create your first entry.
+                No entries yet. Click &quot;Add&quot; to create your first entry.
               </div>
             ) : (
               entries.map((entry) => {

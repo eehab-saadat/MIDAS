@@ -4,17 +4,30 @@ import io
 import requests
 import json
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 def encode_image_to_base64(uploaded_file):
     """Convert uploaded image file to base64 string."""
-    image = Image.open(uploaded_file).convert("RGB")
-    buf = io.BytesIO()
-    image.save(buf, format="PNG")
-    return base64.b64encode(buf.getvalue()).decode("utf-8")
+    try:
+        image = Image.open(uploaded_file).convert("RGB")
+        buf = io.BytesIO()
+        image.save(buf, format="PNG")
+        encoded = base64.b64encode(buf.getvalue()).decode("utf-8")
+        logger.info(f"  Image encoded to base64 (size: {len(encoded)} chars)")
+        return encoded
+    except Exception as e:
+        logger.error(f"  Error encoding image: {str(e)}")
+        raise
 
 def generate_diagnosis(data, image):
     OLLAMA_URL = "http://localhost:11434/api/chat"
     MODEL = "amsaravi/medgemma-4b-it:q6"
+    
+    logger.info(f"  Calling MedGemma model: {MODEL}")
+    logger.info(f"  Ollama URL: {OLLAMA_URL}")
+    
     try:
         message = {
                     "role": "user",
@@ -32,7 +45,7 @@ def generate_diagnosis(data, image):
                 }
         
         message["content"] += f"\n\nThe following json depicts relevant information about the case: {data}"
-        print(message["content"])
+        logger.debug(f"  Prompt: {message['content'][:200]}...")
         message["images"] = [image]
 
         payload = {
@@ -44,40 +57,64 @@ def generate_diagnosis(data, image):
             }
         }
 
-        response = requests.post(OLLAMA_URL, json=payload)
+        logger.info("  Sending request to Ollama...")
+        response = requests.post(OLLAMA_URL, json=payload, timeout=120)
 
         if response.status_code == 200:
+            logger.info("  ✅ Received response from Ollama")
             try:
                 response_data = response.json()
                 response_text = response_data.get("message", {}).get("content", "").strip()
+                
                 if not response_text:
+                    logger.warning("  Empty response from model")
                     return {"error": "No response received from the model. Please try again."}
+                
+                logger.info(f"  Response length: {len(response_text)} chars")
+                logger.debug(f"  Raw response: {response_text[:300]}...")
                 
                 # Extract JSON from markdown code block if present
                 json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response_text, re.DOTALL)
                 if json_match:
                     json_str = json_match.group(1)
+                    logger.info("  Found JSON in markdown code block")
                 else:
                     # Try to find JSON object directly in the response
                     json_match = re.search(r'\{.*"diagnosis".*"reasoning".*\}', response_text, re.DOTALL)
                     if json_match:
                         json_str = json_match.group(0)
+                        logger.info("  Found JSON object in response")
                     else:
                         json_str = response_text
+                        logger.warning("  No JSON structure found, using raw response")
                 
                 parsed_json = json.loads(json_str)
                 
                 if "diagnosis" not in parsed_json or "reasoning" not in parsed_json:
+                    logger.error("  Invalid response format: missing required fields")
                     return {"error": "Invalid response format: missing 'diagnosis' or 'reasoning' field"}
                 
+                logger.info(f"  ✅ Successfully parsed diagnosis: {parsed_json['diagnosis'][:50]}...")
                 return parsed_json
+                
             except json.JSONDecodeError as e:
+                logger.error(f"  JSON decode error: {str(e)}")
+                logger.error(f"  Failed to parse: {response_text[:200]}...")
                 return {"error": f"Error parsing JSON response: {e}"}
             except ValueError as e:
+                logger.error(f"  Value error: {str(e)}")
                 return {"error": f"Error parsing response: {e}"}
         else:
+            logger.error(f"  ❌ Ollama returned error {response.status_code}")
+            logger.error(f"  Response: {response.text[:200]}")
             return {"error": f"Error {response.status_code}: {response.text}"}
+            
     except requests.exceptions.ConnectionError:
-        return {"error": "Unable to connect to Ollama. Make sure Ollama is running locally."}
+        logger.error("  ❌ Cannot connect to Ollama")
+        return {"error": "Unable to connect to Ollama. Make sure Ollama is running locally on port 11434."}
+    except requests.exceptions.Timeout:
+        logger.error("  ❌ Request to Ollama timed out")
+        return {"error": "Request timed out. The model may be processing. Please try again."}
     except Exception as e:
+        logger.error(f"  ❌ Unexpected error: {str(e)}", exc_info=True)
         return {"error": f"An error occurred: {e}"}

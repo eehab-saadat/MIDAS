@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const FLASK_BACKEND_URL = process.env.FLASK_BACKEND_URL || "http://localhost:5000";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -10,40 +12,95 @@ export async function POST(request: Request) {
     console.log(JSON.stringify(body, null, 2));
     console.log("================================");
 
-    // Extract patient info for context
-    const patientName = body.personal_information?.name || "Patient";
-    const conditions = body.diagnosis?.probable_conditions || [];
-    const symptoms = body.current_symptoms || [];
-    const medications = body.medications?.map((m: any) => m.name) || [];
-    const sessionEntries = body.entries || [];
+    // Find the first lab report image from the merged data
+    let imageBase64 = null;
+    let imageType = "image/jpeg";
 
-    // Generate a dummy AI diagnosis summary
-    const aiDiagnosisSummary = `
-CLINICAL ANALYSIS SUMMARY
-Patient: ${patientName}
+    // Check lab_report_imgs first
+    if (body.lab_report_imgs && body.lab_report_imgs.length > 0) {
+      const firstLabReport = body.lab_report_imgs[0];
+      imageBase64 = firstLabReport.base64_data;
+      imageType = firstLabReport.file_type || "image/jpeg";
+      console.log("Using lab report image:", firstLabReport.file_name);
+    } 
+    // Check medical_imagery as fallback
+    else if (body.medical_imagery && body.medical_imagery.length > 0) {
+      const firstImage = body.medical_imagery[0];
+      imageBase64 = firstImage.imagePath;
+      imageType = "image/jpeg";
+      console.log("Using medical imagery:", firstImage.name);
+    }
 
-Based on the comprehensive medical evaluation and ${sessionEntries.length > 0 ? `${sessionEntries.length} session entries` : "baseline data"}:
+    if (!imageBase64) {
+      return NextResponse.json(
+        { 
+          error: "No medical image found. Please upload at least one medical image to generate a diagnosis.",
+          diagnosis: "Unable to generate diagnosis: No medical image provided. Please add a medical image to the session."
+        },
+        { status: 400 }
+      );
+    }
 
-ASSESSMENT:
-${conditions.length > 0 ? `Primary conditions identified: ${conditions.join(", ")}.` : "No acute conditions identified at this time."}
+    // Clean base64 data if it has a data URI prefix
+    if (imageBase64.startsWith('data:')) {
+      imageBase64 = imageBase64.split(',')[1];
+    }
 
-CURRENT CLINICAL STATUS:
-${symptoms.length > 0 ? `Patient reports: ${symptoms.slice(0, 3).join(", ")}.` : "Patient appears stable with no acute symptoms."}
+    // Convert base64 to blob for multipart form data
+    const imageBuffer = Buffer.from(imageBase64, 'base64');
+    const blob = new Blob([imageBuffer], { type: imageType });
 
-MEDICATION REVIEW:
-${medications.length > 0 ? `Current medications: ${medications.join(", ")}.` : "No active medications."} Compliance and effectiveness should be monitored.
+    // Prepare the data for the backend (removing unnecessary fields)
+    const diagnosisData = {
+      patient_id: body.patient_id,
+      personal_information: body.personal_information,
+      vitals: body.vitals,
+      current_symptoms: body.current_symptoms,
+      medications: body.medications,
+      known_medical_history: body.known_medical_history,
+      clinical_notes: body.clinical_notes,
+      audio_transcriptions: body.audio_transcriptions || [],
+    };
 
-${sessionEntries.length > 0 ? `SESSION ENTRIES REVIEWED: ${sessionEntries.length} entries analyzed.` : ""}
+    // Create FormData for Flask backend
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(diagnosisData));
+    formData.append('image', blob, 'medical-image.jpg');
 
-CLINICAL RECOMMENDATIONS:
-1. Continue current treatment plan with regular follow-ups
-2. Monitor vital signs and symptom progression
-3. Schedule follow-up appointment in 2-4 weeks
-4. Maintain medication adherence as prescribed
-5. Consider lifestyle modifications as appropriate
+    console.log("Calling Flask backend at:", `${FLASK_BACKEND_URL}/diagnose`);
 
-NOTES:
-This is a preliminary AI-assisted analysis based on available data. Clinical correlation with physician examination is essential for definitive diagnosis and management decisions.
+    // Call Flask backend
+    const backendResponse = await fetch(`${FLASK_BACKEND_URL}/diagnose`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!backendResponse.ok) {
+      const errorText = await backendResponse.text();
+      console.error("Flask backend error:", errorText);
+      throw new Error(`Backend returned ${backendResponse.status}: ${errorText}`);
+    }
+
+    const diagnosisResult = await backendResponse.json();
+    console.log("Diagnosis result from backend:", diagnosisResult);
+
+    // Check if there's an error in the diagnosis result
+    if (diagnosisResult.error) {
+      return NextResponse.json(
+        { 
+          error: diagnosisResult.error,
+          diagnosis: `Error generating diagnosis: ${diagnosisResult.error}`
+        },
+        { status: 500 }
+      );
+    }
+
+    // Format the response for the frontend
+    const formattedDiagnosis = `
+DIAGNOSIS: ${diagnosisResult.diagnosis || "No diagnosis provided"}
+
+REASONING:
+${diagnosisResult.reasoning || "No reasoning provided"}
 
 Generated: ${new Date().toLocaleString()}
     `.trim();
@@ -51,8 +108,9 @@ Generated: ${new Date().toLocaleString()}
     return NextResponse.json(
       {
         success: true,
-        diagnosis: aiDiagnosisSummary,
-        entriesProcessed: sessionEntries.length,
+        diagnosis: formattedDiagnosis,
+        raw_diagnosis: diagnosisResult.diagnosis,
+        raw_reasoning: diagnosisResult.reasoning,
       },
       {
         status: 200,
@@ -64,7 +122,10 @@ Generated: ${new Date().toLocaleString()}
   } catch (error) {
     console.error("Error processing AI diagnosis request:", error);
     return NextResponse.json(
-      { error: "Failed to generate AI diagnosis" },
+      { 
+        error: error instanceof Error ? error.message : "Failed to generate AI diagnosis",
+        diagnosis: `Error: ${error instanceof Error ? error.message : "Failed to generate AI diagnosis. Please ensure the backend server is running and Ollama is available."}`
+      },
       { status: 500 }
     );
   }
