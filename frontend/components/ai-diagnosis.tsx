@@ -106,6 +106,33 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
         });
       }
 
+      // Update patient data with merged session entries
+      const patientId = mergedData.patient_id;
+      if (patientId) {
+        try {
+          const updateResponse = await fetch(`/api/patients/${patientId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(mergedData),
+          });
+
+          if (!updateResponse.ok) {
+            console.warn(
+              "Failed to update patient data:",
+              updateResponse.status
+            );
+            // Continue anyway, as this is not critical to generating the diagnosis
+          } else {
+            console.log("Patient data updated successfully");
+          }
+        } catch (error) {
+          console.warn("Error updating patient data:", error);
+          // Continue anyway, as this is not critical to generating the diagnosis
+        }
+      }
+
       const response = await fetch("/api/ai-diagnosis", {
         method: "POST",
         headers: {

@@ -1,45 +1,52 @@
 {
     "patient_id": "P004",
     "personal_information": {
-        "salutation": "Mrs",
-        "name": "dummy 1",
         "age": 55,
-        "sex": "Male",
         "ethnicity": "Unknown",
-        "occupation": "Unknown",
         "family_history": {},
+        "name": "dummy 1",
+        "occupation": "Unknown",
+        "salutation": "Mrs",
+        "sex": "Male",
         "social_determinants": {
-            "smoking_status": "Unknown",
-            "physical_activity": "Unknown",
+            "access_to_healthcare": "Unknown",
             "diet": "Unknown",
             "hearing_impairment": "None reported",
-            "access_to_healthcare": "Unknown"
+            "physical_activity": "Unknown",
+            "smoking_status": "Unknown"
         }
     },
     "vitals": {
-        "weight_kg": 0,
-        "bmi_estimate": 0,
+        "blood_glucose": "Unknown",
         "blood_pressure_mmHg": "",
+        "bmi_estimate": 0,
         "heart_rate_bpm": 0,
         "spo2_percent": 0,
         "temperature": "",
-        "blood_glucose": "Unknown"
+        "weight_kg": 0
     },
     "lab_results": [],
     "medical_imagery": [],
     "clinical_notes": {
-        "summary": "",
-        "examination": "",
         "assessment": "",
-        "plan": []
+        "examination": "",
+        "plan": [],
+        "summary": ""
     },
-    "medications": [],
+    "medications": [
+        {
+            "name": "a",
+            "dose": "a",
+            "frequency": "a",
+            "indication": "a"
+        }
+    ],
     "current_symptoms": [],
     "known_medical_history": [],
     "diagnosis": {
+        "medical_advice": [],
         "probable_conditions": [],
-        "treatment_suggestions": [],
-        "medical_advice": []
+        "treatment_suggestions": []
     },
     "lab_report_imgs": [],
     "audio_transcriptions": [],
