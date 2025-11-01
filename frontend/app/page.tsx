@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,19 +9,60 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Patient, mockPatients } from "@/lib/patients";
+import { PatientData } from "@/lib/patients";
+
+interface PatientDisplay extends PatientData {
+  status: "active" | "inactive";
+}
 
 export default function PatientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredPatients, setFilteredPatients] = useState(mockPatients);
+  const [filteredPatients, setFilteredPatients] = useState<PatientDisplay[]>([]);
+  const [patients, setPatients] = useState<PatientDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch patients from API on component mount
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/patients");
+        if (!response.ok) {
+          throw new Error("Failed to fetch patients");
+        }
+        const data: PatientData[] = await response.json();
+
+        // Transform API data to display format with status
+        const transformedData: PatientDisplay[] = data.map((patient) => ({
+          ...patient,
+          status: "active" as const,
+        }));
+
+        setPatients(transformedData);
+        setFilteredPatients(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching patients:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch patients"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    const filtered = mockPatients.filter(
+    const filtered = patients.filter(
       (patient) =>
-        patient.name.toLowerCase().includes(term.toLowerCase()) ||
-        patient.id.toLowerCase().includes(term.toLowerCase()) ||
-        patient.email.toLowerCase().includes(term.toLowerCase())
+        patient.personal_information.name
+          .toLowerCase()
+          .includes(term.toLowerCase()) ||
+        patient.patient_id.toLowerCase().includes(term.toLowerCase())
     );
     setFilteredPatients(filtered);
   };
@@ -73,29 +114,40 @@ export default function PatientsPage() {
 
       {/* Patients Grid */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
+        {loading && <div className="col-span-full text-center py-8">Loading patients...</div>}
+        {error && <div className="col-span-full text-center py-8 text-red-500">Error: {error}</div>}
+        {!loading && filteredPatients.length === 0 && (
+          <div className="col-span-full text-center py-8 text-muted-foreground">
+            No patients found
+          </div>
+        )}
         {filteredPatients.map((patient) => (
           <Card
-            key={patient.id}
+            key={patient.patient_id}
             className="hover:shadow-lg transition-shadow cursor-pointer"
           >
             <CardHeader className="pb-3">
               <div className="flex items-center space-x-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={patient.image} alt={patient.name} />
-                  <AvatarFallback>{getInitials(patient.name)}</AvatarFallback>
+                  <AvatarImage
+                    src={undefined}
+                    alt={patient.personal_information.name}
+                  />
+                  <AvatarFallback>
+                    {getInitials(patient.personal_information.name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-base truncate">
-                    {patient.name}
+                    {patient.personal_information.salutation}{" "}
+                    {patient.personal_information.name}
                   </CardTitle>
                   <div className="text-xs text-muted-foreground">
-                    {patient.id}
+                    {patient.patient_id}
                   </div>
                 </div>
                 <Badge
-                  variant={
-                    patient.status === "active" ? "default" : "secondary"
-                  }
+                  variant={patient.status === "active" ? "default" : "secondary"}
                 >
                   {patient.status}
                 </Badge>
@@ -105,21 +157,21 @@ export default function PatientsPage() {
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Age:</span>
-                  <span>{patient.age} years</span>
+                  <span>{patient.personal_information.age} years</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Gender:</span>
-                  <span>{patient.gender}</span>
+                  <span>{patient.personal_information.sex}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Last Visit:</span>
                   <span>
-                    {new Date(patient.lastVisit).toLocaleDateString()}
+                    {new Date(patient.last_visit).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="pt-2">
                   <Button size="sm" className="w-full text-xs" asChild>
-                    <Link href={`/patient?patient=${patient.id}`}>
+                    <Link href={`/patient?patient=${patient.patient_id}`}>
                       View Details
                     </Link>
                   </Button>

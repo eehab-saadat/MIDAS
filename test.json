@@ -1,0 +1,10 @@
+{
+    "patient_id": "P001",
+    "personal_information": {
+        "salutation": "Mrs",
+        "name": "Yasmeen Pervaiz",
+        "age": 65,
+        "sex": "Female"
+    },
+    "last_visit": "2025-07-11"
+}
