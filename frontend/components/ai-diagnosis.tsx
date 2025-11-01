@@ -106,12 +106,66 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
         });
       }
 
+      // Prepare FormData to send JSON and image blobs
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(mergedData));
+
+      // Helper function to convert base64 data URL to blob
+      const dataUrlToBlob = (dataUrl: string): Blob => {
+        const parts = dataUrl.split(",");
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+        const bstr = atob(parts[1]);
+        const n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        for (let i = 0; i < n; i++) {
+          u8arr[i] = bstr.charCodeAt(i);
+        }
+        return new Blob([u8arr], { type: mime });
+      };
+
+      // Add all imaging files from medical_imagery as blobs
+      if (mergedData.medical_imagery && mergedData.medical_imagery.length > 0) {
+        mergedData.medical_imagery.forEach(
+          (image: { imagePath?: string }, index: number) => {
+            if (image.imagePath && image.imagePath.startsWith("data:")) {
+              try {
+                const blob = dataUrlToBlob(image.imagePath);
+                formData.append(`image_${index}`, blob, `image_${index}.png`);
+              } catch (err) {
+                console.error(`Failed to convert image ${index}:`, err);
+              }
+            }
+          }
+        );
+      }
+
+      // Add all lab report images as blobs
+      if (mergedData.lab_report_imgs && mergedData.lab_report_imgs.length > 0) {
+        mergedData.lab_report_imgs.forEach(
+          (
+            lab: { base64_data?: string; file_name?: string },
+            index: number
+          ) => {
+            if (lab.base64_data && lab.base64_data.startsWith("data:")) {
+              try {
+                const blob = dataUrlToBlob(lab.base64_data);
+                formData.append(
+                  `lab_${index}`,
+                  blob,
+                  lab.file_name || `lab_${index}.png`
+                );
+              } catch (err) {
+                console.error(`Failed to convert lab image ${index}:`, err);
+              }
+            }
+          }
+        );
+      }
+
       const response = await fetch("/api/ai-diagnosis", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(mergedData),
+        body: formData,
       });
 
       if (!response.ok) {
