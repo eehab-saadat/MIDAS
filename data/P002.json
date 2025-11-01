@@ -68,10 +68,20 @@
     ],
     "medical_imagery": [
         {
-            "type": "Chest X-ray (CXR)",
-            "file_path": "./images/xrays/P002_cxr.jpeg",
-            "description": null,
-            "expected_findings": "Possible mild hyperinflation; no consolidation or acute infiltrates noted."
+            "id": "IMG-001",
+            "name": "Chest X-ray (CXR)",
+            "type": "X-ray",
+            "date": "2025-10-28",
+            "description": "Possible mild hyperinflation; no consolidation or acute infiltrates noted.",
+            "imagePath": "\\blob//"
+        },
+        {
+            "id": "1761955195244",
+            "name": "digger.gif",
+            "type": "Imaging",
+            "date": "2025-10-31T23:59:55.244Z",
+            "description": "Session imaging result",
+            "imagePath": "\\blob//"
         }
     ],
     "clinical_notes": {
@@ -136,5 +146,19 @@
             "Engage in mild regular exercise to improve lung capacity",
             "Follow up with a pulmonologist every 3-6 months for spirometry and treatment adjustment"
         ]
-    }
+    },
+    "lab_report_imgs": [
+        {
+            "id": "1761955204440",
+            "file_name": "renewable-energy.gif",
+            "file_type": "image/gif",
+            "blob_data": "\\blob//",
+            "date": "2025-11-01T00:00:04.440Z"
+        }
+    ],
+    "audio_transcriptions": [
+        "",
+        ""
+    ],
+    "summary": ""
 }

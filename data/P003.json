@@ -67,7 +67,6 @@
             }
         }
     ],
-    "medical_imagery": [],
     "clinical_notes": {
         "summary": "74-year-old male with known history of borderline diabetes, hypertension, and asthma presenting with swelling in lower shanks and feet. Clinical labs show significant proteinuria (+++) and mucosuria (+++) on a routine urine examination. Serum electrolytes, liver function, and kidney function tests (Creatinine, eGFR) are currently within the established normal ranges.",
         "examination": "Unknown (Physical exam details missing, except for vitals and reported swelling)",
@@ -97,6 +96,7 @@
         "Hypertension",
         "Asthma"
     ],
+    "medical_imagery": [],
     "diagnosis": {
         "probable_conditions": [
             "Proteinuria / Albuminuria (Possible Diabetic or Hypertensive Nephropathy)",
@@ -115,5 +115,11 @@
             "Monitor weight daily to track fluid retention/edema.",
             "Elevate feet above heart level when resting."
         ]
-    }
+    },
+    "lab_report_imgs": [],
+    "audio_transcriptions": [
+        "",
+        ""
+    ],
+    "summary": ""
 }
