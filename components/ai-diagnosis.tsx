@@ -112,8 +112,13 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
-          link.download = `patient_data_${patientData?.patient_id || "unknown"}_${timestamp}.json`;
+          const timestamp = new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")
+            .slice(0, -5);
+          link.download = `patient_data_${
+            patientData?.patient_id || "unknown"
+          }_${timestamp}.json`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -144,9 +149,7 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
       setShowAIDiagnosis(true);
     } catch (error) {
       console.error("Error generating AI diagnosis:", error);
-      setAiDiagnosis(
-        "Error generating diagnosis. Please try again."
-      );
+      setAiDiagnosis("Error generating diagnosis. Please try again.");
       setShowAIDiagnosis(true);
     } finally {
       setIsLoading(false);

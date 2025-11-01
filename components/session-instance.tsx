@@ -173,7 +173,7 @@ export const SessionInstance = ({
         setAudioUrl(url);
         setAudioBlob(blob);
         stream.getTracks().forEach((track) => track.stop());
-        
+
         // Start transcription after audio blob is ready
         transcribeAudio(blob);
       };
@@ -295,7 +295,10 @@ export const SessionInstance = ({
           },
           audio_transcription: transcription || undefined,
         };
-        console.log("Creating audio entry with transcription:", { transcription, entry: newEntry });
+        console.log("Creating audio entry with transcription:", {
+          transcription,
+          entry: newEntry,
+        });
         setEntries([...entries, newEntry]);
         // cleanup audio URL and blob after saving
         setAudioBlob(null);
