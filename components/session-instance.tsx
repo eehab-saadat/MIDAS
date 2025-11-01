@@ -40,25 +40,28 @@ export const SessionInstance = ({
 }: SessionInstanceProps) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const prevAudioUrlRef = useRef<string | null>(null);
 
   // Ensure component is mounted on client before using browser APIs
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const [entryType, setEntryType] = useState<"imaging" | "lab" | "note" | "meds" | "symptoms">(
-    "note"
-  );
+  const [entryType, setEntryType] = useState<
+    "imaging" | "lab" | "note" | "meds" | "symptoms"
+  >("note");
 
   // Note fields
   const [noteContent, setNoteContent] = useState("");
@@ -101,26 +104,39 @@ export const SessionInstance = ({
       audioChunksRef.current = [];
       setRecordingTime(0);
       setAudioBlob(null);
-      
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      
+
       mediaRecorder.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
-      
+
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        // Revoke previous URL if exists
+        if (prevAudioUrlRef.current) {
+          try {
+            URL.revokeObjectURL(prevAudioUrlRef.current);
+          } catch (e) {
+            // ignore
+          }
+          prevAudioUrlRef.current = null;
+        }
+        const url = URL.createObjectURL(blob);
+        prevAudioUrlRef.current = url;
+        setAudioUrl(url);
         setAudioBlob(blob);
         stream.getTracks().forEach((track) => track.stop());
       };
-      
+
       mediaRecorder.start();
       setIsRecording(true);
-      
+      setIsPaused(false);
+
       // Start timer
       timerIntervalRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
@@ -131,39 +147,85 @@ export const SessionInstance = ({
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state !== "inactive") {
+      try {
+        mr.stop();
+      } catch (e) {
+        // ignore
       }
+    }
+    setIsRecording(false);
+    setIsPaused(false);
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
     }
   };
 
   const pauseRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.pause();
+    const mr = mediaRecorderRef.current;
+    if (!mr) return;
+    if (mr.state === "recording") {
+      if (typeof mr.pause === "function") {
+        mr.pause();
+      }
+      setIsPaused(true);
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    } else if (mr.state === "paused") {
+      if (typeof mr.resume === "function") {
+        mr.resume();
+      }
+      setIsPaused(false);
+      // restart timer
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
     }
   };
 
   const resumeRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.resume();
+    const mr = mediaRecorderRef.current;
+    if (!mr) return;
+    if (mr.state === "paused" && typeof mr.resume === "function") {
+      mr.resume();
+      setIsPaused(false);
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
     }
   };
 
   const cancelRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      streamRef.current?.getTracks().forEach((track) => track.stop());
-      setIsRecording(false);
-      setRecordingTime(0);
-      setAudioBlob(null);
-      audioChunksRef.current = [];
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
+    const mr = mediaRecorderRef.current;
+    try {
+      if (mr && mr.state !== "inactive") {
+        mr.stop();
       }
+    } catch (e) {
+      // ignore
     }
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    setIsRecording(false);
+    setIsPaused(false);
+    setRecordingTime(0);
+    setAudioBlob(null);
+    audioChunksRef.current = [];
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    if (prevAudioUrlRef.current) {
+      try {
+        URL.revokeObjectURL(prevAudioUrlRef.current);
+      } catch (e) {}
+      prevAudioUrlRef.current = null;
+      setAudioUrl(null);
+    }
+    mediaRecorderRef.current = null;
   };
 
   const convertBlobToBase64 = (blob: Blob): Promise<string> => {
@@ -179,7 +241,7 @@ export const SessionInstance = ({
     if (audioBlob) {
       try {
         const base64Audio = await convertBlobToBase64(audioBlob);
-        
+
         const newEntry: MedicalEntry = {
           id: Date.now().toString(),
           type: "audio",
@@ -197,9 +259,20 @@ export const SessionInstance = ({
           },
         };
         setEntries([...entries, newEntry]);
+        // cleanup audio URL and blob after saving
         setAudioBlob(null);
         setRecordingTime(0);
-        cancelRecording();
+        if (prevAudioUrlRef.current) {
+          try {
+            URL.revokeObjectURL(prevAudioUrlRef.current);
+          } catch (e) {}
+          prevAudioUrlRef.current = null;
+        }
+        setAudioUrl(null);
+        // ensure any recorder/stream are stopped
+        try {
+          cancelRecording();
+        } catch (e) {}
       } catch (error) {
         console.error("Error saving audio:", error);
       }
@@ -255,7 +328,7 @@ export const SessionInstance = ({
           content: content,
         };
         setEntries([...entries, newEntry]);
-        
+
         // Reset form
         setNoteContent("");
         setMedName("");
@@ -332,7 +405,9 @@ export const SessionInstance = ({
             {/* Recording Time */}
             <div className="text-center">
               <p className="text-sm font-semibold text-red-600">Recording...</p>
-              <p className="text-lg font-bold text-red-600">{formatTime(recordingTime)}</p>
+              <p className="text-lg font-bold text-red-600">
+                {formatTime(recordingTime)}
+              </p>
             </div>
 
             {/* Control Buttons */}
@@ -373,10 +448,20 @@ export const SessionInstance = ({
         <Card className="p-4 mb-2 bg-green-50 dark:bg-green-950 border-2 border-green-500">
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-green-600">Recording saved ({formatTime(recordingTime)})</p>
+              <p className="text-sm font-semibold text-green-600">
+                Recording saved ({formatTime(recordingTime)})
+              </p>
               <Button
                 size="sm"
-                onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                onClick={() => {
+                  const audioEl = audioElementRef.current;
+                  if (!audioEl) return;
+                  if (audioEl.paused) {
+                    audioEl.play();
+                  } else {
+                    audioEl.pause();
+                  }
+                }}
                 variant="outline"
                 className="h-7 text-xs"
               >
@@ -384,11 +469,11 @@ export const SessionInstance = ({
                 {isPlayingAudio ? "Pause" : "Play"}
               </Button>
             </div>
-            
+
             {/* Hidden audio element for playback */}
             <audio
               ref={audioElementRef}
-              src={URL.createObjectURL(audioBlob)}
+              src={audioUrl ?? undefined}
               onPlay={() => setIsPlayingAudio(true)}
               onPause={() => setIsPlayingAudio(false)}
               onEnded={() => setIsPlayingAudio(false)}
@@ -426,9 +511,9 @@ export const SessionInstance = ({
               <Label className="text-xs">Entry Type</Label>
               <Select
                 value={entryType}
-                onValueChange={(value: "imaging" | "lab" | "note" | "meds" | "symptoms") =>
-                  setEntryType(value)
-                }
+                onValueChange={(
+                  value: "imaging" | "lab" | "note" | "meds" | "symptoms"
+                ) => setEntryType(value)}
               >
                 <SelectTrigger className="h-8 w-full">
                   <SelectValue />
@@ -515,7 +600,9 @@ export const SessionInstance = ({
             {(entryType === "imaging" || entryType === "lab") && (
               <div>
                 <Label className="text-xs">
-                  {entryType === "imaging" ? "Upload Image" : "Upload Lab Report"}
+                  {entryType === "imaging"
+                    ? "Upload Image"
+                    : "Upload Lab Report"}
                 </Label>
                 <Input
                   type="file"
@@ -565,12 +652,17 @@ export const SessionInstance = ({
                     case "symptoms":
                       return entry.content.symptoms.join(", ");
                     case "note":
-                      return entry.content.summary.substring(0, 50) + (entry.content.summary.length > 50 ? "..." : "");
+                      return (
+                        entry.content.summary.substring(0, 50) +
+                        (entry.content.summary.length > 50 ? "..." : "")
+                      );
                     case "imaging":
                     case "lab":
                       return entry.content.file_name;
                     case "audio":
-                      return `Audio Recording (${formatTime(entry.content.duration)})`;
+                      return `Audio Recording (${formatTime(
+                        entry.content.duration
+                      )})`;
                     default:
                       return "Entry";
                   }
