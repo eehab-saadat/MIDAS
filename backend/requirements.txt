@@ -1,3 +1,7 @@
-streamlit
+flask
+flask-cors
+langchain-google-genai
+langchain-core
+pillow
 requests
-Pillow
+streamlit
