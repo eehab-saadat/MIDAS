@@ -36,23 +36,21 @@ export async function POST(request: Request) {
     }
 
     if (!imageBase64) {
-      return NextResponse.json(
-        { 
-          error: "No medical image found. Please upload at least one medical image to generate a diagnosis.",
-          diagnosis: "Unable to generate diagnosis: No medical image provided. Please add a medical image to the session."
-        },
-        { status: 400 }
-      );
+      console.log("No image found, will proceed with text-only diagnosis");
     }
 
-    // Clean base64 data if it has a data URI prefix
-    if (imageBase64.startsWith('data:')) {
-      imageBase64 = imageBase64.split(',')[1];
-    }
+    // Prepare blob if image exists
+    let blob = null;
+    if (imageBase64) {
+      // Clean base64 data if it has a data URI prefix
+      if (imageBase64.startsWith('data:')) {
+        imageBase64 = imageBase64.split(',')[1];
+      }
 
-    // Convert base64 to blob for multipart form data
-    const imageBuffer = Buffer.from(imageBase64, 'base64');
-    const blob = new Blob([imageBuffer], { type: imageType });
+      // Convert base64 to blob for multipart form data
+      const imageBuffer = Buffer.from(imageBase64, 'base64');
+      blob = new Blob([imageBuffer], { type: imageType });
+    }
 
     // Prepare the data for the backend (removing unnecessary fields)
     const diagnosisData = {
@@ -69,12 +67,15 @@ export async function POST(request: Request) {
     // Create FormData for Flask backend
     const formData = new FormData();
     formData.append('data', JSON.stringify(diagnosisData));
-    formData.append('image', blob, 'medical-image.jpg');
+    if (blob) {
+      formData.append('image', blob, 'medical-image.jpg');
+    }
 
     console.log("Calling Flask backend at:", `${FLASK_BACKEND_URL}/diagnose`);
     console.log("FormData contents:");
     console.log("  - data field length:", diagnosisData ? JSON.stringify(diagnosisData).length : 0);
-    console.log("  - image blob size:", blob.size, "bytes");
+    console.log("  - image blob size:", blob ? blob.size : 0, "bytes");
+    console.log("  - has image:", !!blob);
 
     // Call Flask backend
     const backendResponse = await fetch(`${FLASK_BACKEND_URL}/diagnose`, {

@@ -5,8 +5,15 @@ def parse_data(data):
     
     Removes image data and medical imagery to reduce payload size,
     but keeps audio transcriptions for clinical context.
+    Handles empty or minimal data gracefully.
     """
-    data = json.loads(data)
+    if not data or data == '{}':
+        return {}
+    
+    try:
+        data = json.loads(data)
+    except (json.JSONDecodeError, TypeError):
+        return {}
     
     # Remove large binary data fields that aren't needed for text analysis
     data.pop("lab_report_imgs", None)

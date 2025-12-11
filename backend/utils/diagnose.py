@@ -27,6 +27,7 @@ def generate_diagnosis(data, image):
     
     logger.info(f"  Calling MedGemma model: {MODEL}")
     logger.info(f"  Ollama URL: {OLLAMA_URL}")
+    logger.info(f"  Image provided: {image is not None}")
     
     try:
         message = {
@@ -44,9 +45,17 @@ def generate_diagnosis(data, image):
                     )
                 }
         
-        message["content"] += f"\n\nThe following json depicts relevant information about the case: {data}"
+        # Only add data if it's not empty
+        if data and any(data.values()):
+            message["content"] += f"\n\nThe following json depicts relevant information about the case: {data}"
+        else:
+            message["content"] += "\n\nNote: Limited patient data available. Please provide a general assessment."
+        
         logger.debug(f"  Prompt: {message['content'][:200]}...")
-        message["images"] = [image]
+        
+        # Only add images field if image exists (MedGemma fails if image is None)
+        if image is not None:
+            message["images"] = [image]
 
         payload = {
             "model": MODEL,
@@ -58,7 +67,7 @@ def generate_diagnosis(data, image):
         }
 
         logger.info("  Sending request to Ollama...")
-        response = requests.post(OLLAMA_URL, json=payload, timeout=120)
+        response = requests.post(OLLAMA_URL, json=payload, timeout=800)  # 5 minutes timeout
 
         if response.status_code == 200:
             logger.info("  ✅ Received response from Ollama")

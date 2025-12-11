@@ -578,7 +578,6 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
               <Button
                 onClick={generateAIDiagnosis}
                 className="h-10 px-4"
-                disabled={entries.length === 0}
               >
                 <Brain className="h-4 w-4 mr-2" />
                 Get AI Diagnosis
@@ -597,7 +596,6 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
             <Button
               onClick={generateAIDiagnosis}
               size="sm"
-              disabled={entries.length === 0}
               className="text-xs flex-1"
             >
               <Brain className="h-2 w-2 mr-1" />
