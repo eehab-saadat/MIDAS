@@ -69,6 +69,13 @@ export default function PatientsPage() {
       router.push("/login");
       return;
     }
+    
+    // Redirect patients to their diagnosis page
+    if (currentUser.role === "patient") {
+      router.push("/patient?patient=demo");
+      return;
+    }
+    
     setUser(currentUser);
     setIsCheckingAuth(false);
   }, [router]);

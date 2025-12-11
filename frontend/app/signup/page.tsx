@@ -143,7 +143,13 @@ export default function SignupPage() {
                     <SelectItem value="receptionist">
                       <div className="flex items-center gap-2">
                         <span>Receptionist/Nurse</span>
-                        <span className="text-xs text-muted-foreground">(Limited Access)</span>
+                        <span className="text-xs text-muted-foreground">(Patient Management)</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="patient">
+                      <div className="flex items-center gap-2">
+                        <span>Patient</span>
+                        <span className="text-xs text-muted-foreground">(View Results Only)</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -157,8 +163,10 @@ export default function SignupPage() {
                   <div className="text-xs text-muted-foreground">
                     {role === "doctor" ? (
                       <p><span className="font-medium text-foreground">Doctors</span> can access patient records, AI diagnosis tools, and all features.</p>
+                    ) : role === "receptionist" ? (
+                      <p><span className="font-medium text-foreground">Receptionists/Nurses</span> can manage patient lists and add new patients.</p>
                     ) : (
-                      <p><span className="font-medium text-foreground">Receptionists/Nurses</span> can view patient lists and basic information.</p>
+                      <p><span className="font-medium text-foreground">Patients</span> can view their diagnosis results and medical history.</p>
                     )}
                   </div>
                 </div>

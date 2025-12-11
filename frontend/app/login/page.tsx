@@ -128,6 +128,15 @@ export default function LoginPage() {
                   <p className="text-muted-foreground">Email: <span className="font-mono text-secondary-foreground">nurse@midas.com</span></p>
                   <p className="text-muted-foreground">Password: <span className="font-mono text-secondary-foreground">nurse123</span></p>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemoCredentials("patient@midas.com", "patient123")}
+                  className="w-full p-2 rounded-md bg-accent/50 border border-accent/30 hover:bg-accent/60 hover:border-accent/40 transition-colors text-left cursor-pointer"
+                >
+                  <p className="font-medium text-foreground">Patient Account</p>
+                  <p className="text-muted-foreground">Email: <span className="font-mono text-accent-foreground">patient@midas.com</span></p>
+                  <p className="text-muted-foreground">Password: <span className="font-mono text-accent-foreground">patient123</span></p>
+                </button>
               </div>
             </div>
 

@@ -1,7 +1,7 @@
 // Authentication utilities for demo purposes
 // This is hardcoded for demonstration - in production, use a proper auth service
 
-export type UserRole = "doctor" | "receptionist";
+export type UserRole = "doctor" | "receptionist" | "patient";
 
 export interface User {
   id: string;
@@ -33,6 +33,13 @@ const DEMO_USERS = [
     password: "nurse123",
     name: "Jane Nurse",
     role: "receptionist" as UserRole,
+  },
+  {
+    id: "3",
+    email: "patient@midas.com",
+    password: "patient123",
+    name: "John Patient",
+    role: "patient" as UserRole,
   },
 ];
 

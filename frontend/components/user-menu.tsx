@@ -6,7 +6,7 @@ import { getCurrentUser, logoutUser, type User } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { LogOut, User as UserIcon, Shield, Users } from "lucide-react";
+import { LogOut, User as UserIcon, Shield, Users, Stethoscope } from "lucide-react";
 
 export function UserMenu() {
   const router = useRouter();
@@ -33,8 +33,20 @@ export function UserMenu() {
     .join("")
     .toUpperCase();
 
-  const roleIcon = user.role === "doctor" ? Shield : Users;
-  const RoleIcon = roleIcon;
+  const getRoleIcon = () => {
+    switch (user.role) {
+      case "doctor":
+        return Shield;
+      case "receptionist":
+        return Users;
+      case "patient":
+        return UserIcon;
+      default:
+        return UserIcon;
+    }
+  };
+
+  const RoleIcon = getRoleIcon();
 
   return (
     <div className="relative">
@@ -73,13 +85,15 @@ export function UserMenu() {
             <div className="flex items-center gap-2 text-sm">
               <RoleIcon className="size-4 text-primary" />
               <span className="capitalize font-medium">
-                {user.role === "doctor" ? "Doctor" : "Receptionist/Nurse"}
+                {user.role === "doctor" ? "Doctor" : user.role === "receptionist" ? "Receptionist/Nurse" : "Patient"}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               {user.role === "doctor"
                 ? "Full access to diagnosis tools and patient records"
-                : "Limited access to patient list"}
+                : user.role === "receptionist"
+                ? "Patient management and list access"
+                : "View your diagnosis results and medical history"}
             </p>
           </div>
 
