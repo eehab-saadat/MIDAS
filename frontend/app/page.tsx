@@ -264,7 +264,7 @@ export default function PatientsPage() {
             <p className="text-xs text-muted-foreground">
               {user.role === "doctor"
                 ? "You have full access to all features including diagnosis tools and patient management"
-                : "You have limited access - view patient list only"}
+                : "You can manage and view patient list"}
             </p>
           </div>
         </div>
@@ -281,12 +281,10 @@ export default function PatientsPage() {
             className="pl-10"
           />
         </div>
-        {user?.role === "doctor" && (
-          <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Patient
-          </Button>
-        )}
+        <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Patient
+        </Button>
       </div>
 
       {/* Patients Grid */}
@@ -365,7 +363,7 @@ export default function PatientsPage() {
       </div>
 
       {/* Add Patient Modal */}
-      {showAddPatientModal && user?.role === "doctor" && (
+      {showAddPatientModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
