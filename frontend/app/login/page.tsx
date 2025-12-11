@@ -32,6 +32,12 @@ export default function LoginPage() {
     }
   };
 
+  const fillDemoCredentials = (demoEmail: string, demoPassword: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError("");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 p-4">
       <div className="w-full max-w-md">
@@ -102,18 +108,26 @@ export default function LoginPage() {
 
             {/* Demo Credentials Helper */}
             <div className="mt-6 space-y-3 pt-6 border-t border-border/50">
-              <p className="text-xs text-muted-foreground font-medium">Demo Credentials:</p>
+              <p className="text-xs text-muted-foreground font-medium">Demo Credentials (Click to fill):</p>
               <div className="space-y-2 text-xs">
-                <div className="p-2 rounded-md bg-primary/5 border border-primary/20">
+                <button
+                  type="button"
+                  onClick={() => fillDemoCredentials("doctor@midas.com", "doctor123")}
+                  className="w-full p-2 rounded-md bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-colors text-left cursor-pointer"
+                >
                   <p className="font-medium text-foreground">Doctor Account</p>
                   <p className="text-muted-foreground">Email: <span className="font-mono text-primary">doctor@midas.com</span></p>
                   <p className="text-muted-foreground">Password: <span className="font-mono text-primary">doctor123</span></p>
-                </div>
-                <div className="p-2 rounded-md bg-secondary/50 border border-secondary/20">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemoCredentials("nurse@midas.com", "nurse123")}
+                  className="w-full p-2 rounded-md bg-secondary/50 border border-secondary/20 hover:bg-secondary/60 hover:border-secondary/30 transition-colors text-left cursor-pointer"
+                >
                   <p className="font-medium text-foreground">Receptionist Account</p>
                   <p className="text-muted-foreground">Email: <span className="font-mono text-secondary-foreground">nurse@midas.com</span></p>
                   <p className="text-muted-foreground">Password: <span className="font-mono text-secondary-foreground">nurse123</span></p>
-                </div>
+                </button>
               </div>
             </div>
 
