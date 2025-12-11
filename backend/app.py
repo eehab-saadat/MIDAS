@@ -151,18 +151,22 @@ def diagnose():
         data = parse_data(data_json)
         logger.info(f"  Parsed data keys: {list(data.keys())}")
         
-        if 'image' not in request.files:
-            logger.warning("No image file provided in request")
-            return jsonify({"error": "No image file provided"}), 400
-        
-        image_file = request.files['image']
-        if image_file.filename == '':
-            logger.warning("Empty filename provided")
-            return jsonify({"error": "Empty filename"}), 400
-        
-        logger.info(f"  Processing image: {image_file.filename}")
-        image_base64 = encode_image_to_base64(image_file)
-        logger.info(f"  Base64 image length: {len(image_base64)} chars")
+        # Image is optional - proceed with text-only diagnosis if no image provided
+        image_base64 = None
+        if 'image' in request.files:
+            image_file = request.files['image']
+            if image_file.filename != '':
+                logger.info(f"  Processing image: {image_file.filename}")
+                try:
+                    image_base64 = encode_image_to_base64(image_file)
+                    logger.info(f"  Base64 image length: {len(image_base64)} chars")
+                except Exception as e:
+                    logger.warning(f"  Failed to process image: {str(e)}, proceeding with text-only diagnosis")
+                    image_base64 = None
+            else:
+                logger.info("  Empty filename provided, proceeding with text-only diagnosis")
+        else:
+            logger.info("  No image file provided, proceeding with text-only diagnosis")
         
         logger.info("  Generating diagnosis with MedGemma model...")
         diagnosis_result = generate_diagnosis(data, image_base64)

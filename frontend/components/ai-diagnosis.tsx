@@ -141,17 +141,23 @@ export const AIDiagnosis = ({ entries, patientData }: AIDiagnosisProps) => {
         body: JSON.stringify(mergedData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to generate AI diagnosis");
+        // Extract error message from response
+        const errorMessage = data.error || data.diagnosis || "Failed to generate AI diagnosis";
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
-      setAiDiagnosis(data.diagnosis);
+      setAiDiagnosis(data.diagnosis || "No diagnosis available.");
       setMergedData(mergedData);
       setShowAIDiagnosis(true);
     } catch (error) {
       console.error("Error generating AI diagnosis:", error);
-      setAiDiagnosis("Error generating diagnosis. Please try again.");
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Error generating diagnosis. Please ensure the backend server is running and Ollama is available.";
+      setAiDiagnosis(`Error: ${errorMessage}`);
       setShowAIDiagnosis(true);
     } finally {
       setIsLoading(false);
