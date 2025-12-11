@@ -1,0 +1,157 @@
+{
+    "patient_id": "P002",
+    "personal_information": {
+        "age": 23,
+        "ethnicity": "Sudanese",
+        "family_history": {
+            "asthma": true
+        },
+        "name": "Eehab Saadat",
+        "occupation": "University student",
+        "salutation": "Mr",
+        "sex": "Intersex",
+        "social_determinants": {
+            "access_to_healthcare": "Moderate (occasional clinic visits)",
+            "diet": "Irregular meals, moderate fast food intake",
+            "hearing_impairment": "None",
+            "physical_activity": "Low",
+            "smoking_status": "Non-smoker"
+        }
+    },
+    "vitals": {
+        "blood_glucose": "Unknown",
+        "blood_pressure_mmHg": "120/80",
+        "bmi_estimate": 30,
+        "heart_rate_bpm": 84,
+        "spo2_percent": 92,
+        "temperature": "98.6",
+        "weight_kg": 92
+    },
+    "lab_results": [
+        {
+            "date": "2025-10-28",
+            "results": {
+                "CBC": {
+                    "Differential_Count_percent": {
+                        "Eosinophils": 4,
+                        "Lymphocytes": 33,
+                        "Monocytes": 7,
+                        "Neutrophils": 56
+                    },
+                    "Hematocrit_percent": 42,
+                    "Hemoglobin_g_per_dL": 14.1,
+                    "MCHC_g_per_dL": 34,
+                    "MCH_pg": 29,
+                    "MCV_fL": 86,
+                    "Platelet_Count_per_mm3": 240000,
+                    "RBC_Count_mil_per_mm3": 4.9,
+                    "RDW_CV_percent": 12.5,
+                    "WBC_Count_per_mm3": 7200
+                },
+                "ESR_mm_per_hr": 5
+            }
+        },
+        {
+            "date": "2025-10-28",
+            "results": {
+                "Allergy_and_Spirometry": {
+                    "Comments": "Reduced FEV1 and FEV1/FVC ratio consistent with obstructive airway disease; elevated IgE and eosinophils support allergic asthma diagnosis.",
+                    "Eosinophil_Count_percent": 8,
+                    "FEV1_FVC_ratio": 0.65,
+                    "FEV1_percent_predicted": 68,
+                    "FVC_percent_predicted": 83,
+                    "IgE_IU_per_mL": 240,
+                    "Peak_Expiratory_Flow_L_min": 310
+                }
+            }
+        }
+    ],
+    "medical_imagery": [
+        {
+            "date": "2025-10-28",
+            "description": "Possible mild hyperinflation; no consolidation or acute infiltrates noted.",
+            "id": "IMG-001",
+            "imagePath": "\\blob//",
+            "name": "Chest X-ray (CXR)",
+            "type": "X-ray"
+        }
+    ],
+    "clinical_notes": {
+        "assessment": "Likely mild persistent asthma with environmental trigger sensitivity; no acute distress but requires inhaled corticosteroid management.",
+        "examination": "On auscultation, expiratory wheezes heard bilaterally; no crackles or rhonchi. Oxygen saturation mildly reduced at 92%.",
+        "plan": [
+            "Continue beclometasone dipropionate inhaler twice daily for maintenance",
+            "Prescribe rescue inhaler (short-acting beta-agonist) for acute episodes if not already in use",
+            "Encourage avoidance of outdoor exposure during high smog/pollution periods",
+            "Recommend spirometry follow-up every 3 months to monitor airway function",
+            "Maintain regular physical activity and weight control"
+        ],
+        "summary": "Patient presents with recurrent shortness of breath, wheezing, and reduced exercise tolerance, exacerbated during smog season or cold weather.\n\n[Session Entry] breathing and asthma issue\n\n[Session Entry] asthma issue.\n\n[Session Entry] breathing and asthma issue."
+    },
+    "medications": [
+        {
+            "dose": "90 mg",
+            "frequency": "twice daily",
+            "indication": "Cardiac rate control / hypertension management",
+            "name": "Diltiazem Hydrochloride"
+        },
+        {
+            "dose": "5 mg",
+            "frequency": "twice daily",
+            "indication": "Anticoagulant therapy",
+            "name": "Apixaban"
+        },
+        {
+            "dose": "50 micrograms",
+            "frequency": "twice daily (inhaled)",
+            "indication": "Asthma control",
+            "name": "Beclometasone Dipropionate"
+        }
+    ],
+    "current_symptoms": [
+        "Wheezing sound during breathing",
+        "Frequent shortness of breath",
+        "Low stamina",
+        "Fatigue after climbing stairs or light exertion",
+        "Worsened symptoms in smog season"
+    ],
+    "known_medical_history": [
+        "Family history of asthma",
+        "No known diabetes or cardiac disease"
+    ],
+    "diagnosis": {
+        "medical_advice": [
+            "Avoid exposure to smog, smoke, dust, and pollen",
+            "Keep rescue inhaler accessible at all times",
+            "Do not smoke or stay near smokers",
+            "Use air purifiers indoors during pollution season",
+            "Engage in mild regular exercise to improve lung capacity",
+            "Follow up with a pulmonologist every 3-6 months for spirometry and treatment adjustment"
+        ],
+        "probable_conditions": [
+            "Asthma (mild persistent)",
+            "Allergic airway inflammation"
+        ],
+        "treatment_suggestions": [
+            "Continue beclometasone dipropionate inhaler (corticosteroid) for maintenance",
+            "Consider nebulization with Clenil or inhaled corticosteroids during flare-ups",
+            "Add long-acting beta-agonist (LABA) if symptoms remain uncontrolled",
+            "Use short-acting rescue inhaler (e.g., salbutamol) for acute wheezing episodes"
+        ]
+    },
+    "lab_report_imgs": [
+        {
+            "blob_data": "\\blob//",
+            "date": "2025-11-01T00:00:04.440Z",
+            "file_name": "renewable-energy.gif",
+            "file_type": "image/gif",
+            "id": "1761955204440"
+        }
+    ],
+    "audio_transcriptions": [
+        "",
+        ""
+    ],
+    "summary": "Patient Overview\nEehab Saadat, a 23-year-old intersex patient, presents with mild persistent asthma with environmental trigger sensitivity. Recent spirometry results show reduced FEV1 (68% predicted) and FEV1/FVC ratio (0.65) consistent with obstructive airway disease.\n\nKey Findings\n\u2022 Spirometry (2025-10-28) shows reduced FEV1 and FEV1/FVC ratio consistent with obstructive airway disease\n\u2022 Elevated IgE (240 IU/mL) and eosinophils (8%) support allergic asthma diagnosis\n\u2022 Chest X-ray (2025-10-28) shows possible mild hyperinflation with no consolidation or acute infiltrates\n\u2022 CBC (2025-10-28) within normal limits with appropriate differential count\n\u2022 SpO2 mildly reduced at 92% on room air\n\nRisk Assessment\nModerate risk for asthma exacerbation, particularly during smog season or cold weather. Patient demonstrates environmental trigger sensitivity and requires consistent maintenance therapy. BMI of 30 indicates obesity which may contribute to respiratory symptoms. Recommend close monitoring during high pollution periods and regular spirometry follow-ups.\n\nRecommendations\n\u2022 Continue beclometasone dipropionate inhaler (50 mcg) twice daily for maintenance\n\u2022 Keep rescue inhaler (short-acting beta-agonist) accessible for acute episodes\n\u2022 Avoid exposure to smog, smoke, dust, and pollen triggers\n\u2022 Consider weight management program to improve respiratory function\n\u2022 Follow up with pulmonologist every 3 months for spirometry monitoring\n\u2022 Use air purifiers indoors during pollution season\n\u2022 Maintain diltiazem and apixaban therapy as prescribed for cardiac rate control",
+    "last_visit": "2025-11-01"
+}
