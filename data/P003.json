@@ -71,7 +71,7 @@
         "assessment": "Pending",
         "examination": "Unknown (Physical exam details missing, except for vitals and reported swelling)",
         "plan": [],
-        "summary": "74-year-old male with known history of borderline diabetes, hypertension, and asthma presenting with swelling in lower shanks and feet. Clinical labs show significant proteinuria (+++) and mucosuria (+++) on a routine urine examination. Serum electrolytes, liver function, and kidney function tests (Creatinine, eGFR) are currently within the established normal ranges.\n\n[Session Entry] kidney issue. small kidney stones."
+        "summary": "74-year-old male with known history of borderline diabetes, hypertension, and asthma presenting with swelling in lower shanks and feet. Clinical labs show significant proteinuria (+++) and mucosuria (+++) on a routine urine examination. Serum electrolytes, liver function, and kidney function tests (Creatinine, eGFR) are currently within the established normal ranges.\n\n[Session Entry] kidney issue. small kidney stones.\n\n[Session Entry] jhjh"
     },
     "medications": [
         {
@@ -89,7 +89,8 @@
     ],
     "current_symptoms": [
         "Swelling in lower shanks and feet",
-        "frequent urination"
+        "frequent urination",
+        "klkl"
     ],
     "known_medical_history": [
         "Borderline diabetic",
@@ -122,5 +123,5 @@
         ""
     ],
     "summary": "Patient Overview\nPervaiz Akhtar, a 74-year-old retired male with significant family history of diabetes, hypertension, and cardiovascular disease, presents with lower extremity edema and proteinuria. Current medications include Bisoprolol for blood pressure control and Budesonide/Formoterol for asthma management.\n\nKey Findings\n\u2022 Significant proteinuria (+++) and mucosuria (+++) on urine routine examination (14-JUN-2025)\n\u2022 Serum chemistry panel shows normal liver and kidney function parameters\n\u2022 eGFR at 67.56 mL/min/1.73 m\u00b2 (borderline but within acceptable range for age)\n\u2022 Blood pressure 130/87 mmHg, slightly elevated despite medication\n\u2022 Heart rate 92 bpm, slightly tachycardic\n\u2022 Borderline diabetic status requiring close monitoring\n\u2022 Physical examination shows swelling in lower shanks and feet\n\nRisk Assessment\nModerate to high risk for diabetic or hypertensive nephropathy given significant proteinuria, family history, and current comorbidities. Age and cardiovascular risk factors increase likelihood of renal disease progression. Peripheral edema suggests possible early heart failure or advanced kidney involvement. Urgent need for comprehensive renal assessment and optimization of blood pressure and glucose control.\n\nRecommendations\n\u2022 Obtain spot urine protein/creatinine ratio (UPCR) to quantify proteinuria severity\n\u2022 Initiate diuretic therapy to manage peripheral edema and fluid retention\n\u2022 Add ACE inhibitor or ARB for renoprotection and improved blood pressure control\n\u2022 Comprehensive metabolic panel and HbA1c to assess diabetes status\n\u2022 Monitor weight daily to track fluid retention\n\u2022 Elevate feet above heart level when resting\n\u2022 Nephrology referral for proteinuria evaluation and management\n\u2022 Continue Bisoprolol and Budesonide/Formoterol as prescribed\n\u2022 Close monitoring of kidney function with regular follow-up visits\n\u2022 Dietary sodium restriction and fluid intake monitoring",
-    "last_visit": "2025-11-01"
+    "last_visit": "2025-12-11"
 }

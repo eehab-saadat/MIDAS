@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, ArrowLeft, Plus, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
+import { getCurrentUser, type User } from "@/lib/auth";
 import { PatientData } from "@/lib/patients";
 
 interface PatientDisplay extends PatientData {
@@ -24,6 +27,9 @@ interface PatientDisplay extends PatientData {
 }
 
 export default function PatientsPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPatients, setFilteredPatients] = useState<PatientDisplay[]>(
     []
@@ -55,6 +61,17 @@ export default function PatientsPage() {
     spo2_percent: "",
     temperature: "",
   });
+
+  // Check authentication on mount
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      router.push("/login");
+      return;
+    }
+    setUser(currentUser);
+    setIsCheckingAuth(false);
+  }, [router]);
 
   // Fetch patients from API on component mount
   useEffect(() => {
@@ -193,14 +210,26 @@ export default function PatientsPage() {
 
   return (
     <div className="h-screen w-screen px-[1vw] py-[1vh] text-foreground relative overflow-hidden">
-      <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
-        <div className="flex items-center">
-          {/* <Link
-            href="/patients"
-            className="bg-card rounded-full p-1 mr-4 border hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+      {/* Loading Auth Check */}
+      {isCheckingAuth && (
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      )}
+
+      {!isCheckingAuth && (
+        <>
+          <div className="col-span-full rounded-lg h-[5vh] flex items-center justify-between text-foreground text-lg mb-1">
+            <div className="flex items-center">
+              {/* <Link
+                href="/patients"
+                className="bg-card rounded-full p-1 mr-4 border hover:bg-muted transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
           <div>
             <div className="text-sm">Patient List</div>
             <div className="text-sm">NRN: 123456789</div>
@@ -212,8 +241,34 @@ export default function PatientsPage() {
             MIDAS
           </span>
         </div>
-        <ThemeToggle />
-      </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {user && <UserMenu />}
+        </div>
+            </div>
+
+      {/* Role Info Banner */}
+      {user && (
+        <div className={`mb-4 p-3 rounded-lg border flex items-center gap-3 ${
+          user.role === "doctor"
+            ? "bg-primary/5 border-primary/20"
+            : "bg-secondary/50 border-secondary/20"
+        }`}>
+          <div className={`size-2 rounded-full ${
+            user.role === "doctor" ? "bg-primary" : "bg-secondary-foreground"
+          }`} />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">
+              Logged in as: <span className="capitalize font-semibold">{user.role}</span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {user.role === "doctor"
+                ? "You have full access to all features including diagnosis tools and patient management"
+                : "You have limited access - view patient list only"}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="mb-4 mt-4 flex items-center gap-4">
@@ -226,10 +281,12 @@ export default function PatientsPage() {
             className="pl-10"
           />
         </div>
-        <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Patient
-        </Button>
+        {user?.role === "doctor" && (
+          <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Patient
+          </Button>
+        )}
       </div>
 
       {/* Patients Grid */}
@@ -292,13 +349,15 @@ export default function PatientsPage() {
                     {new Date(patient.last_visit).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="pt-2">
-                  <Button size="sm" className="w-full text-xs" asChild>
-                    <Link href={`/patient?patient=${patient.patient_id}`}>
-                      View Details
-                    </Link>
-                  </Button>
-                </div>
+                {user?.role === "doctor" && (
+                  <div className="pt-2">
+                    <Button size="sm" className="w-full text-xs" asChild>
+                      <Link href={`/patient?patient=${patient.patient_id}`}>
+                        View Details
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -306,7 +365,7 @@ export default function PatientsPage() {
       </div>
 
       {/* Add Patient Modal */}
-      {showAddPatientModal && (
+      {showAddPatientModal && user?.role === "doctor" && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground [&::-webkit-scrollbar-thumb]:rounded-r-full">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -653,6 +712,8 @@ export default function PatientsPage() {
             </CardContent>
           </Card>
         </div>
+      )}
+        </>
       )}
     </div>
   );
