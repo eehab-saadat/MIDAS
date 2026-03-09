@@ -1,0 +1,37 @@
+---
+description: MIDAS project architecture, app boundaries, and key data conventions
+alwaysApply: true
+---
+
+# MIDAS - Project Overview
+
+MIDAS is a modular healthcare decision-support system.
+
+## Stack
+
+- **Backend**: Django 6.0.3 + Django REST Framework 3.16.1 — lives in `backend/`
+- **Database**: SQLite (dev) / PostgreSQL (prod via `psycopg2-binary`)
+- **Auth**: JWT via `djangorestframework-simplejwt`
+- **Frontend**: `frontend/` is **deprecated** and will be replaced — do not modify it
+- **Settings**: split into `backend/backend/settings/base.py` (shared) and `backend/backend/settings/dev.py` (DB). Always set `DJANGO_SETTINGS_MODULE=backend.settings.dev`
+
+## Django App Map
+
+| App | Path | Responsibility |
+|-----|------|----------------|
+| `patients` | `backend/patients/` | Patient demographics (`Patient`) and vital signs (`Vitals`) |
+| `clinical` | `backend/clinical/` | Clinicians (`Clinician`), clinical encounters (`Encounter`), prescriptions (`Medication`) |
+| `diagnostics` | `backend/diagnostics/` | Imaging reports (`Radiology`) and lab panel results (`Lab`) |
+
+## Key Data Conventions
+
+- **`mrno`** — human-readable patient ID, stored as a sequential integer string (`"1"`, `"2"`, …). Assigned by `backend/ingest_fmh_data.py` at ingestion time. Never use raw hospital MRNOs from source Excel files.
+- **`age`** — never stored in the DB. Computed as a `@property` on `Patient` from `dob`.
+- **Lab results** — stored as a `JSONField` per CPT panel: `{"TEST": {"result": float|null, "unit": "", "normal_range": ["", ""]}}`.
+- **Encounter notes** — stored as Markdown plain text in `Encounter.notes`.
+- **Radiology** — has two separate conclusion fields: `conclusion` (radiologist-written) and `system_conclusion` (AI-generated, starts blank).
+- **Timestamps** — every model carries `created_at` (`auto_now_add`) and `updated_at` (`auto_now`).
+
+## Data Ingestion
+
+Raw hospital data lives in `data/FMH/files/raw/`. Processed Excel files are in `data/FMH/files/processed/`. Run `backend/ingest_fmh_data.py` (with optional `--flush`) to load them into Django.

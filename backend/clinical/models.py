@@ -66,3 +66,44 @@ class Medication(models.Model):
 
     def __str__(self):
         return f"{self.medication_name} for {self.patient.mrno}"
+
+
+class Symptom(models.Model):
+    """
+    An observed symptom or clinical finding recorded during an Encounter.
+
+    Medical codes follow standard coding systems (ICD-10, SNOMED-CT, etc.).
+    Code and code_system are optional — clinicians can record free-text
+    observations without a formal code.
+    """
+
+    CODE_SYSTEM_CHOICES = [
+        ("ICD-10", "ICD-10"),
+        ("SNOMED-CT", "SNOMED CT"),
+        ("CPT", "CPT"),
+        ("LOINC", "LOINC"),
+        ("OTHER", "Other"),
+    ]
+
+    encounter = models.ForeignKey(
+        Encounter,
+        on_delete=models.CASCADE,
+        related_name="symptoms",
+    )
+    # Standard medical code, e.g. "J06.9" for ICD-10 or "386661006" for SNOMED-CT
+    code = models.CharField(max_length=50, blank=True)
+    code_system = models.CharField(
+        max_length=20, choices=CODE_SYSTEM_CHOICES, blank=True
+    )
+    description = models.CharField(max_length=500)
+    clinician_remarks = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        prefix = f"[{self.code_system}: {self.code}] " if self.code else ""
+        return f"{prefix}{self.description}"
