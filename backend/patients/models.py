@@ -16,6 +16,9 @@ class Patient(models.Model):
     dob = models.DateField(null=True, blank=True)
     history = models.TextField(blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         ordering = ["mrno"]
 
@@ -55,6 +58,9 @@ class Vitals(models.Model):
 
     bp_high = models.FloatField(null=True, blank=True)
     bp_low = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-timestamp"]
