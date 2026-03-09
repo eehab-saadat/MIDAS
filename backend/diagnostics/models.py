@@ -9,9 +9,10 @@ class Radiology(models.Model):
     )
     cpt_id = models.CharField(max_length=50, blank=True)
     cpt_name = models.CharField(max_length=255, blank=True)
-    technique = models.TextField(blank=True)
-    result = models.TextField(blank=True)
-    conclusion = models.TextField(blank=True)
+    technique = models.TextField(blank=True) # description of the test
+    result = models.TextField(blank=True) # machine generated result
+    conclusion = models.TextField(blank=True) # radiologist generated conclusion
+    system_conclusion = models.TextField(blank=True) # AI generated conclusion
     file_path = models.CharField(max_length=500, blank=True)
 
     class Meta:
