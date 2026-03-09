@@ -1,5 +1,5 @@
 from datetime import date
-
+from django.utils import timezone
 from django.db import models
 
 
@@ -15,7 +15,7 @@ class Patient(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True)
     dob = models.DateField(null=True, blank=True)
     history = models.TextField(blank=True)
-
+    # default is current date/time
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

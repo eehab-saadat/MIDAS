@@ -10,10 +10,11 @@ class PatientViewSet(viewsets.ModelViewSet):
     """
     CRUD endpoints for Patient records.
 
-    Supports filtering via ?search=<term> (matches mrno or name)
-    and ordering via ?ordering=<field>.
+    Query params:
+      ?search=<term>    – fuzzy match on mrno or name
+      ?ordering=<field> – sort by mrno, name, or dob
 
-    Extra detail routes expose related resources:
+    Sub-resource detail routes:
       GET /api/patients/{id}/vitals/
       GET /api/patients/{id}/encounters/
       GET /api/patients/{id}/medications/
@@ -26,6 +27,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["mrno", "name"]
     ordering_fields = ["mrno", "name", "dob"]
+    ordering = ["mrno"]
 
     @action(detail=True, methods=["get"])
     def vitals(self, request, pk=None):
@@ -39,7 +41,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         from clinical.serializers import EncounterSerializer
 
         patient = self.get_object()
-        qs = patient.encounters.all()
+        qs = patient.encounters.select_related("clinician").all()
         serializer = EncounterSerializer(qs, many=True)
         return Response(serializer.data)
 
@@ -48,7 +50,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         from clinical.serializers import MedicationSerializer
 
         patient = self.get_object()
-        qs = patient.medications.all()
+        qs = patient.medications.select_related("prescribed_by").all()
         serializer = MedicationSerializer(qs, many=True)
         return Response(serializer.data)
 
@@ -75,13 +77,16 @@ class VitalsViewSet(viewsets.ModelViewSet):
     """
     CRUD endpoints for Vitals records.
 
-    Filter by patient with ?patient=<patient_id>.
+    Query params:
+      ?patient=<patient_id> – filter by patient PK
+      ?ordering=<field>     – sort by timestamp
     """
 
     queryset = Vitals.objects.select_related("patient")
     serializer_class = VitalsSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["timestamp"]
+    ordering = ["-timestamp"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
