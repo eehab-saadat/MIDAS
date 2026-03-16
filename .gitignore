@@ -42,3 +42,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+microservices/image_preprocessor/output
+microservices/image_preprocessor/logs
+microservices/logs
+# all pycache in proj
+**/__pycache__/

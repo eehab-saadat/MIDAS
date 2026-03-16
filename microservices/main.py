@@ -65,9 +65,11 @@ def _get_process_image():
         return _PROCESS_IMAGE
 
     pipeline_path = IMAGE_PREPROCESSOR_DIR / "pipeline.py"
-    spec = importlib.util.spec_from_file_location("midas_image_preprocessor_pipeline", pipeline_path)
+    spec = importlib.util.spec_from_file_location(
+        "midas_image_preprocessor_pipeline", pipeline_path)
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"Could not load pipeline module from: {pipeline_path}")
+        raise RuntimeError(
+            f"Could not load pipeline module from: {pipeline_path}")
 
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -112,10 +114,13 @@ async def extract_report(file: UploadFile = File(...)) -> dict:
 @app.post("/preprocess-image")
 async def preprocess_image(
     file: UploadFile = File(...),
-    modality: str | None = Query(default=None, description="Optional modality override"),
-    config_path: str | None = Query(default=None, description="Optional path to config YAML"),
+    modality: str | None = Query(
+        default=None, description="Optional modality override"),
+    config_path: str | None = Query(
+        default=None, description="Optional path to config YAML"),
 ) -> dict:
-    supported_extensions = {".dcm", ".dicom", ".png", ".jpg", ".jpeg", ".tiff", ".tif"}
+    supported_extensions = {".dcm", ".dicom",
+                            ".png", ".jpg", ".jpeg", ".tiff", ".tif"}
     filename_suffix = Path(file.filename or "").suffix.lower()
 
     if filename_suffix not in supported_extensions:
@@ -139,7 +144,8 @@ async def preprocess_image(
     try:
         content = await file.read()
         if not content:
-            raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+            raise HTTPException(
+                status_code=400, detail="Uploaded file is empty.")
 
         with NamedTemporaryFile(delete=False, suffix=temp_suffix) as temp_file:
             temp_file.write(content)
@@ -160,7 +166,8 @@ async def preprocess_image(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Image preprocessing failed: {exc}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Image preprocessing failed: {exc}") from exc
     finally:
         if temp_file_path and temp_file_path.exists():
             temp_file_path.unlink()
