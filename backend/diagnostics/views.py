@@ -8,8 +8,10 @@ class RadiologyViewSet(viewsets.ModelViewSet):
     """
     CRUD endpoints for Radiology report records.
 
-    Filter by patient with ?patient=<patient_id>.
-    Supports searching via ?search=<term> (matches cpt_name or cpt_id).
+    Query params:
+      ?patient=<patient_id> – filter by patient PK
+      ?search=<term>        – match on cpt_name or cpt_id
+      ?ordering=<field>     – sort by cpt_name
     """
 
     queryset = Radiology.objects.select_related("patient")
@@ -17,6 +19,7 @@ class RadiologyViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["cpt_name", "cpt_id"]
     ordering_fields = ["cpt_name"]
+    ordering = ["cpt_name"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -30,8 +33,10 @@ class LabViewSet(viewsets.ModelViewSet):
     """
     CRUD endpoints for Lab result records.
 
-    Filter by patient with ?patient=<patient_id>.
-    Supports searching via ?search=<term> (matches cpt_name or cpt_id).
+    Query params:
+      ?patient=<patient_id> – filter by patient PK
+      ?search=<term>        – match on cpt_name or cpt_id
+      ?ordering=<field>     – sort by invoice_date or cpt_name
     """
 
     queryset = Lab.objects.select_related("patient")
@@ -39,6 +44,7 @@ class LabViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["cpt_name", "cpt_id"]
     ordering_fields = ["invoice_date", "cpt_name"]
+    ordering = ["-invoice_date"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
