@@ -46,5 +46,39 @@ next-env.d.ts
 microservices/image_preprocessor/output
 microservices/image_preprocessor/logs
 microservices/logs
-# all pycache in proj
+
 **/__pycache__/
+
+# python / fastapi / django
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+pip-wheel-metadata/
+
+# django
+db.sqlite3
+db.sqlite3-journal
+local_settings.py
+media/
+staticfiles/
+
+# next.js (additional)
+.next/
+frontend/.next/
+out/
+frontend/out/
+.turbo/
