@@ -78,11 +78,7 @@ class Symptom(models.Model):
     """
 
     CODE_SYSTEM_CHOICES = [
-        ("ICD-10", "ICD-10"),
         ("SNOMED-CT", "SNOMED CT"),
-        ("CPT", "CPT"),
-        ("LOINC", "LOINC"),
-        ("OTHER", "Other"),
     ]
 
     encounter = models.ForeignKey(
@@ -90,10 +86,9 @@ class Symptom(models.Model):
         on_delete=models.CASCADE,
         related_name="symptoms",
     )
-    # Standard medical code, e.g. "J06.9" for ICD-10 or "386661006" for SNOMED-CT
     code = models.CharField(max_length=50, blank=True)
     code_system = models.CharField(
-        max_length=20, choices=CODE_SYSTEM_CHOICES, blank=True
+        max_length=20, choices=CODE_SYSTEM_CHOICES, blank=True, default="SNOMED-CT"
     )
     description = models.CharField(max_length=500)
     clinician_remarks = models.TextField(blank=True)
