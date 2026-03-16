@@ -1,0 +1,72 @@
+{
+  "modality": "XRAY",
+  "metadata": {
+    "Modality": "UNKNOWN",
+    "source_format": "jpeg",
+    "original_shape": [
+      1818,
+      2053
+    ],
+    "original_dtype": "uint8",
+    "file_path": "input_images/IM-0007-0001.jpeg",
+    "detected_modality": "XRAY",
+    "mri_subtype": null,
+    "modality_confidence": 1.0,
+    "modality_source": "user_override",
+    "needs_radiologist_review": true,
+    "filter_selector_rules": [
+      "Poor quality (SNR<15): maximum denoising, flagged for review"
+    ],
+    "original_dimensions": [
+      1818,
+      2053
+    ],
+    "resize_scale": 0.4987822698490015,
+    "padding": {
+      "top": 59,
+      "bottom": 59,
+      "left": 0,
+      "right": 0
+    },
+    "intensity_normalization": "minmax",
+    "orientation_corrected": false,
+    "preprocessing_steps": [
+      "CLAHE contrast enhancement",
+      "Wiener denoising (lung zone)",
+      "Landmark detection"
+    ],
+    "anatomical_landmarks": {
+      "diaphragm_y": 964,
+      "lung_apex_y": 0
+    },
+    "xray_orientation": "Orientation not specified in metadata"
+  },
+  "quality_report": {
+    "metrics": {
+      "snr_db": 13.774688720703125,
+      "snr_pass": false,
+      "sharpness": 550.334229929987,
+      "sharpness_pass": true,
+      "motion_detected": false,
+      "dynamic_range": 0.9914892911911011,
+      "pixel_mean": 0.4398703873157501,
+      "pixel_std": 0.2540309429168701
+    },
+    "warnings": [
+      "Low SNR: 13.8 dB (threshold: 15.0 dB)"
+    ],
+    "overall_pass": false
+  },
+  "quality_delta": {
+    "snr_delta_db": -0.9826469421386719,
+    "sharpness_delta": 435.76072162932746,
+    "quality_improved": true,
+    "regressions": []
+  },
+  "output_images": [
+    "output/IM-0007-0001/processed.png"
+  ],
+  "context_string": "Modality: XRAY\nBody Part: unknown region\nOrientation: Orientation not specified in metadata\nArtifacts/Warnings:\n  - Low SNR: 13.8 dB (threshold: 15.0 dB)\nImage Quality: SNR=13.8dB\nSNR improvement: -1.0dB\nPreprocessing: CLAHE contrast enhancement, Wiener denoising (lung zone), Landmark detection\nClinical Note: State if PA or AP, upright or supine. Supine X-rays make pleural effusions appear as haziness rather than distinct blunting. Free air under diaphragm is only detectable on upright PA.",
+  "original_file": "output/IM-0007-0001/original_IM-0007-0001.jpeg",
+  "qc_visualization": "output/IM-0007-0001/qc_comparison.png"
+}

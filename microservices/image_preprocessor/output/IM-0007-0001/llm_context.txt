@@ -1,0 +1,9 @@
+Modality: XRAY
+Body Part: unknown region
+Orientation: Orientation not specified in metadata
+Artifacts/Warnings:
+  - Low SNR: 13.8 dB (threshold: 15.0 dB)
+Image Quality: SNR=13.8dB
+SNR improvement: -1.0dB
+Preprocessing: CLAHE contrast enhancement, Wiener denoising (lung zone), Landmark detection
+Clinical Note: State if PA or AP, upright or supine. Supine X-rays make pleural effusions appear as haziness rather than distinct blunting. Free air under diaphragm is only detectable on upright PA.
