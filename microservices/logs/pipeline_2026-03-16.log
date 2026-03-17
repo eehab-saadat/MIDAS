@@ -1,0 +1,50 @@
+2026-03-16 14:59:40 | INFO     | midas_image_preprocessor_pipeline:process_image:85 - === Pipeline start: tmp3lq8yc7f.jpg ===
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-16 14:59:40 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: /var/folders/l9/3j5kk6rn72j66wd88z4cmbt80000gn/T/tmp3lq8yc7f.jpg
+2026-03-16 14:59:40 | INFO     | core.dicom_handler:_load_non_dicom:211 - RGB channels are identical — converting to grayscale
+2026-03-16 14:59:40 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(787, 800), range=[0.000, 1.000]
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.022s
+2026-03-16 14:59:40 | INFO     | midas_image_preprocessor_pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-16 14:59:40 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.2dB, sharpness=80.5, warnings=1
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.007s
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-16 14:59:40 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=13.2dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-16 14:59:40 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-16 14:59:40 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 800x787 to 1024x1007, padded to 1024x1024
+2026-03-16 14:59:40 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-16 14:59:40 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.004s
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-16 14:59:40 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.002s
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-16 14:59:40 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.028s
+2026-03-16 14:59:40 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=1014
+2026-03-16 14:59:40 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 13.0 -> 13.4 dB (delta: +0.4 dB)
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.034s
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.034s
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-16 14:59:40 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.4dB, sharpness=152.0, warnings=1
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.010s
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 13.1953 -> 13.4014 (delta: +0.2061, improved)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 80.4548 -> 152.0467 (delta: +71.5919, improved)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9958 (delta: -0.0042, worsened)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5277 -> 0.4972 (delta: -0.0305, worsened)
+2026-03-16 14:59:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2524 -> 0.2633 (delta: +0.0108, improved)
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-16 14:59:40 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-16 14:59:40 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: /Users/huzyefah/Projects/MIDAS/MIDAS/microservices/image_preprocessor/output/tmp3lq8yc7f
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.044s
+2026-03-16 14:59:40 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.044s
+2026-03-16 14:59:40 | INFO     | midas_image_preprocessor_pipeline:process_image:239 - === Pipeline complete: tmp3lq8yc7f.jpg in 0.13s | modality=XRAY | quality_improved=True ===

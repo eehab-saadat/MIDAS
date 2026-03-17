@@ -1,0 +1,74 @@
+{
+  "modality": "XRAY",
+  "metadata": {
+    "Modality": "UNKNOWN",
+    "source_format": "jpg",
+    "original_shape": [
+      787,
+      800,
+      3
+    ],
+    "original_dtype": "uint8",
+    "file_path": "/var/folders/l9/3j5kk6rn72j66wd88z4cmbt80000gn/T/tmp3lq8yc7f.jpg",
+    "converted_from_rgb": true,
+    "detected_modality": "XRAY",
+    "mri_subtype": null,
+    "modality_confidence": 1.0,
+    "modality_source": "user_override",
+    "needs_radiologist_review": true,
+    "filter_selector_rules": [
+      "Poor quality (SNR<15): maximum denoising, flagged for review"
+    ],
+    "original_dimensions": [
+      787,
+      800
+    ],
+    "resize_scale": 1.28,
+    "padding": {
+      "top": 8,
+      "bottom": 9,
+      "left": 0,
+      "right": 0
+    },
+    "intensity_normalization": "minmax",
+    "orientation_corrected": false,
+    "preprocessing_steps": [
+      "CLAHE contrast enhancement",
+      "Wiener denoising (lung zone)",
+      "Landmark detection"
+    ],
+    "anatomical_landmarks": {
+      "diaphragm_y": 1014,
+      "lung_apex_y": 0
+    },
+    "xray_orientation": "Orientation not specified in metadata"
+  },
+  "quality_report": {
+    "metrics": {
+      "snr_db": 13.401426315307617,
+      "snr_pass": false,
+      "sharpness": 152.04674857275666,
+      "sharpness_pass": true,
+      "motion_detected": false,
+      "dynamic_range": 0.9957647323608398,
+      "pixel_mean": 0.49724653363227844,
+      "pixel_std": 0.2632526159286499
+    },
+    "warnings": [
+      "Low SNR: 13.4 dB (threshold: 15.0 dB)"
+    ],
+    "overall_pass": false
+  },
+  "quality_delta": {
+    "snr_delta_db": 0.206085205078125,
+    "sharpness_delta": 71.59193599334115,
+    "quality_improved": true,
+    "regressions": []
+  },
+  "output_images": [
+    "/Users/huzyefah/Projects/MIDAS/MIDAS/microservices/image_preprocessor/output/tmp3lq8yc7f/processed.png"
+  ],
+  "context_string": "Modality: XRAY\nBody Part: unknown region\nOrientation: Orientation not specified in metadata\nArtifacts/Warnings:\n  - Low SNR: 13.4 dB (threshold: 15.0 dB)\nImage Quality: SNR=13.4dB\nSNR improvement: +0.2dB\nPreprocessing: CLAHE contrast enhancement, Wiener denoising (lung zone), Landmark detection\nClinical Note: State if PA or AP, upright or supine. Supine X-rays make pleural effusions appear as haziness rather than distinct blunting. Free air under diaphragm is only detectable on upright PA.",
+  "original_file": "/Users/huzyefah/Projects/MIDAS/MIDAS/microservices/image_preprocessor/output/tmp3lq8yc7f/original_tmp3lq8yc7f.jpg",
+  "qc_visualization": "/Users/huzyefah/Projects/MIDAS/MIDAS/microservices/image_preprocessor/output/tmp3lq8yc7f/qc_comparison.png"
+}

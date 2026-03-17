@@ -1,0 +1,165 @@
+# Medical Image Preprocessor Configuration
+# Per-modality default parameters — all numerical values sourced from here
+
+ct:
+  target_size: [512, 512]
+  bit_depth_output: "float32"
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+  window_presets:
+    lung:
+      center: -600
+      width: 1500
+    mediastinum:
+      center: 40
+      width: 400
+    bone:
+      center: 400
+      width: 1500
+    brain:
+      center: 35
+      width: 80
+    subdural:
+      center: 75
+      width: 200
+    liver:
+      center: 60
+      width: 150
+    vascular:
+      center: 250
+      width: 500
+  bilateral_filter:
+    spatial_sigma: 1.5
+    range_sigma: 15.0
+    thin_slice_spatial_sigma: 2.0
+    thin_slice_threshold_mm: 2.0
+
+mri:
+  target_size: [512, 512]
+  bit_depth_output: "float32"
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: true
+  nlm_params:
+    h_3T: 0.05
+    h_1_5T: 0.08
+    h_flair: 0.04
+  percentile_normalization:
+    lower: 1
+    upper: 99
+  adc_clip_range: [0.0, 0.003]  # mm^2/s
+
+xray:
+  target_size: [1024, 1024]
+  bit_depth_output: "float32"
+  clahe_clip_limit: 2.0
+  clahe_tile_grid_size: [8, 8]
+  clahe_clip_limit_pediatric: 1.5
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+  wiener_kernel_size: [5, 5]
+
+ultrasound:
+  target_size: [512, 512]
+  bit_depth_output: "float32"
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+  anisotropic_diffusion:
+    kappa: 50
+    gamma: 0.1
+    n_iterations: 10
+  log_compression_db_threshold: 60.0
+
+histopath:
+  target_size: [224, 224]
+  bit_depth_output: "float32"
+  clahe_clip_limit: 2.0
+  clahe_tile_grid_size: [16, 16]
+  denoise_strength: 0.3
+  orientation_standard: "LPS"
+  quality_snr_threshold: 10.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+  stain_normalization:
+    method: "macenko"  # or "vahadane"
+  tile_rejection:
+    min_od_threshold: 0.05
+    min_focus_score: 50
+
+fundus:
+  target_size: [800, 800]
+  bit_depth_output: "float32"
+  clahe_clip_limit: 3.0
+  clahe_tile_grid_size: [8, 8]
+  denoise_strength: 0.3
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+  illumination_normalization:
+    structuring_element_radius: 50
+
+dermoscopy:
+  target_size: [512, 512]
+  bit_depth_output: "float32"
+  clahe_clip_limit: 1.5
+  clahe_tile_grid_size: [8, 8]
+  denoise_strength: 0.3
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+  hair_removal:
+    structuring_element_angles: [0, 45, 90, 135]
+  specular_removal:
+    intensity_percentile_threshold: 98
+
+mammography:
+  target_size: [1024, 1024]
+  bit_depth_output: "float32"
+  clahe_clip_limit: 2.0
+  clahe_tile_grid_size: [8, 8]
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+
+pet:
+  target_size: [512, 512]
+  bit_depth_output: "float32"
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+
+nuclear_med:
+  target_size: [512, 512]
+  bit_depth_output: "float32"
+  denoise_strength: 0.5
+  orientation_standard: "LPS"
+  quality_snr_threshold: 15.0
+  llm_output_format: "png"
+  mri_bias_correction: false
+
+# Quality assessment thresholds
+quality:
+  snr_threshold: 15.0
+  sharpness_threshold: 80.0
+  motion_laplacian_threshold: 80.0
+  high_snr_threshold: 30.0
+  high_sharpness_threshold: 100.0
+  metal_artifact_hu_threshold: 3000
+  metal_artifact_std_threshold: 5.0

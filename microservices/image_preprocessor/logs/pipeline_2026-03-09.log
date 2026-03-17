@@ -1,0 +1,1251 @@
+2026-03-09 15:39:13 | INFO     | pipeline:process_image:84 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 15:39:13 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 15:39:13 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 15:39:13 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 15:39:13 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.497s
+2026-03-09 15:39:13 | INFO     | utils.logger:__enter__:41 - Starting step: modality_detection
+2026-03-09 15:39:13 | WARNING  | core.modality_detector:detect_modality:73 - DICOM modality tag absent or unrecognized ('UNKNOWN'). Falling back to heuristic-based detection.
+2026-03-09 15:39:13 | WARNING  | core.modality_detector:detect_modality:80 - Heuristic confidence 0.65 below threshold 0.8. Assigning MODALITY_UNCERTAIN.
+2026-03-09 15:39:13 | INFO     | utils.logger:log_modality_detection:75 - Modality detected: MODALITY_UNCERTAIN (method: HEURISTIC_FALLBACK, confidence: 0.65)
+2026-03-09 15:39:13 | INFO     | utils.logger:__exit__:51 - Step 'modality_detection' completed in 0.025s
+2026-03-09 15:39:13 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 15:39:13 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 15:39:13 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.034s
+2026-03-09 15:39:13 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 15:39:13 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 15:39:13 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for MODALITY_UNCERTAIN (unknown body part)
+2026-03-09 15:39:13 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 15:39:13 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 15:39:13 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 15:39:13 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 15:39:14 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 15:39:14 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 15:39:14 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 15:39:14 | WARNING  | pipeline:process_image:169 - MODALITY_UNCERTAIN — applying only universal safe operations
+2026-03-09 15:39:14 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 15:39:14 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.1dB, sharpness=403.0, warnings=1
+2026-03-09 15:39:14 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.003s
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.1051 (delta: -2.6523, worsened)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 402.9850 (delta: +288.4115, improved)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4404 (delta: -0.0996, worsened)
+2026-03-09 15:39:14 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2262 (delta: +0.0145, improved)
+2026-03-09 15:39:14 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 2.7 dB
+2026-03-09 15:39:14 | WARNING  | pipeline:process_image:191 - Quality regression detected: ['SNR regressed by 2.7 dB']. Reverting to pre-filter image.
+2026-03-09 15:39:14 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 15:39:14 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 15:39:14 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 15:39:14 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.079s
+2026-03-09 15:39:14 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.079s
+2026-03-09 15:39:14 | INFO     | pipeline:process_image:228 - === Pipeline complete: IM-0007-0001.jpeg in 0.65s | modality=MODALITY_UNCERTAIN | quality_improved=True ===
+2026-03-09 15:41:05 | INFO     | pipeline:process_image:84 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 15:41:05 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 15:41:05 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.023s
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: modality_detection
+2026-03-09 15:41:05 | WARNING  | core.modality_detector:detect_modality:73 - DICOM modality tag absent or unrecognized ('UNKNOWN'). Falling back to heuristic-based detection.
+2026-03-09 15:41:05 | WARNING  | core.modality_detector:detect_modality:80 - Heuristic confidence 0.65 below threshold 0.8. Assigning MODALITY_UNCERTAIN.
+2026-03-09 15:41:05 | INFO     | utils.logger:log_modality_detection:75 - Modality detected: MODALITY_UNCERTAIN (method: HEURISTIC_FALLBACK, confidence: 0.65)
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'modality_detection' completed in 0.034s
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 15:41:05 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.038s
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 15:41:05 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 15:41:05 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for MODALITY_UNCERTAIN (unknown body part)
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 15:41:05 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 15:41:05 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.008s
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.009s
+2026-03-09 15:41:05 | WARNING  | pipeline:process_image:169 - MODALITY_UNCERTAIN — applying only universal safe operations
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 15:41:05 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.1dB, sharpness=403.0, warnings=1
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.003s
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.1051 (delta: -2.6523, worsened)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 402.9850 (delta: +288.4115, improved)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4404 (delta: -0.0996, worsened)
+2026-03-09 15:41:05 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2262 (delta: +0.0145, improved)
+2026-03-09 15:41:05 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 2.7 dB
+2026-03-09 15:41:05 | WARNING  | pipeline:process_image:191 - Quality regression detected: ['SNR regressed by 2.7 dB']. Reverting to pre-filter image.
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 15:41:05 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 15:41:05 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.084s
+2026-03-09 15:41:05 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.084s
+2026-03-09 15:41:05 | INFO     | pipeline:process_image:228 - === Pipeline complete: IM-0007-0001.jpeg in 0.20s | modality=MODALITY_UNCERTAIN | quality_improved=True ===
+2026-03-09 15:52:09 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 15:52:09 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 15:52:09 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.017s
+2026-03-09 15:52:09 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 15:52:09 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.031s
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 15:52:09 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 15:52:09 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 15:52:09 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 15:52:09 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 15:52:09 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.007s
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.007s
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 15:52:09 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.003s
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 15:52:09 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.029s
+2026-03-09 15:52:09 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 15:52:09 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.036s
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.036s
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 15:52:09 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.011s
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 15:52:09 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 15:52:09 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 15:52:09 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.104s
+2026-03-09 15:52:09 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.104s
+2026-03-09 15:52:09 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.21s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:24:15 | INFO     | pipeline:process_batch:286 - Batch processing 3 images with 10 workers
+2026-03-09 16:24:15 | INFO     | pipeline:process_image:85 - === Pipeline start: 27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery.png ===
+2026-03-09 16:24:15 | INFO     | pipeline:process_image:85 - === Pipeline start: c0372788-800px-wm.jpg ===
+2026-03-09 16:24:15 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery.png
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/c0372788-800px-wm.jpg
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(630, 629), range=[0.000, 1.000]
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.021s
+2026-03-09 16:24:15 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:24:15 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.7dB, sharpness=173.3, warnings=1
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.005s
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:24:15 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.7dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:24:15 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:211 - RGB channels are identical — converting to grayscale
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(787, 800), range=[0.000, 1.000]
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.030s
+2026-03-09 16:24:15 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:24:15 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.037s
+2026-03-09 16:24:15 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:24:15 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.2dB, sharpness=80.5, warnings=1
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.009s
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:24:15 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=13.2dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:24:15 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:24:15 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 800x787 to 1024x1007, padded to 1024x1024
+2026-03-09 16:24:15 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:24:15 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.009s
+2026-03-09 16:24:15 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.009s
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:24:15 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:24:15 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 629x630 to 1022x1024, padded to 1024x1024
+2026-03-09 16:24:15 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:24:15 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.030s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.032s
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.011s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.005s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:24:16 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.097s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:24:16 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:24:16 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.074s
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=1014
+2026-03-09 16:24:16 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.072s
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=1014
+2026-03-09 16:24:16 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:24:16 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:24:16 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 13.0 -> 13.4 dB (delta: +0.4 dB)
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.090s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.091s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.003s
+2026-03-09 16:24:16 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 17.7 -> 15.2 dB (delta: -2.4 dB)
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.082s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.083s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:24:16 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.4dB, sharpness=152.0, warnings=1
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.013s
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 13.1953 -> 13.4014 (delta: +0.2061, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 80.4548 -> 152.0465 (delta: +71.5917, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9958 (delta: -0.0042, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5277 -> 0.4972 (delta: -0.0305, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2524 -> 0.2633 (delta: +0.0108, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:24:16 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=15.2dB, sharpness=58.7, warnings=2
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.015s
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7291 -> 15.2371 (delta: +0.5080, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 173.3180 -> 58.7006 (delta: -114.6174, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9977 (delta: -0.0023, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.4931 -> 0.5323 (delta: +0.0392, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.1826 -> 0.1507 (delta: -0.0318, worsened)
+2026-03-09 16:24:16 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: Sharpness regressed by 114.6
+2026-03-09 16:24:16 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['Sharpness regressed by 114.6']. Reverting to pre-filter image.
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.043s
+2026-03-09 16:24:16 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:24:16 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.051s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.051s
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:24:16 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.012s
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:24:16 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:24:16 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:24:16 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.048s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.048s
+2026-03-09 16:24:16 | INFO     | pipeline:process_image:239 - === Pipeline complete: 27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery.png in 0.21s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:24:16 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/c0372788-800px-wm
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.062s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.062s
+2026-03-09 16:24:16 | INFO     | pipeline:process_image:239 - === Pipeline complete: c0372788-800px-wm.jpg in 0.22s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:24:16 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.116s
+2026-03-09 16:24:16 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.116s
+2026-03-09 16:24:16 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.32s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:24:16 | INFO     | pipeline:process_batch:356 - Batch complete: 3/3 successful in 1.24s
+2026-03-09 16:30:35 | INFO     | pipeline:process_batch:286 - Batch processing 4 images with 10 workers
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:85 - === Pipeline start: c0372788-800px-wm.jpg ===
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:85 - === Pipeline start: WhatsApp Image 2026-03-09 at 16.29.51.jpeg ===
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:85 - === Pipeline start: 27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery.png ===
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/c0372788-800px-wm.jpg
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery.png
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/WhatsApp Image 2026-03-09 at 16.29.51.jpeg
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(630, 629), range=[0.000, 1.000]
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.016s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.7dB, sharpness=173.3, warnings=1
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.006s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:30:36 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.7dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:30:36 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:211 - RGB channels are identical — converting to grayscale
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(787, 800), range=[0.000, 1.000]
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.037s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.039s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.2dB, sharpness=80.5, warnings=1
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.016s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:30:36 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=13.2dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:30:36 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 800x787 to 1024x1007, padded to 1024x1024
+2026-03-09 16:30:36 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:30:36 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.004s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:30:36 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 629x630 to 1022x1024, padded to 1024x1024
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:30:36 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:30:36 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.034s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.034s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.008s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.011s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:30:36 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1204, 1600, 3), range=[0.000, 1.000]
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.069s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=17.4dB, sharpness=69.4, warnings=2
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.074s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:30:36 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 0 rules applied for XRAY (unknown body part)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 1600x1204 to 1024x770, padded to 1024x1024
+2026-03-09 16:30:36 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:30:36 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.018s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.019s
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.099s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=1014
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.107s
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=1014
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.137s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:30:36 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:30:36 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:30:36 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 17.7 -> 15.2 dB (delta: -2.4 dB)
+2026-03-09 16:30:36 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 13.0 -> 13.4 dB (delta: +0.4 dB)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.126s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.123s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.126s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.124s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.023s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:30:36 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:30:36 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:30:36 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.019s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.019s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.005s
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.4dB, sharpness=152.0, warnings=1
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.022s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 13.1953 -> 13.4014 (delta: +0.2061, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 80.4548 -> 152.0465 (delta: +71.5917, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9958 (delta: -0.0042, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5277 -> 0.4972 (delta: -0.0305, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2524 -> 0.2633 (delta: +0.0108, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=15.2dB, sharpness=58.7, warnings=2
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.023s
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7291 -> 15.2371 (delta: +0.5080, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 173.3180 -> 58.7006 (delta: -114.6174, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9977 (delta: -0.0023, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.4931 -> 0.5323 (delta: +0.0392, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.1826 -> 0.1507 (delta: -0.0318, worsened)
+2026-03-09 16:30:36 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: Sharpness regressed by 114.6
+2026-03-09 16:30:36 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['Sharpness regressed by 114.6']. Reverting to pre-filter image.
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.058s
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=896
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.046s
+2026-03-09 16:30:36 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:30:36 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.057s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.058s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:30:36 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.055s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.055s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:239 - === Pipeline complete: 27e6e725de1f349479fd214944aaf0d32523ec38f111107b6f347a3530e4b4ff_big_gallery.png in 0.26s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:30:36 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 14.4 -> 15.6 dB (delta: +1.3 dB)
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.096s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.098s
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.017s
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/c0372788-800px-wm
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.080s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.080s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:239 - === Pipeline complete: c0372788-800px-wm.jpg in 0.29s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:30:36 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=15.6dB, sharpness=313.6, warnings=0
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.026s
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 17.3669 -> 15.6052 (delta: -1.7617, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 69.4122 -> 313.5665 (delta: +244.1543, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9785 (delta: -0.0215, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.3869 -> 0.3373 (delta: -0.0496, worsened)
+2026-03-09 16:30:36 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2166 -> 0.2721 (delta: +0.0555, improved)
+2026-03-09 16:30:36 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 1.8 dB
+2026-03-09 16:30:36 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 1.8 dB']. Reverting to pre-filter image.
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:30:36 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/WhatsApp Image 2026-03-09 at 16.29.51
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.111s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.111s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:239 - === Pipeline complete: WhatsApp Image 2026-03-09 at 16.29.51.jpeg in 0.41s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:30:36 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.143s
+2026-03-09 16:30:36 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.143s
+2026-03-09 16:30:36 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.42s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:30:36 | INFO     | pipeline:process_batch:356 - Batch complete: 4/4 successful in 1.35s
+2026-03-09 16:38:57 | INFO     | pipeline:process_batch:286 - Batch processing 2 images with 10 workers
+2026-03-09 16:38:58 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:38:58 | INFO     | pipeline:process_image:85 - === Pipeline start: WhatsApp Image 2026-03-09 at 16.38.19.jpeg ===
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:38:58 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/WhatsApp Image 2026-03-09 at 16.38.19.jpeg
+2026-03-09 16:38:58 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:38:58 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.030s
+2026-03-09 16:38:58 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:38:58 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1600, 1204, 3), range=[0.000, 1.000]
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.067s
+2026-03-09 16:38:58 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:38:58 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.072s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:38:58 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:38:58 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:38:58 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:38:58 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:38:58 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.012s
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.012s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:38:58 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=16.4dB, sharpness=380.9, warnings=0
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.051s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:38:58 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 0 rules applied for XRAY (unknown body part)
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:38:58 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.005s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:38:58 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 1204x1600 to 770x1024, padded to 1024x1024
+2026-03-09 16:38:58 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:38:58 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.005s
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.006s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:38:58 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.005s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:38:58 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.041s
+2026-03-09 16:38:58 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:38:58 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.036s
+2026-03-09 16:38:58 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=551
+2026-03-09 16:38:58 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.053s
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.053s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:38:58 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 18.8 -> 18.3 dB (delta: -0.5 dB)
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.053s
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.054s
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:38:58 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.012s
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:38:58 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=18.3dB, sharpness=893.8, warnings=0
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.011s
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 16.4145 -> 18.3179 (delta: +1.9034, improved)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 380.8669 -> 893.8111 (delta: +512.9442, improved)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9889 (delta: -0.0111, worsened)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.3762 -> 0.3396 (delta: -0.0366, worsened)
+2026-03-09 16:38:58 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2761 -> 0.2673 (delta: -0.0088, worsened)
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:38:58 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:38:58 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/WhatsApp Image 2026-03-09 at 16.38.19
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.076s
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.076s
+2026-03-09 16:38:58 | INFO     | pipeline:process_image:239 - === Pipeline complete: WhatsApp Image 2026-03-09 at 16.38.19.jpeg in 0.27s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:38:58 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.115s
+2026-03-09 16:38:58 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.115s
+2026-03-09 16:38:58 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.30s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:38:58 | INFO     | pipeline:process_batch:356 - Batch complete: 2/2 successful in 1.11s
+2026-03-09 16:43:17 | INFO     | pipeline:process_batch:286 - Batch processing 2 images with 10 workers
+2026-03-09 16:43:18 | INFO     | pipeline:process_image:85 - === Pipeline start: person100_bacteria_477.jpeg ===
+2026-03-09 16:43:18 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:43:18 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/person100_bacteria_477.jpeg
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:43:18 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:43:18 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(680, 1024), range=[0.000, 1.000]
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.015s
+2026-03-09 16:43:18 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:43:18 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:43:18 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.4dB, sharpness=126.6, warnings=1
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.012s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:43:18 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.4dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:43:18 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.027s
+2026-03-09 16:43:18 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:43:18 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 1024x680 to 1024x680, padded to 1024x1024
+2026-03-09 16:43:18 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:43:18 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.005s
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.005s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:43:18 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.016s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:43:18 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.051s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:43:18 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:43:18 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:43:18 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:43:18 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:43:18 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:43:18 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.006s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:43:18 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.050s
+2026-03-09 16:43:18 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=851
+2026-03-09 16:43:18 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 15.3 -> 15.7 dB (delta: +0.4 dB)
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.073s
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.074s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:43:18 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=15.7dB, sharpness=211.8, warnings=0
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.026s
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.3724 -> 15.7237 (delta: +1.3513, improved)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 126.5955 -> 211.7761 (delta: +85.1806, improved)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9958 (delta: -0.0042, worsened)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.2864 -> 0.2607 (delta: -0.0257, worsened)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.1594 -> 0.2385 (delta: +0.0792, improved)
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:43:18 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.055s
+2026-03-09 16:43:18 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:43:18 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.069s
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.070s
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:43:18 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.013s
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:43:18 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:43:18 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:43:18 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/person100_bacteria_477
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.049s
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.049s
+2026-03-09 16:43:18 | INFO     | pipeline:process_image:239 - === Pipeline complete: person100_bacteria_477.jpeg in 0.19s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:43:18 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.110s
+2026-03-09 16:43:18 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.110s
+2026-03-09 16:43:18 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.28s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:43:18 | INFO     | pipeline:process_batch:356 - Batch complete: 2/2 successful in 1.12s
+2026-03-09 16:47:38 | INFO     | pipeline:process_batch:286 - Batch processing 2 images with 10 workers
+2026-03-09 16:47:39 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:47:39 | INFO     | pipeline:process_image:85 - === Pipeline start: person100_bacteria_477.jpeg ===
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:47:39 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/person100_bacteria_477.jpeg
+2026-03-09 16:47:39 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:47:39 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(680, 1024), range=[0.000, 1.000]
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.020s
+2026-03-09 16:47:39 | INFO     | pipeline:process_image:112 - Using user-specified modality: CT
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:47:39 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.031s
+2026-03-09 16:47:39 | INFO     | pipeline:process_image:112 - Using user-specified modality: CT
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:47:39 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.4dB, sharpness=126.6, warnings=2
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.016s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:47:39 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.4dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:47:39 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for CT (unknown body part)
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:47:39 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 1024x680 to 512x340, padded to 512x512
+2026-03-09 16:47:39 | INFO     | core.standardizer:_normalize_intensity:129 - CT modality — keeping Hounsfield Units (no global normalization)
+2026-03-09 16:47:39 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.010s
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.010s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: ct_filtering
+2026-03-09 16:47:39 | INFO     | filters.ct_filters:_apply_hu_window:85 - Applied HU window: center=40, width=400 (range [-160.0, 240.0])
+2026-03-09 16:47:39 | INFO     | filters.base_filter:_track_quality:83 - CTFilter quality: SNR 15.3 -> 60.0 dB (delta: +44.7 dB)
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'ct_filtering' completed in 0.006s
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.006s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:47:39 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=60.0dB, sharpness=0.0, warnings=2
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.006s
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.3724 -> 60.0000 (delta: +45.6276, improved)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 126.5955 -> 0.0003 (delta: -126.5952, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.2864 -> 102.0000 (delta: +101.7136, improved)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.1594 -> 0.0048 (delta: -0.1546, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] metal_artifact_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] truncation_artifact_detected: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:47:39 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: Sharpness regressed by 126.6
+2026-03-09 16:47:39 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['Sharpness regressed by 126.6']. Reverting to pre-filter image.
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:47:39 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/person100_bacteria_477
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.030s
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.030s
+2026-03-09 16:47:39 | INFO     | pipeline:process_image:239 - === Pipeline complete: person100_bacteria_477.jpeg in 0.09s | modality=CT | quality_improved=True ===
+2026-03-09 16:47:39 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=2
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.059s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:47:39 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:47:39 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for CT (unknown body part)
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:47:39 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 16:47:39 | INFO     | core.standardizer:_normalize_intensity:129 - CT modality — keeping Hounsfield Units (no global normalization)
+2026-03-09 16:47:39 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: ct_filtering
+2026-03-09 16:47:39 | INFO     | filters.ct_filters:_apply_hu_window:85 - Applied HU window: center=40, width=400 (range [-160.0, 240.0])
+2026-03-09 16:47:39 | INFO     | filters.base_filter:_track_quality:83 - CTFilter quality: SNR 11.7 -> 0.0 dB (delta: -11.7 dB)
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'ct_filtering' completed in 0.005s
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.005s
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:47:39 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=0.0dB, sharpness=0.0, warnings=3
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.005s
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 0.0000 (delta: -14.7573, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 0.0000 (delta: -114.5735, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 102.0000 (delta: +101.4600, improved)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.0000 (delta: -0.2116, worsened)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] metal_artifact_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:47:39 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] truncation_artifact_detected: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:47:39 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 14.8 dB
+2026-03-09 16:47:39 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: Sharpness regressed by 114.6
+2026-03-09 16:47:39 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 14.8 dB', 'Sharpness regressed by 114.6']. Reverting to pre-filter image.
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:47:39 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:47:39 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.085s
+2026-03-09 16:47:39 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.085s
+2026-03-09 16:47:39 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.19s | modality=CT | quality_improved=True ===
+2026-03-09 16:47:40 | INFO     | pipeline:process_batch:356 - Batch complete: 2/2 successful in 1.11s
+2026-03-09 16:49:40 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:49:40 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:49:40 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.024s
+2026-03-09 16:49:40 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:49:40 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.046s
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:49:40 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:49:40 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:49:40 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:49:40 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:49:40 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.008s
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.008s
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:49:40 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.003s
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:49:40 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.034s
+2026-03-09 16:49:40 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:49:40 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.042s
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.042s
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:49:40 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.011s
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:49:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:49:40 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:49:40 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.111s
+2026-03-09 16:49:40 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.111s
+2026-03-09 16:49:40 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.25s | modality=XRAY | quality_improved=True ===
+2026-03-09 16:50:03 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:50:03 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:50:03 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.024s
+2026-03-09 16:50:03 | INFO     | pipeline:process_image:112 - Using user-specified modality: ULTRASOUND
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:50:03 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.045s
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:50:03 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:50:03 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 2 rules applied for ULTRASOUND (unknown body part)
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:03 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 16:50:03 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.009s
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.009s
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: ultrasound_filtering
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: anisotropic_diffusion
+2026-03-09 16:50:03 | INFO     | filters.ultrasound_filters:_apply_anisotropic_diffusion:99 - Anisotropic diffusion applied: kappa=50, gamma=0.1, iterations=10
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'anisotropic_diffusion' completed in 0.017s
+2026-03-09 16:50:03 | INFO     | filters.ultrasound_filters:_check_log_compression:122 - Ultrasound appears already log-compressed (0-255 range)
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: gain_normalization
+2026-03-09 16:50:03 | INFO     | filters.ultrasound_filters:_apply_gain_normalization:164 - Gain normalization applied (column-wise depth correction)
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'gain_normalization' completed in 0.000s
+2026-03-09 16:50:03 | INFO     | filters.base_filter:_track_quality:83 - UltrasoundFilter quality: SNR 12.1 -> 12.9 dB (delta: +0.8 dB)
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'ultrasound_filtering' completed in 0.018s
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.018s
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:50:03 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.9dB, sharpness=0.0, warnings=2
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.002s
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.8781 (delta: -1.8792, worsened)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 0.0003 (delta: -114.5732, worsened)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 0.0000 (delta: -1.0000, worsened)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 1.0000 (delta: +1.0000, improved)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9753 (delta: -0.0247, worsened)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.3979 (delta: -0.1421, worsened)
+2026-03-09 16:50:03 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.1886 (delta: -0.0231, worsened)
+2026-03-09 16:50:03 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 1.9 dB
+2026-03-09 16:50:03 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: Sharpness regressed by 114.6
+2026-03-09 16:50:03 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 1.9 dB', 'Sharpness regressed by 114.6']. Reverting to pre-filter image.
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:03 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:03 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.092s
+2026-03-09 16:50:03 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.092s
+2026-03-09 16:50:03 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.20s | modality=ULTRASOUND | quality_improved=True ===
+2026-03-09 16:50:16 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:50:16 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:50:16 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:50:16 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:50:16 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.041s
+2026-03-09 16:50:16 | INFO     | pipeline:process_image:112 - Using user-specified modality: HISTOPATH
+2026-03-09 16:50:16 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:50:17 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.149s
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:50:17 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:50:17 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for HISTOPATH (unknown body part)
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:17 | INFO     | core.standardizer:_resize_with_padding:58 - Histopathology modality — skipping resize (tile-level processing)
+2026-03-09 16:50:17 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: histopath_filtering
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: stain_normalization
+2026-03-09 16:50:17 | WARNING  | filters.histopath_filters:_apply_stain_normalization:179 - staintools not installed — falling back to manual OD normalization
+2026-03-09 16:50:17 | ERROR    | utils.logger:__exit__:47 - Step 'stain_normalization' failed after 0.014s: too many indices for array: array is 2-dimensional, but 3 were indexed
+2026-03-09 16:50:17 | ERROR    | utils.logger:__exit__:47 - Step 'histopath_filtering' failed after 0.014s: too many indices for array: array is 2-dimensional, but 3 were indexed
+2026-03-09 16:50:17 | ERROR    | utils.logger:__exit__:47 - Step 'modality_filtering' failed after 0.014s: too many indices for array: array is 2-dimensional, but 3 were indexed
+2026-03-09 16:50:17 | ERROR    | pipeline:process_image:176 - Filter application failed for HISTOPATH: too many indices for array: array is 2-dimensional, but 3 were indexed
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:50:17 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.027s
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 14.7573 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 114.5735 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.5400 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2116 (delta: +0.0000, unchanged)
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:17 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:17 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.179s
+2026-03-09 16:50:17 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.179s
+2026-03-09 16:50:17 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.42s | modality=HISTOPATH | quality_improved=True ===
+2026-03-09 16:50:29 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:50:29 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:50:29 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:50:29 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:50:29 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.015s
+2026-03-09 16:50:29 | INFO     | pipeline:process_image:112 - Using user-specified modality: FUNDUS
+2026-03-09 16:50:29 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:50:30 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.054s
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:50:30 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:50:30 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for FUNDUS (unknown body part)
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:30 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 800x708, padded to 800x800
+2026-03-09 16:50:30 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.003s
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: fundus_filtering
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: green_channel_CLAHE
+2026-03-09 16:50:30 | INFO     | filters.fundus_filters:_apply_green_channel_clahe:123 - Green channel CLAHE applied: clip_limit=3.0
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'green_channel_CLAHE' completed in 0.003s
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: illumination_normalization
+2026-03-09 16:50:30 | ERROR    | utils.logger:__exit__:47 - Step 'illumination_normalization' failed after 0.001s: Can't parse 'ksize'. Sequence item with index 0 has a wrong type
+2026-03-09 16:50:30 | ERROR    | utils.logger:__exit__:47 - Step 'fundus_filtering' failed after 0.013s: Can't parse 'ksize'. Sequence item with index 0 has a wrong type
+2026-03-09 16:50:30 | ERROR    | utils.logger:__exit__:47 - Step 'modality_filtering' failed after 0.013s: Can't parse 'ksize'. Sequence item with index 0 has a wrong type
+2026-03-09 16:50:30 | ERROR    | pipeline:process_image:176 - Filter application failed for FUNDUS: Can't parse 'ksize'. Sequence item with index 0 has a wrong type
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:50:30 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.8dB, sharpness=290.3, warnings=1
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.006s
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.7561 (delta: -2.0013, worsened)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 290.3137 (delta: +175.7402, improved)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4701 (delta: -0.0699, worsened)
+2026-03-09 16:50:30 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2180 (delta: +0.0064, improved)
+2026-03-09 16:50:30 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 2.0 dB
+2026-03-09 16:50:30 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 2.0 dB']. Reverting to pre-filter image.
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:30 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:30 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.090s
+2026-03-09 16:50:30 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.090s
+2026-03-09 16:50:30 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.19s | modality=FUNDUS | quality_improved=True ===
+2026-03-09 16:50:40 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:50:40 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:50:40 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.016s
+2026-03-09 16:50:40 | INFO     | pipeline:process_image:112 - Using user-specified modality: DERMOSCOPY
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:50:40 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.036s
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:50:40 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:50:40 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for DERMOSCOPY (unknown body part)
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:40 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 16:50:40 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: dermoscopy_filtering
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: hair_removal
+2026-03-09 16:50:40 | INFO     | filters.dermoscopy_filters:_remove_hair_artifacts:102 - Hair artifacts detected and removed (151229 pixels inpainted)
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'hair_removal' completed in 0.092s
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: specular_removal
+2026-03-09 16:50:40 | INFO     | filters.dermoscopy_filters:_remove_specular_reflections:168 - Specular reflections removed (4758 pixels)
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'specular_removal' completed in 0.006s
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: vignette_correction
+2026-03-09 16:50:40 | INFO     | filters.dermoscopy_filters:_correct_vignette:219 - Vignette correction applied
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'vignette_correction' completed in 0.031s
+2026-03-09 16:50:40 | INFO     | filters.base_filter:_track_quality:83 - DermoscopyFilter quality: SNR 12.1 -> 11.6 dB (delta: -0.5 dB)
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'dermoscopy_filtering' completed in 0.131s
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.131s
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:50:40 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=11.6dB, sharpness=168.7, warnings=1
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.002s
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 11.6393 (delta: -3.1181, worsened)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 168.6613 (delta: +54.0878, improved)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9306 (delta: -0.0694, worsened)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.5177 (delta: -0.0223, worsened)
+2026-03-09 16:50:40 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2471 (delta: +0.0354, improved)
+2026-03-09 16:50:40 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 3.1 dB
+2026-03-09 16:50:40 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 3.1 dB']. Reverting to pre-filter image.
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:40 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:40 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.080s
+2026-03-09 16:50:40 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.080s
+2026-03-09 16:50:40 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.27s | modality=DERMOSCOPY | quality_improved=True ===
+2026-03-09 16:50:49 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:50:49 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:50:49 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.016s
+2026-03-09 16:50:49 | INFO     | pipeline:process_image:112 - Using user-specified modality: MAMMOGRAPHY
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:50:49 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.037s
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:50:49 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:50:49 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for MAMMOGRAPHY (unknown body part)
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:49 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:50:49 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:50:49 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.002s
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:50:49 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.033s
+2026-03-09 16:50:49 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:50:49 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.041s
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.041s
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:50:49 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:50:49 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.011s
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:50:49 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:49 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:50 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:50:50 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.109s
+2026-03-09 16:50:50 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.109s
+2026-03-09 16:50:50 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.22s | modality=MAMMOGRAPHY | quality_improved=True ===
+2026-03-09 16:50:56 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:50:56 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:50:56 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.016s
+2026-03-09 16:50:56 | INFO     | pipeline:process_image:112 - Using user-specified modality: PET
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:50:56 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.039s
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:50:56 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:50:56 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for PET (unknown body part)
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:50:56 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 16:50:56 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:50:56 | INFO     | pipeline:process_image:170 - No specific filter for PET — using standardized image
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.000s
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:50:56 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.1dB, sharpness=403.0, warnings=1
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.003s
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.1051 (delta: -2.6523, worsened)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 402.9850 (delta: +288.4115, improved)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4404 (delta: -0.0996, worsened)
+2026-03-09 16:50:56 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2262 (delta: +0.0145, improved)
+2026-03-09 16:50:56 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 2.7 dB
+2026-03-09 16:50:56 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 2.7 dB']. Reverting to pre-filter image.
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:56 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:50:56 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.081s
+2026-03-09 16:50:56 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.082s
+2026-03-09 16:50:56 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.15s | modality=PET | quality_improved=True ===
+2026-03-09 16:51:07 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:51:07 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:51:07 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.017s
+2026-03-09 16:51:07 | INFO     | pipeline:process_image:112 - Using user-specified modality: NUCLEAR_MED
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:51:07 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.040s
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:51:07 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:51:07 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for NUCLEAR_MED (unknown body part)
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:51:07 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 16:51:07 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:51:07 | INFO     | pipeline:process_image:170 - No specific filter for NUCLEAR_MED — using standardized image
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.000s
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:51:07 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.1dB, sharpness=403.0, warnings=1
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.003s
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.1051 (delta: -2.6523, worsened)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 402.9850 (delta: +288.4115, improved)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4404 (delta: -0.0996, worsened)
+2026-03-09 16:51:07 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2262 (delta: +0.0145, improved)
+2026-03-09 16:51:07 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 2.7 dB
+2026-03-09 16:51:07 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 2.7 dB']. Reverting to pre-filter image.
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:51:07 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:51:07 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.080s
+2026-03-09 16:51:07 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.080s
+2026-03-09 16:51:07 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.15s | modality=NUCLEAR_MED | quality_improved=True ===
+2026-03-09 16:51:14 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:51:14 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:51:14 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:51:14 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:51:14 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.017s
+2026-03-09 16:51:14 | INFO     | utils.logger:__enter__:41 - Starting step: modality_detection
+2026-03-09 16:51:14 | WARNING  | core.modality_detector:detect_modality:73 - DICOM modality tag absent or unrecognized ('UNKNOWN'). Falling back to heuristic-based detection.
+2026-03-09 16:51:14 | WARNING  | core.modality_detector:detect_modality:80 - Heuristic confidence 0.65 below threshold 0.8. Assigning MODALITY_UNCERTAIN.
+2026-03-09 16:51:14 | INFO     | utils.logger:log_modality_detection:75 - Modality detected: MODALITY_UNCERTAIN (method: HEURISTIC_FALLBACK, confidence: 0.65)
+2026-03-09 16:51:14 | INFO     | utils.logger:__exit__:51 - Step 'modality_detection' completed in 0.024s
+2026-03-09 16:51:14 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:51:15 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.038s
+2026-03-09 16:51:15 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:51:15 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:51:15 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for MODALITY_UNCERTAIN (unknown body part)
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:51:15 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:51:15 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:51:15 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 512x453, padded to 512x512
+2026-03-09 16:51:15 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.001s
+2026-03-09 16:51:15 | WARNING  | pipeline:process_image:180 - MODALITY_UNCERTAIN — applying only universal safe operations
+2026-03-09 16:51:15 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:51:15 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=12.1dB, sharpness=403.0, warnings=1
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.003s
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 12.1051 (delta: -2.6523, worsened)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 402.9850 (delta: +288.4115, improved)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4404 (delta: -0.0996, worsened)
+2026-03-09 16:51:15 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2262 (delta: +0.0145, improved)
+2026-03-09 16:51:15 | WARNING  | core.quality_assessor:compute_quality_delta:139 - Quality regression: SNR regressed by 2.7 dB
+2026-03-09 16:51:15 | WARNING  | pipeline:process_image:202 - Quality regression detected: ['SNR regressed by 2.7 dB']. Reverting to pre-filter image.
+2026-03-09 16:51:15 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:51:15 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:51:15 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.092s
+2026-03-09 16:51:15 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.092s
+2026-03-09 16:51:15 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.18s | modality=MODALITY_UNCERTAIN | quality_improved=True ===
+2026-03-09 16:51:33 | INFO     | pipeline:process_image:85 - === Pipeline start: IM-0007-0001.jpeg ===
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: image_loading
+2026-03-09 16:51:33 | INFO     | core.dicom_handler:_load_non_dicom:193 - Loading non-DICOM image: input_images/IM-0007-0001.jpeg
+2026-03-09 16:51:33 | INFO     | core.dicom_handler:_load_non_dicom:215 - Non-DICOM loaded: shape=(1818, 2053), range=[0.000, 1.000]
+2026-03-09 16:51:33 | INFO     | utils.logger:__exit__:51 - Step 'image_loading' completed in 0.018s
+2026-03-09 16:51:33 | INFO     | pipeline:process_image:112 - Using user-specified modality: XRAY
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: pre_quality_assessment
+2026-03-09 16:51:33 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=14.8dB, sharpness=114.6, warnings=1
+2026-03-09 16:51:33 | INFO     | utils.logger:__exit__:51 - Step 'pre_quality_assessment' completed in 0.041s
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: filter_selection
+2026-03-09 16:51:33 | WARNING  | agents.filter_selector:select_filter_config:62 - Filter selector: SNR=14.8dB — poor quality, applying maximum denoising and flagging for radiologist review
+2026-03-09 16:51:33 | INFO     | agents.filter_selector:select_filter_config:124 - Filter selector: 1 rules applied for XRAY (unknown body part)
+2026-03-09 16:51:33 | INFO     | utils.logger:__exit__:51 - Step 'filter_selection' completed in 0.000s
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: standardization
+2026-03-09 16:51:33 | INFO     | core.standardizer:_resize_with_padding:102 - Resized from 2053x1818 to 1024x906, padded to 1024x1024
+2026-03-09 16:51:33 | INFO     | core.standardizer:_normalize_intensity:158 - X-ray min-max normalization to [0, 1]
+2026-03-09 16:51:33 | INFO     | core.standardizer:_correct_orientation:203 - No ImageOrientationPatient tag — skipping orientation correction
+2026-03-09 16:51:33 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:51:33 | INFO     | utils.logger:__exit__:51 - Step 'standardization' completed in 0.002s
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: modality_filtering
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: xray_filtering
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: CLAHE
+2026-03-09 16:51:33 | INFO     | filters.xray_filters:_apply_clahe:99 - CLAHE applied: clip_limit=2.0, tile_grid=[8, 8]
+2026-03-09 16:51:33 | INFO     | utils.logger:__exit__:51 - Step 'CLAHE' completed in 0.002s
+2026-03-09 16:51:33 | INFO     | utils.logger:__enter__:41 - Starting step: Wiener_denoising
+2026-03-09 16:51:34 | INFO     | filters.xray_filters:_apply_wiener_denoising:132 - Wiener denoising applied to lung zone (kernel_size=[5, 5])
+2026-03-09 16:51:34 | INFO     | utils.logger:__exit__:51 - Step 'Wiener_denoising' completed in 0.030s
+2026-03-09 16:51:34 | INFO     | filters.xray_filters:_detect_landmarks:160 - Diaphragm detected at approximately y=964
+2026-03-09 16:51:34 | INFO     | filters.base_filter:_track_quality:83 - XRayFilter quality: SNR 12.2 -> 13.8 dB (delta: +1.6 dB)
+2026-03-09 16:51:34 | INFO     | utils.logger:__exit__:51 - Step 'xray_filtering' completed in 0.037s
+2026-03-09 16:51:34 | INFO     | utils.logger:__exit__:51 - Step 'modality_filtering' completed in 0.037s
+2026-03-09 16:51:34 | INFO     | utils.logger:__enter__:41 - Starting step: post_quality_assessment
+2026-03-09 16:51:34 | INFO     | core.quality_assessor:assess_quality:95 - Quality assessment: SNR=13.8dB, sharpness=550.3, warnings=1
+2026-03-09 16:51:34 | INFO     | utils.logger:__exit__:51 - Step 'post_quality_assessment' completed in 0.011s
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_db: 14.7573 -> 13.7747 (delta: -0.9826, worsened)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] snr_pass: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness: 114.5735 -> 550.3342 (delta: +435.7607, improved)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] sharpness_pass: 1.0000 -> 1.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] motion_detected: 0.0000 -> 0.0000 (delta: +0.0000, unchanged)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] dynamic_range: 1.0000 -> 0.9915 (delta: -0.0085, worsened)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_mean: 0.5400 -> 0.4399 (delta: -0.1001, worsened)
+2026-03-09 16:51:34 | INFO     | utils.logger:log_quality_delta:66 - Quality delta [preprocessing] pixel_std: 0.2116 -> 0.2540 (delta: +0.0424, improved)
+2026-03-09 16:51:34 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:51:34 | INFO     | utils.logger:__enter__:41 - Starting step: llm_formatting
+2026-03-09 16:51:34 | INFO     | core.llm_formatter:format_for_llm:152 - LLM output bundle written to: output/IM-0007-0001
+2026-03-09 16:51:34 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.100s
+2026-03-09 16:51:34 | INFO     | utils.logger:__exit__:51 - Step 'llm_formatting' completed in 0.100s
+2026-03-09 16:51:34 | INFO     | pipeline:process_image:239 - === Pipeline complete: IM-0007-0001.jpeg in 0.21s | modality=XRAY | quality_improved=True ===
