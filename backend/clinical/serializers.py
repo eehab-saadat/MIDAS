@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Clinician, Encounter, Medication
+from .models import Clinician, Encounter, Medication, Symptom
 
 
 class ClinicianSerializer(serializers.ModelSerializer):
@@ -17,10 +17,27 @@ class ClinicianSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at", "updated_at"]
 
 
+class SymptomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Symptom
+        fields = [
+            "id",
+            "encounter",
+            "code",
+            "code_system",
+            "description",
+            "clinician_remarks",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+
 class EncounterSerializer(serializers.ModelSerializer):
     patient_mrno = serializers.CharField(source="patient.mrno", read_only=True)
-    # clinician is nullable; use SerializerMethodField to avoid AttributeError on None
     clinician_name = serializers.SerializerMethodField()
+    # Inline list of symptoms; read-only here — manage via /api/symptoms/
+    symptoms = SymptomSerializer(many=True, read_only=True)
 
     class Meta:
         model = Encounter
@@ -32,10 +49,11 @@ class EncounterSerializer(serializers.ModelSerializer):
             "clinician_name",
             "date",
             "notes",
+            "symptoms",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["patient_mrno", "clinician_name", "created_at", "updated_at"]
+        read_only_fields = ["patient_mrno", "clinician_name", "symptoms", "created_at", "updated_at"]
 
     def get_clinician_name(self, obj) -> str | None:
         return obj.clinician.name if obj.clinician else None
@@ -43,7 +61,6 @@ class EncounterSerializer(serializers.ModelSerializer):
 
 class MedicationSerializer(serializers.ModelSerializer):
     patient_mrno = serializers.CharField(source="patient.mrno", read_only=True)
-    # prescribed_by is nullable
     prescribed_by_name = serializers.SerializerMethodField()
 
     class Meta:

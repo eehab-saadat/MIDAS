@@ -1,7 +1,12 @@
 from rest_framework import filters, viewsets
 
-from .models import Clinician, Encounter, Medication
-from .serializers import ClinicianSerializer, EncounterSerializer, MedicationSerializer
+from .models import Clinician, Encounter, Medication, Symptom
+from .serializers import (
+    ClinicianSerializer,
+    EncounterSerializer,
+    MedicationSerializer,
+    SymptomSerializer,
+)
 
 
 class ClinicianViewSet(viewsets.ModelViewSet):
@@ -23,7 +28,8 @@ class ClinicianViewSet(viewsets.ModelViewSet):
 
 class EncounterViewSet(viewsets.ModelViewSet):
     """
-    CRUD endpoints for Encounter records.
+    CRUD endpoints for Encounter records.  Each encounter response includes
+    its full list of symptoms inline (read-only).
 
     Query params:
       ?patient=<patient_id>     – filter by patient PK
@@ -32,7 +38,11 @@ class EncounterViewSet(viewsets.ModelViewSet):
       ?ordering=<field>         – sort by date
     """
 
-    queryset = Encounter.objects.select_related("patient", "clinician")
+    queryset = (
+        Encounter.objects
+        .select_related("patient", "clinician")
+        .prefetch_related("symptoms")
+    )
     serializer_class = EncounterSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["notes"]
@@ -72,4 +82,29 @@ class MedicationViewSet(viewsets.ModelViewSet):
         patient_id = self.request.query_params.get("patient")
         if patient_id:
             queryset = queryset.filter(patient_id=patient_id)
+        return queryset
+
+
+class SymptomViewSet(viewsets.ModelViewSet):
+    """
+    CRUD endpoints for Symptom / clinical observation records.
+
+    Query params:
+      ?encounter=<encounter_id> – filter by encounter PK
+      ?search=<term>            – match on code, code_system, or description
+      ?ordering=<field>         – sort by created_at
+    """
+
+    queryset = Symptom.objects.select_related("encounter__patient")
+    serializer_class = SymptomSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["code", "code_system", "description"]
+    ordering_fields = ["created_at"]
+    ordering = ["created_at"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        encounter_id = self.request.query_params.get("encounter")
+        if encounter_id:
+            queryset = queryset.filter(encounter_id=encounter_id)
         return queryset
