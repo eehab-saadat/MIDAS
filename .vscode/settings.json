@@ -1,5 +1,11 @@
 {
   "python-envs.defaultEnvManager": "ms-python.python:system",
-  "python.defaultInterpreterPath": "${workspaceFolder}/microservices/.venv/bin/python",
-  "python.analysis.extraPaths": ["${workspaceFolder}/microservices"]
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/env/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/microservices"
+  ],
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }
