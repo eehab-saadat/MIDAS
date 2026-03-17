@@ -3,7 +3,7 @@ from clinical.models import Encounter, Medication
 
 from .models import Patient, Vitals
 
-
+# TODO: change this to actually use preexisting data fetching functions from other apps
 def get_complete_patient_details(mrno: str) -> dict | None:
     """
     Return a single comprehensive dict for the patient identified by *mrno*.
@@ -250,3 +250,10 @@ def get_complete_patient_details(mrno: str) -> dict | None:
         "known_medical_history": known_medical_history,
         "last_visit": last_visit,
     }
+
+def process_model_response(response: dict) -> dict:
+    """
+    Process the model response and return the cleaned response
+    """
+    # TODO: see the generate_diagnosis function in "diagnose.py" file in old-backend for reference
+    return response
