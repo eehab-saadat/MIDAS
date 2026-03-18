@@ -1,6 +1,44 @@
 from rest_framework import serializers
 
-from .models import Clinician, Encounter, Medication, Symptom
+from .models import BodyPart, Clinician, Encounter, Medication, SnomedEntity, Symptom
+
+
+class BodyPartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodyPart
+        fields = [
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+
+class SnomedEntitySerializer(serializers.ModelSerializer):
+    body_parts = BodyPartSerializer(many=True, read_only=True)
+    body_part_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=BodyPart.objects.all(),
+        source="body_parts",
+        write_only=True,
+        required=False,
+    )
+
+    class Meta:
+        model = SnomedEntity
+        fields = [
+            "snomed_cid",
+            "fsn",
+            "umls_cui",
+            "entity_type",
+            "body_parts",
+            "body_part_ids",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["body_parts", "created_at", "updated_at"]
 
 
 class ClinicianSerializer(serializers.ModelSerializer):
@@ -18,19 +56,24 @@ class ClinicianSerializer(serializers.ModelSerializer):
 
 
 class SymptomSerializer(serializers.ModelSerializer):
+    snomed_cid = serializers.CharField(source="snomed_entity.snomed_cid", read_only=True)
+    snomed_fsn = serializers.CharField(source="snomed_entity.fsn", read_only=True)
+    snomed_entity_type = serializers.CharField(source="snomed_entity.entity_type", read_only=True)
+
     class Meta:
         model = Symptom
         fields = [
             "id",
             "encounter",
-            "code",
-            "code_system",
-            "description",
+            "snomed_entity",
+            "snomed_cid",
+            "snomed_fsn",
+            "snomed_entity_type",
             "clinician_remarks",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["snomed_cid", "snomed_fsn", "snomed_entity_type", "created_at", "updated_at"]
 
 
 class EncounterSerializer(serializers.ModelSerializer):
