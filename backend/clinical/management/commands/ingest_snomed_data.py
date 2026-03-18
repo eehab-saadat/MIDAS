@@ -2,6 +2,7 @@ import csv
 import re
 from django.core.management.base import BaseCommand
 from clinical.models import SnomedEntity  # Update 'your_app_name'
+from clinical.constants import SnomedEntityType
 
 
 class Command(BaseCommand):
@@ -23,14 +24,14 @@ class Command(BaseCommand):
         if match:
             tag = match.group(1).lower()
             if tag in ["disorder", "finding", "symptom"]:
-                return SnomedEntity.FINDING
+                return SnomedEntityType.FINDING.value
             elif tag == "procedure":
-                return SnomedEntity.PROCEDURE
+                return SnomedEntityType.PROCEDURE.value
             elif tag in ["body structure", "morphologic abnormality"]:
-                return SnomedEntity.BODY_STRUCTURE
+                return SnomedEntityType.BODY_STRUCTURE.value
 
         # Default fallback
-        return SnomedEntity.OTHER
+        return SnomedEntityType.OTHER.value
 
     def handle(self, *args, **kwargs):
         file_path = kwargs["file_path"]
