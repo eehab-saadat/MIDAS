@@ -1,6 +1,75 @@
 from django.db import models
 
 
+class BodyPart(models.Model):
+    """
+    Consumer-friendly, high-level body parts (e.g. 'Chest', 'Abdomen', 'Head & Face').
+    Used to group SNOMED entities for UI filtering.
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Optional details about what this body part includes.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+class SnomedEntity(models.Model):
+    """
+    A SNOMED CT concept imported from a terminology source file.
+    Acts as the authoritative symptom/finding vocabulary for the system.
+    """
+
+    FINDING = "finding"
+    PROCEDURE = "procedure"
+    BODY_STRUCTURE = "body_structure"
+    OTHER = "other"
+
+    ENTITY_TYPE_CHOICES = [
+        (FINDING, "Finding/Symptom"),
+        (PROCEDURE, "Procedure"),
+        (BODY_STRUCTURE, "Body Structure"),
+        (OTHER, "Other"),
+    ]
+
+    # SNOMED_CID — CharField prevents integer truncation of large concept IDs
+    snomed_cid = models.CharField(max_length=20, primary_key=True)
+    # SNOMED_FSN (Fully Specified Name)
+    fsn = models.CharField(
+        max_length=500,
+        help_text="Fully Specified Name, e.g. 'Hypertensive disorder, systemic arterial (disorder)'",
+    )
+    # UMLS_CUI (e.g. 'C0020538')
+    umls_cui = models.CharField(max_length=20, blank=True, null=True)
+    entity_type = models.CharField(
+        max_length=20,
+        choices=ENTITY_TYPE_CHOICES,
+        default=FINDING,
+    )
+    body_parts = models.ManyToManyField(
+        BodyPart,
+        related_name="snomed_entities",
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "SNOMED Entities"
+        ordering = ["fsn"]
+
+    def __str__(self):
+        return f"{self.snomed_cid} - {self.fsn}"
+
+
 class Clinician(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -72,25 +141,23 @@ class Symptom(models.Model):
     """
     An observed symptom or clinical finding recorded during an Encounter.
 
-    Medical codes follow standard coding systems (ICD-10, SNOMED-CT, etc.).
-    Code and code_system are optional — clinicians can record free-text
-    observations without a formal code.
+    Every symptom must reference a SnomedEntity — free-text codes are no longer
+    accepted. The one-to-many relationship (Encounter → Symptoms) is enforced
+    through the encounter FK.
     """
-
-    CODE_SYSTEM_CHOICES = [
-        ("SNOMED-CT", "SNOMED CT"),
-    ]
 
     encounter = models.ForeignKey(
         Encounter,
         on_delete=models.CASCADE,
         related_name="symptoms",
     )
-    code = models.CharField(max_length=50, blank=True)
-    code_system = models.CharField(
-        max_length=20, choices=CODE_SYSTEM_CHOICES, blank=True, default="SNOMED-CT"
+    # PROTECT prevents accidental deletion of a SNOMED concept that has been
+    # referenced in a patient's clinical history.
+    snomed_entity = models.ForeignKey(
+        SnomedEntity,
+        on_delete=models.PROTECT,
+        related_name="symptoms",
     )
-    description = models.CharField(max_length=500)
     clinician_remarks = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -100,5 +167,4 @@ class Symptom(models.Model):
         ordering = ["created_at"]
 
     def __str__(self):
-        prefix = f"[{self.code_system}: {self.code}] " if self.code else ""
-        return f"{prefix}{self.description}"
+        return f"{self.snomed_entity.fsn} [{self.encounter}]"
