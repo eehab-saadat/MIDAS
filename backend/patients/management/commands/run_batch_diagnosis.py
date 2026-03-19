@@ -25,7 +25,7 @@ Troubleshooting Hangs:
 ----------------------
 If the script hangs on a specific patient (e.g., patient 303):
     python manage.py run_batch_diagnosis --continue --skip 303
-    
+
 The --skip option allows you to skip problematic patients and continue processing.
 """
 
@@ -67,8 +67,13 @@ SYSTEM_PROMPT = (
 
 CSV_FIELDNAMES = ["mrno", "diagnosis", "reasoning", "error"]
 
-DEFAULT_OUTPUT_FILE = Path(__file__).resolve(
-).parents[5] / "data" / "outputs" / "batch_diagnosis" / "diagnosis.csv"
+DEFAULT_OUTPUT_FILE = (
+    Path(__file__).resolve().parents[5]
+    / "data"
+    / "outputs"
+    / "batch_diagnosis"
+    / "diagnosis.csv"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +117,9 @@ def _call_ollama(patient_data_json: str) -> dict:
         return {"error": f"Unexpected error: {exc}"}
 
     if response.status_code != 200:
-        return {"error": f"Ollama returned HTTP {response.status_code}: {response.text[:200]}"}
+        return {
+            "error": f"Ollama returned HTTP {response.status_code}: {response.text[:200]}"
+        }
 
     return _parse_model_response(response.json())
 
@@ -124,8 +131,7 @@ def _call_hosted(patient_data_json: str) -> dict:
     Should POST patient_data_json to HOSTED_ENDPOINT and return a parsed
     dict with keys: diagnosis, reasoning (or an ``error`` key).
     """
-    raise NotImplementedError(
-        "Hosted endpoint inference is not yet implemented.")
+    raise NotImplementedError("Hosted endpoint inference is not yet implemented.")
 
 
 def _parse_model_response(raw: dict) -> dict:
@@ -142,14 +148,14 @@ def _parse_model_response(raw: dict) -> dict:
         return {"error": "Model returned an empty response"}
 
     # 1. Try to extract from triple-backtick block
-    fenced = re.search(
-        r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+    fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
     if fenced:
         json_str = fenced.group(1)
     else:
         # 2. Fallback: find a bare JSON object containing the expected keys
         bare = re.search(
-            r'\{[^{}]*"diagnosis"[^{}]*"reasoning"[^{}]*\}', response_text, re.DOTALL)
+            r'\{[^{}]*"diagnosis"[^{}]*"reasoning"[^{}]*\}', response_text, re.DOTALL
+        )
         json_str = bare.group(0) if bare else response_text
 
     try:
@@ -180,8 +186,7 @@ def _run_inference(patient_data: dict) -> dict:
         try:
             return _call_hosted(patient_data_json)
         except NotImplementedError:
-            logger.warning(
-                "Hosted endpoint not implemented — falling back to Ollama")
+            logger.warning("Hosted endpoint not implemented — falling back to Ollama")
 
     return _call_ollama(patient_data_json)
 
@@ -256,13 +261,14 @@ class Command(BaseCommand):
             try:
                 with open(output_path, "r", encoding="utf-8") as f:
                     reader = csv.DictReader(f)
-                    processed_mrnos = {row["mrno"]
-                                       for row in reader if row["mrno"]}
+                    processed_mrnos = {row["mrno"] for row in reader if row["mrno"]}
                 self.stdout.write(
-                    f"Continuing from last run. Skipping {len(processed_mrnos)} processed patients.\n")
+                    f"Continuing from last run. Skipping {len(processed_mrnos)} processed patients.\n"
+                )
             except Exception as exc:
-                self.stdout.write(self.style.WARNING(
-                    f"Could not read existing file: {exc}\n"))
+                self.stdout.write(
+                    self.style.WARNING(f"Could not read existing file: {exc}\n")
+                )
 
         # ── Build patient queryset ──────────────────────────────────────
         qs = Patient.objects.order_by("mrno")
@@ -279,7 +285,8 @@ class Command(BaseCommand):
         if skip_mrnos:
             qs = qs.exclude(mrno__in=skip_mrnos)
             self.stdout.write(
-                f"Skipping {len(skip_mrnos)} problematic patients: {', '.join(skip_mrnos)}\n")
+                f"Skipping {len(skip_mrnos)} problematic patients: {', '.join(skip_mrnos)}\n"
+            )
 
         if options["limit"]:
             qs = qs[: options["limit"]]
@@ -287,8 +294,7 @@ class Command(BaseCommand):
         total = qs.count()
         if total == 0:
             if processed_mrnos:
-                self.stdout.write(self.style.SUCCESS(
-                    "All patients already processed!"))
+                self.stdout.write(self.style.SUCCESS("All patients already processed!"))
             else:
                 raise CommandError("No patients match the given criteria.")
             return
@@ -302,8 +308,9 @@ class Command(BaseCommand):
         start_time = time.monotonic()
 
         # Determine if we're appending or creating new file
-        file_mode = "a" if (
-            options["continue_from_last"] and output_path.exists()) else "w"
+        file_mode = (
+            "a" if (options["continue_from_last"] and output_path.exists()) else "w"
+        )
 
         try:
             with open(output_path, file_mode, newline="", encoding="utf-8") as csv_file:
@@ -314,11 +321,11 @@ class Command(BaseCommand):
 
                 for idx, patient in enumerate(qs, start=1):
                     mrno = patient.mrno
-                    row = {"mrno": mrno, "diagnosis": "",
-                           "reasoning": "", "error": ""}
+                    row = {"mrno": mrno, "diagnosis": "", "reasoning": "", "error": ""}
 
                     self.stdout.write(
-                        f"[{idx}/{total}] Processing patient {mrno}...", ending=" ")
+                        f"[{idx}/{total}] Processing patient {mrno}...", ending=" "
+                    )
                     self.stdout.flush()
 
                     patient_data = get_complete_patient_details(mrno)
@@ -327,8 +334,7 @@ class Command(BaseCommand):
                         writer.writerow(row)
                         failed += 1
                         logger.warning("Patient %s: data not found", mrno)
-                        self.stdout.write(self.style.WARNING(
-                            "ERROR: data not found"))
+                        self.stdout.write(self.style.WARNING("ERROR: data not found"))
                         continue
 
                     result = _run_inference(patient_data)
@@ -336,10 +342,10 @@ class Command(BaseCommand):
                     if "error" in result:
                         row["error"] = result["error"]
                         failed += 1
-                        logger.error("Patient %s: inference failed — %s",
-                                     mrno, result["error"])
-                        self.stdout.write(self.style.ERROR(
-                            f"ERROR: {result['error']}"))
+                        logger.error(
+                            "Patient %s: inference failed — %s", mrno, result["error"]
+                        )
+                        self.stdout.write(self.style.ERROR(f"ERROR: {result['error']}"))
                     else:
                         row["diagnosis"] = result.get("diagnosis", "")
                         row["reasoning"] = result.get("reasoning", "")
@@ -357,7 +363,8 @@ class Command(BaseCommand):
                         rate = idx / elapsed if elapsed > 0 else 0
                         self.stdout.write(
                             f"  [{idx}/{total}] elapsed {elapsed:.0f}s, "
-                            f"rate {rate:.2f} patients/sec\n")
+                            f"rate {rate:.2f} patients/sec\n"
+                        )
 
                     if options["delay"] > 0:
                         time.sleep(options["delay"])
@@ -374,7 +381,8 @@ class Command(BaseCommand):
             self.stdout.write(f"CSV saved to: {output_path}")
             self.stdout.write("\nTo resume processing, run:")
             self.stdout.write(
-                f"  python manage.py run_batch_diagnosis --continue --output {output_path}\n")
+                f"  python manage.py run_batch_diagnosis --continue --output {output_path}\n"
+            )
             return
 
         elapsed_total = time.monotonic() - start_time

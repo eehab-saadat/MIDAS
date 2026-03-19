@@ -30,8 +30,10 @@ class Patient(models.Model):
         if not self.dob:
             return None
         today = date.today()
-        return today.year - self.dob.year - (
-            (today.month, today.day) < (self.dob.month, self.dob.day)
+        return (
+            today.year
+            - self.dob.year
+            - ((today.month, today.day) < (self.dob.month, self.dob.day))
         )
 
 

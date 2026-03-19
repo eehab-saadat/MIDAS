@@ -18,14 +18,14 @@ MIDAS is a modular healthcare decision-support system.
 ## Django App Map
 
 | App | Path | Responsibility |
-|-----|------|----------------|
+| ----- | ------ | ---------------- |
 | `patients` | `backend/patients/` | Patient demographics (`Patient`) and vital signs (`Vitals`) |
-| `clinical` | `backend/clinical/` | Clinicians (`Clinician`), clinical encounters (`Encounter`), prescriptions (`Medication`) |
+| `clinical` | `backend/clinical/` | Clinicians (`Clinician`), clinical encounters (`Encounter`), prescriptions (`Medication`), snomed entities (`SnomedEntity`), Body part (`BodyPart`) |
 | `diagnostics` | `backend/diagnostics/` | Imaging reports (`Radiology`) and lab panel results (`Lab`) |
 
 ## Key Data Conventions
 
-- **`mrno`** — human-readable patient ID, stored as a sequential integer string (`"1"`, `"2"`, …). Assigned by `backend/ingest_fmh_data.py` at ingestion time. Never use raw hospital MRNOs from source Excel files.
+- **`mrno`** — human-readable patient ID, stored as a sequential integer string (`"1"`, `"2"`, …).
 - **`age`** — never stored in the DB. Computed as a `@property` on `Patient` from `dob`.
 - **Lab results** — stored as a `JSONField` per CPT panel: `{"TEST": {"result": float|null, "unit": "", "normal_range": ["", ""]}}`.
 - **Encounter notes** — stored as Markdown plain text in `Encounter.notes`.
@@ -34,4 +34,4 @@ MIDAS is a modular healthcare decision-support system.
 
 ## Data Ingestion
 
-Raw hospital data lives in `data/FMH/files/raw/`. Processed Excel files are in `data/FMH/files/processed/`. Run `backend/ingest_fmh_data.py` (with optional `--flush`) to load them into Django.
+Processed Excel files are in `data/FMH/files/processed/`. Run `backend/ingest_fmh_data.py` (with optional `--flush`) to load them into Django.
