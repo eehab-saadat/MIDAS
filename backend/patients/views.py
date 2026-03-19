@@ -150,7 +150,7 @@ def diagnose_with_medgemma(request):
     # model call vars
     ROLE: "user"
     CONTENT: "You are an expert medical AI assistant. Analyze the provided case details and the medical image (if any) to suggest a probable diagnosis with detailed reasoning. Format your response EXACTLY as follows, wrapped in triple backticks:\n\n```\n'{'diagnosis': '<diagnosis>', 'reasoning': '<detailed reasoning>'}```\n\nBe precise, evidence-based, and explain your reasoning clearly. Return ONLY the JSON object wrapped in triple backticks."
-    
+
     # adding optionl params to the patient data in others field if provided
     for param in OPTIONAL_PARAMS:
         if param in request.GET:
@@ -159,7 +159,7 @@ def diagnose_with_medgemma(request):
     try:
         mrno: str = request.GET.get("mrno")
         patient_data: str = json.dumps(get_complete_patient_details(mrno))
-        
+
         """if hosted:
             send request and wait for success code response
             if not success code returned or not hosted, then call ollama as fallback
@@ -180,18 +180,17 @@ def diagnose_with_medgemma(request):
             logger.info(f"calling ollama model: {OLLAMA_URL}")
             message: dict = {
                 "role": ROLE,
-                "content": CONTENT + f"\n\nThe following json depicts relevant information about the case: {patient_data}",
+                "content": CONTENT
+                + f"\n\nThe following json depicts relevant information about the case: {patient_data}",
             }
             payload: dict = {
                 "model": MODEL,
                 "messages": [message],
                 "stream": False,
-                "options": {
-                    "temperature": 0
-                }
+                "options": {"temperature": 0},
             }
             response = requests.post(OLLAMA_URL, json=payload, timeout=800)
-            
+
         # response handling
         if response.status_code == 200:
             # handle success scenerio
@@ -205,7 +204,7 @@ def diagnose_with_medgemma(request):
         else:
             # throw unknown error - TODO
             pass
-        
+
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

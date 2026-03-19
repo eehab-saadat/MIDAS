@@ -99,28 +99,19 @@ def get_complete_patient_details(mrno: str) -> dict | None:
         return None
 
     # ── Fetch related data in as few queries as possible ────────────────────
-    latest_vitals: Vitals | None = (
-        patient.vitals.order_by("-timestamp").first()
-    )
+    latest_vitals: Vitals | None = patient.vitals.order_by("-timestamp").first()
 
-    lab_records = list(
-        patient.lab_results.order_by("-invoice_date")[:3]
-    )
+    lab_records = list(patient.lab_results.order_by("-invoice_date")[:3])
 
-    radiology_records = list(
-        patient.radiology_reports.order_by("-created_at")[:3]
-    )
+    radiology_records = list(patient.radiology_reports.order_by("-created_at")[:3])
 
     medications = list(
-        patient.medications.select_related(
-            "prescribed_by").order_by("-prescribed_on")
+        patient.medications.select_related("prescribed_by").order_by("-prescribed_on")
     )
 
     # Last 2 encounters (symptoms will be fetched as needed)
     recent_encounters = list(
-        patient.encounters
-        .select_related("clinician")
-        .order_by("-date")[:2]
+        patient.encounters.select_related("clinician").order_by("-date")[:2]
     )
 
     most_recent_encounter: Encounter | None = (
@@ -219,34 +210,34 @@ def get_complete_patient_details(mrno: str) -> dict | None:
             # If symptoms table doesn't exist, leave empty
             symptoms = []
 
-        encounters_data.append({
-            "id": enc.id,
-            "date": enc.date.isoformat(),
-            "clinician": enc.clinician.name if enc.clinician else None,
-            "notes": enc.notes,
-            "symptoms": symptoms,
-        })
+        encounters_data.append(
+            {
+                "id": enc.id,
+                "date": enc.date.isoformat(),
+                "clinician": enc.clinician.name if enc.clinician else None,
+                "notes": enc.notes,
+                "symptoms": symptoms,
+            }
+        )
 
     # Current symptoms — descriptions from the most recent encounter only
     current_symptoms = []
     if most_recent_encounter:
         try:
             current_symptoms = [
-                s.description for s in most_recent_encounter.symptoms.all()]
+                s.description for s in most_recent_encounter.symptoms.all()
+            ]
         except Exception:
             # If symptoms table doesn't exist, leave empty
             pass
 
     # Known medical history — split the history blob into non-empty lines
     known_medical_history = [
-        line.strip()
-        for line in patient.history.splitlines()
-        if line.strip()
+        line.strip() for line in patient.history.splitlines() if line.strip()
     ]
 
     last_visit = (
-        most_recent_encounter.date.isoformat()
-        if most_recent_encounter else None
+        most_recent_encounter.date.isoformat() if most_recent_encounter else None
     )
 
     return {
@@ -280,13 +271,20 @@ def get_condensed_patient_details(mrno: str) -> dict | None:
     latest_vitals = patient.vitals.order_by("-timestamp").first()
     vitals_str = ""
     if latest_vitals:
-        bp = f"{latest_vitals.bp_high}/{latest_vitals.bp_low}" if latest_vitals.bp_high else ""
-        vitals_str = f"Vitals: {latest_vitals.weight}kg, {bp}mmHg, {latest_vitals.temperature}°C"
+        bp = (
+            f"{latest_vitals.bp_high}/{latest_vitals.bp_low}"
+            if latest_vitals.bp_high
+            else ""
+        )
+        vitals_str = (
+            f"Vitals: {latest_vitals.weight}kg, {bp}mmHg, {latest_vitals.temperature}°C"
+        )
 
     # Latest medications (brief)
     meds = list(patient.medications.order_by("-prescribed_on")[:3])
-    meds_str = "; ".join([m.medication_name for m in meds]
-                         ) if meds else "No medications"
+    meds_str = (
+        "; ".join([m.medication_name for m in meds]) if meds else "No medications"
+    )
 
     # Recent note
     recent_encounters = list(patient.encounters.order_by("-date")[:1])
@@ -296,8 +294,9 @@ def get_condensed_patient_details(mrno: str) -> dict | None:
         notes_str = f"Latest note: {note}"
 
     # Medical history (truncated)
-    history_lines = [line.strip()
-                     for line in patient.history.splitlines() if line.strip()][:3]
+    history_lines = [
+        line.strip() for line in patient.history.splitlines() if line.strip()
+    ][:3]
     history_str = "; ".join(history_lines) if history_lines else "No history"
 
     return {

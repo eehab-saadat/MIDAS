@@ -9,44 +9,92 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('patients', '0001_initial'),
+        ("patients", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Clinician',
+            name="Clinician",
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255)),
-                ('title', models.CharField(blank=True, max_length=100)),
-                ('joining_date', models.DateField(blank=True, null=True)),
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=255)),
+                ("title", models.CharField(blank=True, max_length=100)),
+                ("joining_date", models.DateField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Encounter',
+            name="Encounter",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateTimeField()),
-                ('notes', models.TextField(blank=True)),
-                ('clinician', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='encounters', to='clinical.clinician')),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='encounters', to='patients.patient')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateTimeField()),
+                ("notes", models.TextField(blank=True)),
+                (
+                    "clinician",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="encounters",
+                        to="clinical.clinician",
+                    ),
+                ),
+                (
+                    "patient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="encounters",
+                        to="patients.patient",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-date'],
+                "ordering": ["-date"],
             },
         ),
         migrations.CreateModel(
-            name='Medication',
+            name="Medication",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('prescribed_on', models.DateField(blank=True, null=True)),
-                ('active_agent_name', models.CharField(blank=True, max_length=255)),
-                ('medication_name', models.CharField(max_length=255)),
-                ('dosage', models.CharField(blank=True, max_length=100)),
-                ('frequency', models.CharField(blank=True, max_length=100)),
-                ('indication', models.TextField(blank=True)),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='medications', to='patients.patient')),
-                ('prescribed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='prescriptions', to='clinical.clinician')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("prescribed_on", models.DateField(blank=True, null=True)),
+                ("active_agent_name", models.CharField(blank=True, max_length=255)),
+                ("medication_name", models.CharField(max_length=255)),
+                ("dosage", models.CharField(blank=True, max_length=100)),
+                ("frequency", models.CharField(blank=True, max_length=100)),
+                ("indication", models.TextField(blank=True)),
+                (
+                    "patient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="medications",
+                        to="patients.patient",
+                    ),
+                ),
+                (
+                    "prescribed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="prescriptions",
+                        to="clinical.clinician",
+                    ),
+                ),
             ],
         ),
     ]
