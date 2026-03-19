@@ -17,6 +17,18 @@ Run from the backend/ directory:
 Optional flags:
     --flush        Drop all existing rows before ingesting (idempotent re-run).
     --data-dir <p> Override the default processed-files directory.
+
+Final Models:
+
+1. Patient: id, mrno, gender, dob, age, history
+2. Clinician: id, name, title, joining data
+3. Radiology: id, mrno, cpt_id, cpt_name, technique, result, conclusion, file_path - this contains any medical images
+4. Encounter: id, mrno, clinician, date, notes (md formatted string)
+5. Lab: id, mrno, cpt_id, cpt_name, {test: result_numeric}, invoice_date (currently one lab report is shown in multiple rows with each result field of the test as separate row, i want the final database to show a dictionary object of all such tests and their results pairs) - this contains any laboratory test results
+6. Vitals: id, mrno, timestamp, weight, weight_unit_id, height, height_unit_id, temperature, temperature_unit_id, pulse, pulse_unit_id, respiratory_rate, respiratory_rate_unit_id, bp_high, bp_low - this contains any patient's vital signs
+7. Medication: id, mrno, prescribed_by (doctor id), prescribed_on (date), active_agent_name, medication_name, dosage, frequency, indication
+8. SnomedEntity: id, snomed_cid, fsn, umls_cui, entity_type, body_parts - all possible symptoms or findings
+9. Symptom: id, name, description, snomed_entity, encounter - this contains any symptoms or findings that were observed during the encounter for patient
 """
 
 import argparse
@@ -51,6 +63,7 @@ BATCH_SIZE = 500
 # ---------------------------------------------------------------------------
 # Low-level helpers
 # ---------------------------------------------------------------------------
+
 
 def _load(path: Path, label: str) -> pd.DataFrame:
     print(f"  Loading {label} from {path} …")
@@ -137,6 +150,7 @@ def _datetime(val):
 # Step 0.5 – Collect raw MRNOs then build sequential mapping
 # ---------------------------------------------------------------------------
 
+
 def collect_raw_mrnos(
     patients_df: pd.DataFrame,
     vitals_df: pd.DataFrame,
@@ -179,6 +193,7 @@ def build_mrno_map(raw_mrnos: set[str]) -> dict[str, str]:
 # Step 1 – Patients (covers every MRNO seen in any sheet)
 # ---------------------------------------------------------------------------
 
+
 def ingest_patients(
     patients_df: pd.DataFrame,
     mrno_map: dict[str, str],
@@ -218,9 +233,7 @@ def ingest_patients(
     seq_to_raw: dict[str, str] = {v: k for k, v in mrno_map.items()}
 
     # Existing patients in DB are keyed by their stored seq_id (Patient.mrno)
-    existing_by_seq: dict[str, Patient] = {
-        p.mrno: p for p in Patient.objects.all()
-    }
+    existing_by_seq: dict[str, Patient] = {p.mrno: p for p in Patient.objects.all()}
 
     to_create: list[Patient] = []
     to_update: list[Patient] = []
@@ -252,9 +265,7 @@ def ingest_patients(
             )
 
     # Re-query so every Patient object carries a real DB primary key
-    all_patients_by_seq: dict[str, Patient] = {
-        p.mrno: p for p in Patient.objects.all()
-    }
+    all_patients_by_seq: dict[str, Patient] = {p.mrno: p for p in Patient.objects.all()}
     # Return dict keyed by *raw* MRNO for transparent downstream lookups
     raw_to_patient: dict[str, Patient] = {
         seq_to_raw[seq]: p
@@ -274,6 +285,7 @@ def ingest_patients(
 # Step 2 – Default Clinician
 # ---------------------------------------------------------------------------
 
+
 def ingest_default_clinician() -> Clinician:
     """
     Ensure a single default Clinician exists.  Uses get_or_create so the
@@ -291,6 +303,7 @@ def ingest_default_clinician() -> Clinician:
 # ---------------------------------------------------------------------------
 # Step 3 – Vitals
 # ---------------------------------------------------------------------------
+
 
 def ingest_vitals(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
     """
@@ -328,9 +341,7 @@ def ingest_vitals(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
                     row.get("TEMPRATURE_UNIT_ID") or row.get("TEMPERATURE_UNIT_ID")
                 ),
                 pulse=_float(row.get("PLUSE") or row.get("PULSE")),
-                pulse_unit=_str(
-                    row.get("PLUSE_UNIT_ID") or row.get("PULSE_UNIT_ID")
-                ),
+                pulse_unit=_str(row.get("PLUSE_UNIT_ID") or row.get("PULSE_UNIT_ID")),
                 respiratory_rate=_float(row.get("RESPIRATORY_RATE")),
                 respiratory_rate_unit=_str(row.get("RESPIRATORY_RATE_UNIT_ID")),
                 bp_high=_float(row.get("BLOOD_PRESSURE_HIGH")),
@@ -347,6 +358,7 @@ def ingest_vitals(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
 # ---------------------------------------------------------------------------
 # Step 4 – Encounters
 # ---------------------------------------------------------------------------
+
 
 def ingest_encounters(
     df: pd.DataFrame,
@@ -372,16 +384,14 @@ def ingest_encounters(
             skipped += 1
             continue
 
-        enc_date = _datetime(
-            row.get("Encounter_date") or row.get("ENCOUNTER_DATE")
-        )
+        enc_date = _datetime(row.get("Encounter_date") or row.get("ENCOUNTER_DATE"))
         if enc_date is None:
             skipped += 1
             continue
 
-        notes = _str(
-            row.get("doctor_notes") or row.get("DOCTOR_NOTES")
-        ).replace("_x000D_", "")
+        notes = _str(row.get("doctor_notes") or row.get("DOCTOR_NOTES")).replace(
+            "_x000D_", ""
+        )
 
         to_create.append(
             Encounter(
@@ -401,6 +411,7 @@ def ingest_encounters(
 # ---------------------------------------------------------------------------
 # Step 5 – Lab Results  (pivot rows → single JSONField per CPT panel)
 # ---------------------------------------------------------------------------
+
 
 def ingest_lab_results(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
     """
@@ -426,17 +437,15 @@ def ingest_lab_results(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
 
     # Normalise groupby columns in-place
     df = df.copy()
-    df["MRNO"]         = df["MRNO"].apply(_mrno)
-    df["CPT_ID"]       = df["CPT_ID"].fillna("").astype(str).str.strip()
+    df["MRNO"] = df["MRNO"].apply(_mrno)
+    df["CPT_ID"] = df["CPT_ID"].fillna("").astype(str).str.strip()
     df["INVOICE_DATE"] = df["INVOICE_DATE"].fillna("").astype(str).str.strip()
 
     skipped = 0
     to_create: list[Lab] = []
 
     group_cols = ["MRNO", "CPT_ID", "INVOICE_DATE"]
-    for (mrno, cpt_id, invoice_date_str), group in df.groupby(
-        group_cols, sort=False
-    ):
+    for (mrno, cpt_id, invoice_date_str), group in df.groupby(group_cols, sort=False):
         patient = patients.get(mrno)
         if patient is None:
             skipped += len(group)
@@ -479,6 +488,7 @@ def ingest_lab_results(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
 # ---------------------------------------------------------------------------
 # Step 6 – Radiology
 # ---------------------------------------------------------------------------
+
 
 def ingest_radiology(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
     """
@@ -523,6 +533,7 @@ def ingest_radiology(df: pd.DataFrame, patients: dict[str, Patient]) -> None:
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Ingest processed FMH Excel files into Django DB."
@@ -562,11 +573,11 @@ def main() -> None:
 
     # ── Step 0: Load all sheets ──────────────────────────────────────────────
     print("\n[Step 0] Loading Excel files …")
-    patients_df  = _load(data_dir / "Patients.xlsx",    "Patients")
-    vitals_df    = _load(data_dir / "Vital_Signs.xlsx", "Vital Signs")
-    encounter_df = _load(data_dir / "Encounter.xlsx",   "Encounters")
-    lab_df       = _load(data_dir / "Lab_Results.xlsx", "Lab Results")
-    radiology_df = _load(data_dir / "Radiology.xlsx",   "Radiology")
+    patients_df = _load(data_dir / "Patients.xlsx", "Patients")
+    vitals_df = _load(data_dir / "Vital_Signs.xlsx", "Vital Signs")
+    encounter_df = _load(data_dir / "Encounter.xlsx", "Encounters")
+    lab_df = _load(data_dir / "Lab_Results.xlsx", "Lab Results")
+    radiology_df = _load(data_dir / "Radiology.xlsx", "Radiology")
 
     # ── Step 0.5: Collect raw MRNOs and build sequential map ────────────────
     raw_mrnos = collect_raw_mrnos(
@@ -576,7 +587,7 @@ def main() -> None:
 
     # ── Step 1 & 2: Seed independent tables ─────────────────────────────────
     print("\n[Step 1] Ingesting base tables …")
-    patients_map      = ingest_patients(patients_df, mrno_map)
+    patients_map = ingest_patients(patients_df, mrno_map)
     default_clinician = ingest_default_clinician()
 
     # ── Steps 3-6: FK-dependent tables ──────────────────────────────────────
