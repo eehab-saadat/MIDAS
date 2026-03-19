@@ -4,6 +4,8 @@ from clinical.models import Encounter, Medication
 from .models import Patient, Vitals
 
 # TODO: change this to actually use preexisting data fetching functions from other apps
+
+
 def get_complete_patient_details(mrno: str) -> dict | None:
     """
     Return a single comprehensive dict for the patient identified by *mrno*.
@@ -110,14 +112,14 @@ def get_complete_patient_details(mrno: str) -> dict | None:
     )
 
     medications = list(
-        patient.medications.select_related("prescribed_by").order_by("-prescribed_on")
+        patient.medications.select_related(
+            "prescribed_by").order_by("-prescribed_on")
     )
 
-    # Last 2 encounters with their symptoms and SNOMED entities pre-fetched
+    # Last 2 encounters (symptoms will be fetched as needed)
     recent_encounters = list(
         patient.encounters
         .select_related("clinician")
-        .prefetch_related("symptoms__snomed_entity")
         .order_by("-date")[:2]
     )
 
@@ -201,13 +203,10 @@ def get_complete_patient_details(mrno: str) -> dict | None:
     ]
 
     # Recent encounters (last 2) with their symptom lists
-    encounters_data = [
-        {
-            "id": enc.id,
-            "date": enc.date.isoformat(),
-            "clinician": enc.clinician.name if enc.clinician else None,
-            "notes": enc.notes,
-            "symptoms": [
+    encounters_data = []
+    for enc in recent_encounters:
+        try:
+            symptoms = [
                 {
                     "snomed_cid": s.snomed_entity.snomed_cid,
                     "snomed_fsn": s.snomed_entity.fsn,
@@ -215,16 +214,28 @@ def get_complete_patient_details(mrno: str) -> dict | None:
                     "clinician_remarks": s.clinician_remarks,
                 }
                 for s in enc.symptoms.all()
-            ],
-        }
-        for enc in recent_encounters
-    ]
+            ]
+        except Exception:
+            # If symptoms table doesn't exist, leave empty
+            symptoms = []
 
-    # Current symptoms — SNOMED FSNs from the most recent encounter only
-    current_symptoms = (
-        [s.snomed_entity.fsn for s in most_recent_encounter.symptoms.all()]
-        if most_recent_encounter else []
-    )
+        encounters_data.append({
+            "id": enc.id,
+            "date": enc.date.isoformat(),
+            "clinician": enc.clinician.name if enc.clinician else None,
+            "notes": enc.notes,
+            "symptoms": symptoms,
+        })
+
+    # Current symptoms — descriptions from the most recent encounter only
+    current_symptoms = []
+    if most_recent_encounter:
+        try:
+            current_symptoms = [
+                s.description for s in most_recent_encounter.symptoms.all()]
+        except Exception:
+            # If symptoms table doesn't exist, leave empty
+            pass
 
     # Known medical history — split the history blob into non-empty lines
     known_medical_history = [
@@ -250,6 +261,54 @@ def get_complete_patient_details(mrno: str) -> dict | None:
         "known_medical_history": known_medical_history,
         "last_visit": last_visit,
     }
+
+
+def get_condensed_patient_details(mrno: str) -> dict | None:
+    """
+    Return a condensed patient summary (for batch diagnosis inference).
+    Includes only essential fields to reduce token usage in LLM calls.
+    """
+    try:
+        patient = Patient.objects.get(mrno=mrno)
+    except Patient.DoesNotExist:
+        return None
+
+    # Personal info
+    personal_info = f"{patient.name}, {patient.gender}, age {patient.age}"
+
+    # Latest vitals (one line)
+    latest_vitals = patient.vitals.order_by("-timestamp").first()
+    vitals_str = ""
+    if latest_vitals:
+        bp = f"{latest_vitals.bp_high}/{latest_vitals.bp_low}" if latest_vitals.bp_high else ""
+        vitals_str = f"Vitals: {latest_vitals.weight}kg, {bp}mmHg, {latest_vitals.temperature}°C"
+
+    # Latest medications (brief)
+    meds = list(patient.medications.order_by("-prescribed_on")[:3])
+    meds_str = "; ".join([m.medication_name for m in meds]
+                         ) if meds else "No medications"
+
+    # Recent note
+    recent_encounters = list(patient.encounters.order_by("-date")[:1])
+    notes_str = ""
+    if recent_encounters:
+        note = recent_encounters[0].notes[:300]  # First 300 chars
+        notes_str = f"Latest note: {note}"
+
+    # Medical history (truncated)
+    history_lines = [line.strip()
+                     for line in patient.history.splitlines() if line.strip()][:3]
+    history_str = "; ".join(history_lines) if history_lines else "No history"
+
+    return {
+        "mrno": mrno,
+        "patient": personal_info,
+        "history": history_str,
+        "vitals": vitals_str,
+        "medications": meds_str,
+        "recent_notes": notes_str,
+    }
+
 
 def process_model_response(response: dict) -> dict:
     """
