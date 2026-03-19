@@ -1,4 +1,5 @@
 from django.db import models
+from .constants import BodyPart, SnomedEntityType
 
 
 class BodyPart(models.Model):
@@ -27,16 +28,11 @@ class SnomedEntity(models.Model):
     Acts as the authoritative symptom/finding vocabulary for the system.
     """
 
-    FINDING = "finding"
-    PROCEDURE = "procedure"
-    BODY_STRUCTURE = "body_structure"
-    OTHER = "other"
-
     ENTITY_TYPE_CHOICES = [
-        (FINDING, "Finding/Symptom"),
-        (PROCEDURE, "Procedure"),
-        (BODY_STRUCTURE, "Body Structure"),
-        (OTHER, "Other"),
+        (SnomedEntityType.FINDING.value, "Finding/Symptom"),
+        (SnomedEntityType.PROCEDURE.value, "Procedure"),
+        (SnomedEntityType.BODY_STRUCTURE.value, "Body Structure"),
+        (SnomedEntityType.OTHER.value, "Other"),
     ]
 
     # SNOMED_CID — CharField prevents integer truncation of large concept IDs
@@ -51,7 +47,7 @@ class SnomedEntity(models.Model):
     entity_type = models.CharField(
         max_length=20,
         choices=ENTITY_TYPE_CHOICES,
-        default=FINDING,
+        default=SnomedEntityType.FINDING.value,
     )
     body_parts = models.ManyToManyField(
         BodyPart,
