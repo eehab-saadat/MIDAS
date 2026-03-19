@@ -79,15 +79,15 @@ def get_complete_patient_details(mrno: str) -> dict | None:
                 "notes": str,               # Markdown text
                 "symptoms": [
                     {
-                        "code": str,
-                        "code_system": str,
-                        "description": str,
+                        "snomed_cid": str,
+                        "snomed_fsn": str,
+                        "entity_type": str,
                         "clinician_remarks": str,
                     }
                 ],
             }
         ],
-        "current_symptoms": [str],          # descriptions from the most recent encounter
+        "current_symptoms": [str],          # SNOMED FSNs from the most recent encounter
         "known_medical_history": [str],     # patient.history split by newlines
         "last_visit": str | null,           # ISO datetime of most recent encounter
     }
@@ -208,9 +208,9 @@ def get_complete_patient_details(mrno: str) -> dict | None:
         try:
             symptoms = [
                 {
-                    "code": s.code,
-                    "code_system": s.code_system,
-                    "description": s.description,
+                    "snomed_cid": s.snomed_entity.snomed_cid,
+                    "snomed_fsn": s.snomed_entity.fsn,
+                    "entity_type": s.snomed_entity.entity_type,
                     "clinician_remarks": s.clinician_remarks,
                 }
                 for s in enc.symptoms.all()
