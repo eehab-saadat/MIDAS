@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 
 # Get the data directory path
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "data/fake/json"
 
 
 def get_all_patients() -> List[Dict]:
