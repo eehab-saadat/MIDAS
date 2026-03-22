@@ -2240,7 +2240,7 @@ Toast is a wrapper to stack elements, positioned on the corner of page
 - Component: `toast`
 - Placement: `toast-start`, `toast-center`, `toast-end`, `toast-top`, `toast-middle`, `toast-bottom`
 
-#### Synta
+#### Syntax
 
 ```html
 <div class="toast {MODIFIER}">{CONTENT}</div>
