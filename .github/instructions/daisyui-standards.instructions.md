@@ -85,3 +85,17 @@ To maintain a scalable and organized codebase, always use the following folder s
 - `hooks/`: Custom reusable React hooks.
 - `types/`: Shared TypeScript interfaces and utility types.
 - `public/`: Static assets (images, fonts, raw icons).
+
+## Final Django Models are as follows
+
+Final Models:
+
+1. Patient: id, mrno, gender, dob, age, history
+2. Clinician: id, name, title, joining data
+3. Radiology: id, mrno, cpt_id, cpt_name, technique, result, conclusion, file_path - this contains any medical images
+4. Encounter: id, mrno, clinician, date, notes (md formatted string)
+5. Lab: id, mrno, cpt_id, cpt_name, {test: result_numeric}, invoice_date (currently one lab report is shown in multiple rows with each result field of the test as separate row, i want the final database to show a dictionary object of all such tests and their results pairs) - this contains any laboratory test results
+6. Vitals: id, mrno, timestamp, weight, weight_unit_id, height, height_unit_id, temperature, temperature_unit_id, pulse, pulse_unit_id, respiratory_rate, respiratory_rate_unit_id, bp_high, bp_low - this contains any patient's vital signs
+7. Medication: id, mrno, prescribed_by (doctor id), prescribed_on (date), active_agent_name, medication_name, dosage, frequency, indication
+8. SnomedEntity: id, snomed_cid, fsn, umls_cui, entity_type, body_parts - all possible symptoms or findings
+9. Symptom: id, name, description, snomed_entity, encounter - this contains any symptoms or findings that were observed during the encounter for patient

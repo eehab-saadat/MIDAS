@@ -1,15 +1,45 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Trigger fade-in on mount
     setIsVisible(true);
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    router.push("/dashboard");
+
+    // Validate inputs
+    if (!email || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+
+    // TODO: API call to authenticate user
+    // For now, just simulate a delay and redirect
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push("/dashboard");
+    }, 500);
+  };
 
   return (
     <div
@@ -35,7 +65,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right side / Bottom side: Login Form */}
-      <div className="flex justify-center items-center w-full md:flex-[0.45] p-8 md:p-12">
+      <div className="flex justify-center items-center bg-base-100 w-full md:flex-[0.45] p-8 md:p-12">
         <div className="card bg-base-100 w-full max-w-sm shadow-xl border border-base-200">
           <div className="card-body p-6">
             <h2 className="card-title text-2xl font-bold mb-1">Welcome Back</h2>
@@ -43,15 +73,17 @@ export default function LoginPage() {
               Please sign in to your account
             </p>
 
-            <form className="fieldset gap-3">
+            <form className="fieldset gap-3" onSubmit={handleSubmit}>
               {/* Email Input */}
               <div>
                 <legend className="fieldset-legend font-semibold">Email</legend>
                 <input
                   type="email"
-                  className="input validator w-full"
+                  className="input w-full"
                   placeholder="doctor@hospital.com"
-                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  //   required
                 />
               </div>
 
@@ -62,9 +94,11 @@ export default function LoginPage() {
                 </legend>
                 <input
                   type="password"
-                  className="input validator w-full"
+                  className="input w-full"
                   placeholder="••••••••"
-                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  //   required
                   minLength={6}
                 />
                 <p className="validator-hint">
@@ -94,8 +128,16 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   className="btn btn-primary w-full shadow-lg shadow-primary/30"
+                  disabled={isLoading}
                 >
-                  Sign In
+                  {isLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </button>
               </div>
 
