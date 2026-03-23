@@ -1,0 +1,104 @@
+/**
+ * Patients API Service
+ */
+
+import { apiClient } from "./client";
+import {
+  Patient,
+  CreatePatientInput,
+  PaginatedResponse,
+  PatientListParams,
+  Vitals,
+  Encounter,
+  Medication,
+  Radiology,
+  Lab,
+} from "@/types/api";
+
+export const patientsAPI = {
+  /**
+   * List all patients with optional pagination
+   * @param params - Optional pagination and filter parameters (page, search, ordering)
+   * @example
+   * patientsAPI.list({ page: 1 })
+   * patientsAPI.list({ search: "john" }) // search by MRNO or name
+   * patientsAPI.list({ ordering: "-name" }) // sort by name descending
+   */
+  list: (params?: PatientListParams) =>
+    apiClient.get<PaginatedResponse<Patient>>("/patients/", params),
+
+  /**
+   * Search patients by MRNO or name
+   * @param searchTerm - Search query string (case-insensitive)
+   * @param page - Optional page number for pagination
+   */
+  search: (searchTerm: string, page?: number) =>
+    apiClient.get<PaginatedResponse<Patient>>("/patients/", {
+      search: searchTerm,
+      page,
+    }),
+
+  /**
+   * Create a new patient
+   */
+  create: (data: CreatePatientInput) =>
+    apiClient.post<Patient>("/patients/", data),
+
+  /**
+   * Retrieve a specific patient
+   */
+  get: (id: number) => apiClient.get<Patient>(`/patients/${id}/`),
+
+  /**
+   * Full update of a patient
+   */
+  update: (id: number, data: Partial<CreatePatientInput>) =>
+    apiClient.put<Patient>(`/patients/${id}/`, data),
+
+  /**
+   * Partial update of a patient
+   */
+  patch: (id: number, data: Partial<CreatePatientInput>) =>
+    apiClient.patch<Patient>(`/patients/${id}/`, data),
+
+  /**
+   * Delete a patient
+   */
+  delete: (id: number) => apiClient.delete<void>(`/patients/${id}/`),
+
+  /**
+   * Get all vitals for a specific patient
+   */
+  getVitals: (patientId: number) =>
+    apiClient.get<PaginatedResponse<Vitals>>(`/patients/${patientId}/vitals/`),
+
+  /**
+   * Get all encounters for a specific patient
+   */
+  getEncounters: (patientId: number) =>
+    apiClient.get<PaginatedResponse<Encounter>>(
+      `/patients/${patientId}/encounters/`,
+    ),
+
+  /**
+   * Get all medications for a specific patient
+   */
+  getMedications: (patientId: number) =>
+    apiClient.get<PaginatedResponse<Medication>>(
+      `/patients/${patientId}/medications/`,
+    ),
+
+  /**
+   * Get all radiology reports for a specific patient
+   */
+  getRadiology: (patientId: number) =>
+    apiClient.get<PaginatedResponse<Radiology>>(
+      `/patients/${patientId}/radiology/`,
+    ),
+
+  /**
+   * Get all lab results for a specific patient
+   */
+  getLabs: (patientId: number) =>
+    apiClient.get<PaginatedResponse<Lab>>(`/patients/${patientId}/labs/`),
+};
