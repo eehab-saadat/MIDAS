@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Max
 
 from .models import Patient, Vitals
 
@@ -6,6 +7,8 @@ from .models import Patient, Vitals
 class PatientSerializer(serializers.ModelSerializer):
     # Computed from dob; not a DB column
     age = serializers.ReadOnlyField()
+    # Most recent visit date computed from related records
+    last_visit_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
@@ -16,11 +19,19 @@ class PatientSerializer(serializers.ModelSerializer):
             "gender",
             "dob",
             "age",
+            "last_visit_date",
             "history",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["age", "last_visit_date", "created_at", "updated_at"]
+
+    def get_last_visit_date(self, obj):
+        """
+        Compute the most recent encounter date for the patient.
+        """
+        encounter_date = obj.encounters.aggregate(Max('date'))['date__max']
+        return encounter_date
 
 
 class VitalsSerializer(serializers.ModelSerializer):
