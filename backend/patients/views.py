@@ -148,8 +148,10 @@ def diagnose_with_medgemma(request):
     MODEL = "amsaravi/medgemma-4b-it:q6"
 
     # model call vars
-    ROLE: "user"
-    CONTENT: "You are an expert medical AI assistant. Analyze the provided case details and the medical image (if any) to suggest a probable diagnosis with detailed reasoning. Format your response EXACTLY as follows, wrapped in triple backticks:\n\n```\n'{'diagnosis': '<diagnosis>', 'reasoning': '<detailed reasoning>'}```\n\nBe precise, evidence-based, and explain your reasoning clearly. Return ONLY the JSON object wrapped in triple backticks."
+    ROLE: str = "user"
+    CONTENT: str = (
+        "You are an expert medical AI assistant. Analyze the provided case details and the medical image (if any) to suggest a probable diagnosis with detailed reasoning. Format your response EXACTLY as follows, wrapped in triple backticks:\n\n```\n'{'diagnosis': '<diagnosis>', 'reasoning': '<detailed reasoning>'}```\n\nBe precise, evidence-based, and explain your reasoning clearly. Return ONLY the JSON object wrapped in triple backticks."
+    )
 
     # adding optionl params to the patient data in others field if provided
     for param in OPTIONAL_PARAMS:

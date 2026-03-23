@@ -101,11 +101,13 @@ def get_complete_patient_details(mrno: str) -> dict | None:
     # ── Fetch related data in as few queries as possible ────────────────────
     latest_vitals: Vitals | None = patient.vitals.order_by("-timestamp").first()
 
-    lab_records = list(patient.lab_results.order_by("-invoice_date")[:3])
+    lab_records: list[Lab] = list(patient.lab_results.order_by("-invoice_date")[:3])
 
-    radiology_records = list(patient.radiology_reports.order_by("-created_at")[:3])
+    radiology_records: list[Radiology] = list(
+        patient.radiology_reports.order_by("-created_at")[:3]
+    )
 
-    medications = list(
+    medications: list[Medication] = list(
         patient.medications.select_related("prescribed_by").order_by("-prescribed_on")
     )
 
@@ -126,7 +128,6 @@ def get_complete_patient_details(mrno: str) -> dict | None:
         "gender": patient.gender,
         "dob": patient.dob.isoformat() if patient.dob else None,
         "age": patient.age,
-        "history": patient.history,
     }
 
     # Vitals (most recent record)
@@ -153,7 +154,6 @@ def get_complete_patient_details(mrno: str) -> dict | None:
     # Lab results (last 3)
     lab_results = [
         {
-            "id": lr.id,
             "cpt_id": lr.cpt_id,
             "cpt_name": lr.cpt_name,
             "date": lr.invoice_date.isoformat() if lr.invoice_date else None,
@@ -165,7 +165,6 @@ def get_complete_patient_details(mrno: str) -> dict | None:
     # Radiology reports (last 3)
     radiology_reports = [
         {
-            "id": r.id,
             "cpt_id": r.cpt_id,
             "cpt_name": r.cpt_name,
             "technique": r.technique,
@@ -181,7 +180,6 @@ def get_complete_patient_details(mrno: str) -> dict | None:
     # Medications (all)
     medications_data = [
         {
-            "id": m.id,
             "medication_name": m.medication_name,
             "active_agent_name": m.active_agent_name,
             "dosage": m.dosage,
@@ -212,7 +210,6 @@ def get_complete_patient_details(mrno: str) -> dict | None:
 
         encounters_data.append(
             {
-                "id": enc.id,
                 "date": enc.date.isoformat(),
                 "clinician": enc.clinician.name if enc.clinician else None,
                 "notes": enc.notes,
@@ -232,9 +229,10 @@ def get_complete_patient_details(mrno: str) -> dict | None:
             pass
 
     # Known medical history — split the history blob into non-empty lines
-    known_medical_history = [
-        line.strip() for line in patient.history.splitlines() if line.strip()
-    ]
+    known_medical_history: list = []
+    known_medical_history.extend(
+        [line.strip() for line in patient.history.splitlines() if line.strip()]
+    )
 
     last_visit = (
         most_recent_encounter.date.isoformat() if most_recent_encounter else None
