@@ -1,154 +1,183 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginUser } from "@/lib/auth";
-import Link from "next/link";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    // Trigger fade-in on mount
+    setIsVisible(true);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    router.push("/dashboard");
+
+    // Validate inputs
+    if (!email || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+
     setIsLoading(true);
 
-    try {
-      await loginUser(email, password);
-      router.push("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
+    // TODO: API call to authenticate user
+    // For now, just simulate a delay and redirect
+    setTimeout(() => {
       setIsLoading(false);
-    }
-  };
-
-  const fillDemoCredentials = (demoEmail: string, demoPassword: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    setError("");
+      router.push("/dashboard");
+    }, 500);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">MIDAS</h1>
-          <p className="text-muted-foreground">Medical Intelligence Diagnosis & Assessment System</p>
+    <div
+      className={`flex min-h-screen w-full flex-col md:flex-row bg-base-100 transition-opacity duration-1000 ease-in-out ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {/* Left side / Top side: Splased Branding/Hero */}
+      <div className="flex flex-col justify-center items-center w-full md:flex-[0.55] p-24 md:p-32 bg-base-300 relative text-center">
+        <div className="relative w-full h-full drop-shadow-2xl">
+          <Image
+            src="/logo-full.png"
+            alt="MIDAS Logo"
+            fill
+            className="object-contain"
+            priority
+            unoptimized
+          />
         </div>
+        {/* <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4 max-w-[80%] leading-snug">
+          Multi-Input Diagnostic Aid System
+        </h1> */}
+      </div>
 
-        {/* Login Card */}
-        <Card className="border-border/50 shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Sign in to access your patient records and diagnosis tools</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Error Message */}
-              {error && (
-                <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
-                  <AlertCircle className="size-4 text-destructive flex-shrink-0" />
-                  <p className="text-sm text-destructive">{error}</p>
-                </div>
-              )}
+      {/* Right side / Bottom side: Login Form */}
+      <div className="flex justify-center items-center bg-base-100 w-full md:flex-[0.45] p-8 md:p-12">
+        <div className="card bg-base-100 w-full max-w-sm shadow-xl border border-base-200">
+          <div className="card-body p-6">
+            <h2 className="card-title text-2xl font-bold mb-1">Welcome Back</h2>
+            <p className="text-base-content/70 text-sm mb-2">
+              Please sign in to your account
+            </p>
 
-              {/* Email Field */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
+            <form className="fieldset gap-3" onSubmit={handleSubmit}>
+              {/* Email Input */}
+              <div>
+                <legend className="fieldset-legend font-semibold">Email</legend>
+                <input
                   type="email"
-                  placeholder="you@example.com"
+                  className="input w-full"
+                  placeholder="doctor@hospital.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  required
+                  //   required
                 />
               </div>
 
-              {/* Password Field */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
+              {/* Password Input */}
+              <div className="mt-1">
+                <legend className="fieldset-legend font-semibold">
                   Password
-                </Label>
-                <Input
-                  id="password"
+                </legend>
+                <input
                   type="password"
+                  className="input w-full"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  required
+                  //   required
+                  minLength={6}
                 />
+                <p className="validator-hint">
+                  Password must be at least 6 characters.
+                </p>
               </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-10"
+              {/* Options Row */}
+              <div className="flex items-center justify-between mt-1 text-sm">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary checkbox-sm"
+                  />
+                  <span>Remember me</span>
+                </label>
+                <a
+                  href="#"
+                  className="link link-hover text-primary font-medium"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              {/* Submit Action */}
+              <div className="card-actions justify-end mt-4">
+                <button
+                  type="submit"
+                  className="btn btn-primary w-full shadow-lg shadow-primary/30"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
+                </button>
+              </div>
+
+              <div className="divider text-xs text-base-content/50 my-4">
+                OR
+              </div>
+
+              {/* Alternate / Provider Login (Placeholder) */}
+              <button
+                type="button"
+                className="btn btn-outline btn-block border-base-300"
               >
-                {isLoading && <Loader2 className="size-4 animate-spin" />}
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 48 48"
+                  width="24px"
+                  height="24px"
+                >
+                  <path
+                    fill="#FFC107"
+                    d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+                  />
+                  <path
+                    fill="#FF3D00"
+                    d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+                  />
+                  <path
+                    fill="#4CAF50"
+                    d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+                  />
+                  <path
+                    fill="#1976D2"
+                    d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+                  />
+                </svg>
+                Continue with Google
+              </button>
             </form>
-
-            {/* Demo Credentials Helper */}
-            <div className="mt-6 space-y-3 pt-6 border-t border-border/50">
-              <p className="text-xs text-muted-foreground font-medium">Demo Credentials (Click to fill):</p>
-              <div className="space-y-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => fillDemoCredentials("doctor@midas.com", "doctor123")}
-                  className="w-full p-2 rounded-md bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-colors text-left cursor-pointer"
-                >
-                  <p className="font-medium text-foreground">Doctor Account</p>
-                  <p className="text-muted-foreground">Email: <span className="font-mono text-primary">doctor@midas.com</span></p>
-                  <p className="text-muted-foreground">Password: <span className="font-mono text-primary">doctor123</span></p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemoCredentials("nurse@midas.com", "nurse123")}
-                  className="w-full p-2 rounded-md bg-secondary/50 border border-secondary/20 hover:bg-secondary/60 hover:border-secondary/30 transition-colors text-left cursor-pointer"
-                >
-                  <p className="font-medium text-foreground">Receptionist Account</p>
-                  <p className="text-muted-foreground">Email: <span className="font-mono text-secondary-foreground">nurse@midas.com</span></p>
-                  <p className="text-muted-foreground">Password: <span className="font-mono text-secondary-foreground">nurse123</span></p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemoCredentials("patient@midas.com", "patient123")}
-                  className="w-full p-2 rounded-md bg-accent/50 border border-accent/30 hover:bg-accent/60 hover:border-accent/40 transition-colors text-left cursor-pointer"
-                >
-                  <p className="font-medium text-foreground">Patient Account</p>
-                  <p className="text-muted-foreground">Email: <span className="font-mono text-accent-foreground">patient@midas.com</span></p>
-                  <p className="text-muted-foreground">Password: <span className="font-mono text-accent-foreground">patient123</span></p>
-                </button>
-              </div>
-            </div>
-
-            {/* Sign Up Link */}
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
