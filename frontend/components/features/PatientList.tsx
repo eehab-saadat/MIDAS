@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { patientsAPI, Patient, APIError } from "@/lib/api";
 import { PatientRow } from "./PatientRow";
 
@@ -8,8 +8,13 @@ interface PatientListProps {
   searchQuery: string;
 }
 
+interface PatientDisplay extends Patient {
+  clinicianName: string;
+  lastEncounterDate: string;
+}
+
 export function PatientList({ searchQuery }: PatientListProps) {
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<PatientDisplay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,22 +22,48 @@ export function PatientList({ searchQuery }: PatientListProps) {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
 
-  // Fetch patients from API with search support
+  // Fetch patients from API
   useEffect(() => {
     const fetchPatients = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        // Use backend search if search query exists, otherwise list all
-        const response = searchQuery.trim()
-          ? await patientsAPI.search(searchQuery, currentPage)
-          : await patientsAPI.list({ page: currentPage });
+        // Fetch patients list for current page
+        const response = await patientsAPI.list({ page: currentPage });
+        const patientsList = response.results;
 
-        setPatients(response.results);
         setTotalCount(response.count);
         setHasNextPage(!!response.next);
         setHasPreviousPage(!!response.previous);
+
+        // For each patient, try to fetch additional data (encounters, clinician info)
+        const enrichedPatients = await Promise.all(
+          patientsList.map(async (patient) => {
+            try {
+              // Fetch encounters to get last encounter date and clinician
+              const encounters = await patientsAPI.getEncounters(patient.id);
+              const lastEncounter = encounters.results?.[0];
+
+              return {
+                ...patient,
+                clinicianName: lastEncounter
+                  ? `Dr. ${lastEncounter.clinician}`
+                  : "N/A",
+                lastEncounterDate: lastEncounter?.date || "No encounters",
+              } as PatientDisplay;
+            } catch {
+              // If encounters fail, return patient with placeholder data
+              return {
+                ...patient,
+                clinicianName: "N/A",
+                lastEncounterDate: "No encounters",
+              } as PatientDisplay;
+            }
+          }),
+        );
+
+        setPatients(enrichedPatients);
       } catch (err) {
         if (err instanceof APIError) {
           setError(`Failed to load patients: ${err.message}`);
@@ -46,7 +77,19 @@ export function PatientList({ searchQuery }: PatientListProps) {
     };
 
     fetchPatients();
-  }, [currentPage, searchQuery]);
+  }, [currentPage]);
+
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery.trim()) return patients;
+
+    const query = searchQuery.toLowerCase();
+    return patients.filter(
+      (patient) =>
+        patient.mrno.toLowerCase().includes(query) ||
+        patient.name.toLowerCase().includes(query) ||
+        patient.id.toString().includes(query),
+    );
+  }, [patients, searchQuery]);
 
   return (
     <div className="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
@@ -74,7 +117,7 @@ export function PatientList({ searchQuery }: PatientListProps) {
             <span>{error}</span>
           </div>
         </div>
-      ) : patients.length === 0 ? (
+      ) : filteredPatients.length === 0 ? (
         <div className="card-body flex flex-col items-center justify-center py-12">
           <p className="text-base-content/50 text-center">
             No patients found matching your search.
@@ -101,7 +144,7 @@ export function PatientList({ searchQuery }: PatientListProps) {
               </tr>
             </thead>
             <tbody>
-              {patients.map((patient) => (
+              {filteredPatients.map((patient) => (
                 <PatientRow key={patient.id} patient={patient} />
               ))}
             </tbody>
@@ -115,7 +158,7 @@ export function PatientList({ searchQuery }: PatientListProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Info text */}
             <p className="text-sm text-base-content/60">
-              Showing {patients.length} of {totalCount} patients • Page{" "}
+              Showing {filteredPatients.length} of {totalCount} patients • Page{" "}
               <span className="font-semibold">{currentPage}</span>
             </p>
 
