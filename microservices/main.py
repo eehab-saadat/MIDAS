@@ -160,7 +160,14 @@ async def preprocess_image(
             modality_override,
         )
 
-        return _to_json_safe(result)
+        filtered_result = {
+            "modality": result.get("modality"),
+            "input_image_path": result.get("original_file", file.filename),
+            "output_image_path": result.get("processed_image_path"),
+            "model_findings": result.get("model_findings")
+        }
+
+        return _to_json_safe(filtered_result)
     except HTTPException:
         raise
     except ValueError as exc:
