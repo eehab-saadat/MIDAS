@@ -45,6 +45,7 @@ class VLMEngine:
 
         # Convert schema to JSON schema string
         json_schema = schema.model_json_schema()
+        print(f"Using JSON schema for prompt:\n{json.dumps(json_schema, indent=2)}")  # Debug print
 
         prompt = f"""
 You are a medical report extraction system.

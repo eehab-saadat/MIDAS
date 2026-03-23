@@ -233,7 +233,73 @@ def process_image(
             processed_image, metadata, output_dir / input_path.stem
         )
 
-    # Step 11: Log completion
+    # Step 11: Generate models findings with local Medgemma
+    try:
+        with StepTimer("medgemma_insights"):
+            import base64
+            import urllib.request
+            import json as json_lib
+
+            insights = None
+            processed_image_path = None
+            processed_images = output_bundle.get("output_images", [])
+
+            if processed_images:
+                processed_image_path = processed_images[0]
+                with open(processed_image_path, "rb") as f:
+                    img_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+                prompt = (
+                    "Please analyze this medical image carefully and provide detailed and accurate clinical findings. "
+                    "Ensure the findings are precise as they will be directly reviewed by a doctor. "
+                    "Output a JSON object containing the image type, body part, and an array of plain text strings representing the findings. "
+                    "You MUST wrap your response in ```json and ``` markdown tags. "
+                    'Example:\n```json\n{\n  "image_type": "X-ray",\n  "body_part": "Chest",\n  "findings": [\n    "First detailed finding here.",\n    "Second detailed finding here."\n  ]\n}\n```'
+                )
+                if output_bundle.get("context_string"):
+                    prompt += "\n\nImage Context:\n" + output_bundle["context_string"]
+
+                payload = {
+                    "model": "thiagomoraes/medgemma-4b-it:Q8_0",
+                    "prompt": prompt,
+                    "images": [img_base64],
+                    "stream": False
+                }
+
+                req = urllib.request.Request(
+                    "http://localhost:11434/api/generate",
+                    data=json_lib.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+
+                with urllib.request.urlopen(req, timeout=120) as response:
+                    ollama_resp = json_lib.loads(response.read().decode("utf-8"))
+                    raw_insights = ollama_resp.get("response", "")
+                    
+                    # Clean up markdown formatting
+                    clean_insights = raw_insights.strip()
+                    if clean_insights.startswith("```json"):
+                        clean_insights = clean_insights[7:]
+                    elif clean_insights.startswith("```"):
+                        clean_insights = clean_insights[3:]
+                    if clean_insights.endswith("```"):
+                        clean_insights = clean_insights[:-3]
+                        
+                    clean_insights = clean_insights.strip()
+                    
+                    try:
+                        insights = json_lib.loads(clean_insights)
+                    except Exception:
+                        # Fallback to returning plain text if it's not valid JSON
+                        insights = {"raw_output": raw_insights}
+
+            output_bundle["processed_image_path"] = processed_image_path
+            output_bundle["model_findings"] = insights
+    except Exception as e:
+        logger.warning(f"Failed to get insights from local medgemma model: {e}")
+        output_bundle["model_findings"] = f"Failed to get insights: {e}"
+
+    # Step 12: Log completion
     total_time = time.perf_counter() - start_time
     output_bundle["processing_time_seconds"] = total_time
     logger.info(
