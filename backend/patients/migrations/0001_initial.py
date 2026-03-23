@@ -8,46 +8,79 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Patient',
+            name="Patient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mrno', models.CharField(max_length=50, unique=True)),
-                ('name', models.CharField(blank=True, max_length=255)),
-                ('gender', models.CharField(blank=True, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], max_length=10)),
-                ('dob', models.DateField(blank=True, null=True)),
-                ('history', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("mrno", models.CharField(max_length=50, unique=True)),
+                ("name", models.CharField(blank=True, max_length=255)),
+                (
+                    "gender",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("Male", "Male"),
+                            ("Female", "Female"),
+                            ("Other", "Other"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("dob", models.DateField(blank=True, null=True)),
+                ("history", models.TextField(blank=True)),
             ],
             options={
-                'ordering': ['mrno'],
+                "ordering": ["mrno"],
             },
         ),
         migrations.CreateModel(
-            name='Vitals',
+            name="Vitals",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(blank=True, null=True)),
-                ('weight', models.FloatField(blank=True, null=True)),
-                ('weight_unit', models.CharField(blank=True, max_length=20)),
-                ('height', models.FloatField(blank=True, null=True)),
-                ('height_unit', models.CharField(blank=True, max_length=20)),
-                ('temperature', models.FloatField(blank=True, null=True)),
-                ('temperature_unit', models.CharField(blank=True, max_length=20)),
-                ('pulse', models.FloatField(blank=True, null=True)),
-                ('pulse_unit', models.CharField(blank=True, max_length=20)),
-                ('respiratory_rate', models.FloatField(blank=True, null=True)),
-                ('respiratory_rate_unit', models.CharField(blank=True, max_length=20)),
-                ('bp_high', models.FloatField(blank=True, null=True)),
-                ('bp_low', models.FloatField(blank=True, null=True)),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vitals', to='patients.patient')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(blank=True, null=True)),
+                ("weight", models.FloatField(blank=True, null=True)),
+                ("weight_unit", models.CharField(blank=True, max_length=20)),
+                ("height", models.FloatField(blank=True, null=True)),
+                ("height_unit", models.CharField(blank=True, max_length=20)),
+                ("temperature", models.FloatField(blank=True, null=True)),
+                ("temperature_unit", models.CharField(blank=True, max_length=20)),
+                ("pulse", models.FloatField(blank=True, null=True)),
+                ("pulse_unit", models.CharField(blank=True, max_length=20)),
+                ("respiratory_rate", models.FloatField(blank=True, null=True)),
+                ("respiratory_rate_unit", models.CharField(blank=True, max_length=20)),
+                ("bp_high", models.FloatField(blank=True, null=True)),
+                ("bp_low", models.FloatField(blank=True, null=True)),
+                (
+                    "patient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="vitals",
+                        to="patients.patient",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'vitals',
-                'ordering': ['-timestamp'],
+                "verbose_name_plural": "vitals",
+                "ordering": ["-timestamp"],
             },
         ),
     ]

@@ -9,39 +9,53 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('patients', '0001_initial'),
+        ("patients", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Lab',
+            name="Lab",
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('cpt_id', models.CharField(blank=True, max_length=50)),
-                ('cpt_name', models.CharField(blank=True, max_length=255)),
-                ('results', models.JSONField(default=dict)),
-                ('invoice_date', models.DateField(blank=True, null=True)),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lab_results', to='patients.patient')),
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                ("cpt_id", models.CharField(blank=True, max_length=50)),
+                ("cpt_name", models.CharField(blank=True, max_length=255)),
+                ("results", models.JSONField(default=dict)),
+                ("invoice_date", models.DateField(blank=True, null=True)),
+                (
+                    "patient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lab_results",
+                        to="patients.patient",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'lab results',
+                "verbose_name_plural": "lab results",
             },
         ),
         migrations.CreateModel(
-            name='Radiology',
+            name="Radiology",
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('cpt_id', models.CharField(blank=True, max_length=50)),
-                ('cpt_name', models.CharField(blank=True, max_length=255)),
-                ('technique', models.TextField(blank=True)),
-                ('result', models.TextField(blank=True)),
-                ('conclusion', models.TextField(blank=True)),
-                ('system_conclusion', models.TextField(blank=True)),
-                ('file_path', models.CharField(blank=True, max_length=500)),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='radiology_reports', to='patients.patient')),
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                ("cpt_id", models.CharField(blank=True, max_length=50)),
+                ("cpt_name", models.CharField(blank=True, max_length=255)),
+                ("technique", models.TextField(blank=True)),
+                ("result", models.TextField(blank=True)),
+                ("conclusion", models.TextField(blank=True)),
+                ("system_conclusion", models.TextField(blank=True)),
+                ("file_path", models.CharField(blank=True, max_length=500)),
+                (
+                    "patient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="radiology_reports",
+                        to="patients.patient",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'radiology reports',
+                "verbose_name_plural": "radiology reports",
             },
         ),
     ]

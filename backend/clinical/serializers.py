@@ -56,9 +56,13 @@ class ClinicianSerializer(serializers.ModelSerializer):
 
 
 class SymptomSerializer(serializers.ModelSerializer):
-    snomed_cid = serializers.CharField(source="snomed_entity.snomed_cid", read_only=True)
+    snomed_cid = serializers.CharField(
+        source="snomed_entity.snomed_cid", read_only=True
+    )
     snomed_fsn = serializers.CharField(source="snomed_entity.fsn", read_only=True)
-    snomed_entity_type = serializers.CharField(source="snomed_entity.entity_type", read_only=True)
+    snomed_entity_type = serializers.CharField(
+        source="snomed_entity.entity_type", read_only=True
+    )
 
     class Meta:
         model = Symptom
@@ -73,7 +77,13 @@ class SymptomSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["snomed_cid", "snomed_fsn", "snomed_entity_type", "created_at", "updated_at"]
+        read_only_fields = [
+            "snomed_cid",
+            "snomed_fsn",
+            "snomed_entity_type",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class EncounterSerializer(serializers.ModelSerializer):
@@ -96,7 +106,13 @@ class EncounterSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["patient_mrno", "clinician_name", "symptoms", "created_at", "updated_at"]
+        read_only_fields = [
+            "patient_mrno",
+            "clinician_name",
+            "symptoms",
+            "created_at",
+            "updated_at",
+        ]
 
     def get_clinician_name(self, obj) -> str | None:
         return obj.clinician.name if obj.clinician else None
@@ -123,7 +139,12 @@ class MedicationSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["patient_mrno", "prescribed_by_name", "created_at", "updated_at"]
+        read_only_fields = [
+            "patient_mrno",
+            "prescribed_by_name",
+            "created_at",
+            "updated_at",
+        ]
 
     def get_prescribed_by_name(self, obj) -> str | None:
         return obj.prescribed_by.name if obj.prescribed_by else None
