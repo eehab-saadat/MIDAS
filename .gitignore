@@ -68,6 +68,7 @@ ENV/
 .coverage.*
 htmlcov/
 pip-wheel-metadata/
+*.pyc
 
 # django
 db.sqlite3
