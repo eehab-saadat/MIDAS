@@ -1,7 +1,7 @@
 ---
 description: daisyUI 5 & Tailwind CSS 4 Standards
 alwaysApply: true
-applyTo: "**"
+applyTo: "frontend/*"
 ---
 
 # AI Instructions: daisyUI 5 & Tailwind CSS 4 Standards
