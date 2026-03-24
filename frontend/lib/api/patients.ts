@@ -3,11 +3,12 @@
  */
 
 import { apiClient } from "./client";
-import {
+import type {
   Patient,
   CreatePatientInput,
   PaginatedResponse,
   PatientListParams,
+  CompletePatientDetails,
   Vitals,
   Encounter,
   Medication,
@@ -65,6 +66,12 @@ export const patientsAPI = {
    * Delete a patient
    */
   delete: (id: number) => apiClient.delete<void>(`/patients/${id}/`),
+
+  /**
+   * Get complete patient details by MRNO (demographics, vitals, labs, radiology, medications, encounters)
+   */
+  getByMrno: (mrno: string) =>
+    apiClient.get<CompletePatientDetails>(`/patients/mrno/${mrno}/`),
 
   /**
    * Get all vitals for a specific patient

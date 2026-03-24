@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { Patient } from "@/types/api";
 
@@ -10,12 +11,10 @@ interface PatientRowProps {
 
 export function PatientRow({ patient }: PatientRowProps) {
   const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
 
   const handleStartSession = () => {
-    // TODO: API call to start a new session
-    console.log(`Starting session for patient ${patient.id}`);
-    // For now, just show confirmation
-    alert(`Session started for ${patient.name}. API integration coming soon.`);
+    router.push(`/encounter/${patient.mrno}`);
   };
 
   const formatDate = (dateString: string | null) => {
@@ -165,11 +164,7 @@ export function PatientRow({ patient }: PatientRowProps) {
                 <button
                   onClick={() => {
                     setShowModal(false);
-                    // TODO: API call to start session
-                    console.log(`Starting session for patient ${patient.id}`);
-                    alert(
-                      `Session started for ${patient.name}. API integration coming soon.`,
-                    );
+                    router.push(`/encounter/${patient.mrno}`);
                   }}
                   className="btn btn-primary"
                 >
