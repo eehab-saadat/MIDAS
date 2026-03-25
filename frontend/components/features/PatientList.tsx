@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { patientsAPI, Patient, APIError } from "@/lib/api";
 import { PatientRow } from "./PatientRow";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface PatientListProps {
   searchQuery: string;
+  refreshTrigger?: number;
 }
 
 interface PatientDisplay extends Patient {
@@ -13,7 +15,10 @@ interface PatientDisplay extends Patient {
   lastEncounterDate: string;
 }
 
-export function PatientList({ searchQuery }: PatientListProps) {
+export function PatientList({
+  searchQuery,
+  refreshTrigger = 0,
+}: PatientListProps) {
   const [patients, setPatients] = useState<PatientDisplay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,16 +26,23 @@ export function PatientList({ searchQuery }: PatientListProps) {
   const [totalCount, setTotalCount] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
+  const [lastSearchQuery, setLastSearchQuery] = useState("");
+
+  // Debounce the search query to avoid spamming the API
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Fetch patients from API
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchPatients = async (pageToFetch: number) => {
       try {
         setIsLoading(true);
         setError(null);
 
-        // Fetch patients list for current page
-        const response = await patientsAPI.list({ page: currentPage });
+        // Fetch patients list for current page, including search param if present
+        const response = await patientsAPI.list({
+          page: pageToFetch,
+          search: debouncedSearchQuery.trim() || undefined,
+        });
         const patientsList = response.results;
 
         setTotalCount(response.count);
@@ -76,27 +88,62 @@ export function PatientList({ searchQuery }: PatientListProps) {
       }
     };
 
-    fetchPatients();
-  }, [currentPage]);
+    let targetPage = currentPage;
+    if (debouncedSearchQuery !== lastSearchQuery) {
+      targetPage = 1;
+      setCurrentPage(1);
+      setLastSearchQuery(debouncedSearchQuery);
+    }
 
-  const filteredPatients = useMemo(() => {
-    if (!searchQuery.trim()) return patients;
-
-    const query = searchQuery.toLowerCase();
-    return patients.filter(
-      (patient) =>
-        patient.mrno.toLowerCase().includes(query) ||
-        patient.name.toLowerCase().includes(query) ||
-        patient.id.toString().includes(query),
-    );
-  }, [patients, searchQuery]);
+    fetchPatients(targetPage);
+  }, [currentPage, debouncedSearchQuery, refreshTrigger, lastSearchQuery]);
 
   return (
     <div className="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
       {isLoading ? (
-        <div className="card-body flex flex-col items-center justify-center py-12">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-          <p className="text-base-content/70 mt-4">Loading patients...</p>
+        <div className="overflow-x-auto">
+          <table className="table table-sm md:table-md">
+            <thead className="bg-base-200">
+              <tr>
+                <th className="font-semibold text-base-content">MRN</th>
+                <th className="font-semibold text-base-content">Name</th>
+                <th className="font-semibold text-base-content">Age</th>
+                <th className="font-semibold text-base-content">Gender</th>
+                <th className="font-semibold text-base-content hidden lg:table-cell">
+                  Last Visit
+                </th>
+                <th className="font-semibold text-base-content text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i}>
+                  <td>
+                    <div className="skeleton h-4 w-20"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-4 w-32"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-4 w-8"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-4 w-16"></div>
+                  </td>
+                  <td className="hidden lg:table-cell">
+                    <div className="skeleton h-4 w-24"></div>
+                  </td>
+                  <td>
+                    <div className="flex justify-end pr-2">
+                      <div className="skeleton h-8 w-16 rounded"></div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : error ? (
         <div className="card-body flex flex-col items-center justify-center py-12">
@@ -117,7 +164,7 @@ export function PatientList({ searchQuery }: PatientListProps) {
             <span>{error}</span>
           </div>
         </div>
-      ) : filteredPatients.length === 0 ? (
+      ) : patients.length === 0 ? (
         <div className="card-body flex flex-col items-center justify-center py-12">
           <p className="text-base-content/50 text-center">
             No patients found matching your search.
@@ -132,9 +179,6 @@ export function PatientList({ searchQuery }: PatientListProps) {
                 <th className="font-semibold text-base-content">Name</th>
                 <th className="font-semibold text-base-content">Age</th>
                 <th className="font-semibold text-base-content">Gender</th>
-                <th className="font-semibold text-base-content hidden md:table-cell">
-                  DOB
-                </th>
                 <th className="font-semibold text-base-content hidden lg:table-cell">
                   Last Visit
                 </th>
@@ -144,7 +188,7 @@ export function PatientList({ searchQuery }: PatientListProps) {
               </tr>
             </thead>
             <tbody>
-              {filteredPatients.map((patient) => (
+              {patients.map((patient) => (
                 <PatientRow key={patient.id} patient={patient} />
               ))}
             </tbody>
@@ -158,7 +202,7 @@ export function PatientList({ searchQuery }: PatientListProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Info text */}
             <p className="text-sm text-base-content/60">
-              Showing {filteredPatients.length} of {totalCount} patients • Page{" "}
+              Showing {patients.length} out of {totalCount} patients • Page{" "}
               <span className="font-semibold">{currentPage}</span>
             </p>
 
