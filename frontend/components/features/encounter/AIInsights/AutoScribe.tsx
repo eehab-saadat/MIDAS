@@ -1,150 +1,122 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
+import { transcribeAPI } from "@/lib/api";
 
-// SpeechRecognition type shim for browsers
-type SpeechRecognitionInstance = InstanceType<
-  typeof window.webkitSpeechRecognition
-> & {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  onresult: ((e: SpeechRecognitionEvent) => void) | null;
-  onend: (() => void) | null;
-  onerror: ((e: Event) => void) | null;
-};
-
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList;
-  resultIndex: number;
-}
-
-interface SpeechRecognitionResultList {
-  length: number;
-  [index: number]: SpeechRecognitionResult;
-}
-
-interface SpeechRecognitionResult {
-  isFinal: boolean;
-  [index: number]: SpeechRecognitionAlternative;
-}
-
-interface SpeechRecognitionAlternative {
-  transcript: string;
-}
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
-    SpeechRecognition?: new () => SpeechRecognitionInstance;
-  }
-}
+type ScribeState = "idle" | "recording" | "transcribing";
 
 export function AutoScribe() {
-  const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
-  const [interim, setInterim] = useState("");
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const [state, setState] = useState<ScribeState>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setIsSupported(false);
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-
-    recognition.onresult = (e: SpeechRecognitionEvent) => {
-      let interimTranscript = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const transcript = e.results[i][0].transcript;
-        if (e.results[i].isFinal) {
-          // Append final transcript to notes
-          const append = (window as Record<string, unknown>)
-            .__notesAppend as ((text: string) => void) | undefined;
-          if (append) append(transcript.trim());
-          setInterim("");
-        } else {
-          interimTranscript += transcript;
-        }
+  const submitAudio = useCallback(async (blob: Blob) => {
+    setState("transcribing");
+    setError(null);
+    try {
+      const data = await transcribeAPI.transcribe(blob);
+      const append = (window as Record<string, unknown>)
+        .__notesAppend as ((text: string) => void) | undefined;
+      if (append && data.transcription) {
+        append(data.transcription);
       }
-      setInterim(interimTranscript);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      setInterim("");
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      setInterim("");
-    };
-
-    recognitionRef.current = recognition;
+      setState("idle");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Transcription failed";
+      setError(message);
+      setState("idle");
+      setTimeout(() => setError(null), 4000);
+    }
   }, []);
 
-  const toggle = useCallback(() => {
-    const rec = recognitionRef.current;
-    if (!rec) return;
+  const startRecording = useCallback(async () => {
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
 
-    if (isListening) {
-      rec.stop();
-      setIsListening(false);
-    } else {
-      rec.start();
-      setIsListening(true);
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        submitAudio(blob);
+      };
+
+      mr.start();
+      mediaRecorderRef.current = mr;
+      setState("recording");
+    } catch {
+      setError("Microphone access denied");
+      setTimeout(() => setError(null), 4000);
     }
-  }, [isListening]);
+  }, [submitAudio]);
 
-  if (!isSupported) {
-    return (
-      <div className="tooltip tooltip-left" data-tip="Speech recognition not supported in this browser">
-        <button className="btn btn-sm btn-ghost btn-disabled" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="1" y1="1" x2="23" y2="23" />
-            <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
-            <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.12 1.49-.34 2.18" />
-            <line x1="12" y1="19" x2="12" y2="23" />
-            <line x1="8" y1="23" x2="16" y2="23" />
-          </svg>
-        </button>
-      </div>
-    );
-  }
+  const stopRecording = useCallback(() => {
+    mediaRecorderRef.current?.stop();
+    mediaRecorderRef.current = null;
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (state === "idle") startRecording();
+    else if (state === "recording") stopRecording();
+  }, [state, startRecording, stopRecording]);
 
   return (
     <div className="flex items-center gap-2">
       <button
-        className={`btn btn-sm ${isListening ? "btn-error" : "btn-ghost"}`}
-        onClick={toggle}
-        title={isListening ? "Stop auto-scribe" : "Start auto-scribe"}
+        className={`btn btn-sm ${
+          state === "recording"
+            ? "btn-error"
+            : state === "transcribing"
+              ? "btn-ghost btn-disabled"
+              : "btn-ghost"
+        }`}
+        onClick={handleClick}
+        disabled={state === "transcribing"}
+        title={
+          state === "recording"
+            ? "Stop recording"
+            : state === "transcribing"
+              ? "Transcribing audio..."
+              : "Start auto-scribe"
+        }
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`h-4 w-4 ${isListening ? "animate-pulse" : ""}`}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-          <line x1="12" y1="19" x2="12" y2="23" />
-          <line x1="8" y1="23" x2="16" y2="23" />
-        </svg>
-        {isListening ? "Stop" : "Auto-Scribe"}
+        {state === "transcribing" ? (
+          <span className="loading loading-spinner loading-xs" />
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-4 w-4 ${state === "recording" ? "animate-pulse" : ""}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        )}
+        {state === "recording"
+          ? "Stop Recording"
+          : state === "transcribing"
+            ? "Transcribing..."
+            : "Auto-Scribe"}
       </button>
-      {isListening && (
-        <span className="text-xs text-base-content/50 italic truncate max-w-48">
-          {interim || "Listening..."}
+
+      {error && (
+        <span className="text-xs text-error italic truncate max-w-48">
+          {error}
         </span>
       )}
     </div>

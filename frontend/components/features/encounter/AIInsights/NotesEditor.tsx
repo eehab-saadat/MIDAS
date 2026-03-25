@@ -17,43 +17,42 @@ export function NotesEditor() {
   const lastSavedRef = useRef(notes);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const saveNotes = useCallback(
+    async (text: string) => {
+      if (!encounterId) return;
+      setSaveStatus("saving");
+      try {
+        await encountersAPI.patch(encounterId, { notes: text });
+        lastSavedRef.current = text;
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2000);
+      } catch {
+        setSaveStatus("error");
+      }
+    },
+    [encounterId],
+  );
+
   // Auto-save notes when they change (debounced)
   useEffect(() => {
-    if (
-      !encounterId ||
-      debouncedNotes === lastSavedRef.current
-    )
-      return;
+    if (!encounterId || debouncedNotes === lastSavedRef.current) return;
 
     let cancelled = false;
-    setSaveStatus("saving");
 
-    encountersAPI
-      .patch(encounterId, { notes: debouncedNotes })
-      .then(() => {
-        if (!cancelled) {
-          lastSavedRef.current = debouncedNotes;
-          setSaveStatus("saved");
-          setTimeout(() => {
-            if (!cancelled) setSaveStatus("idle");
-          }, 2000);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setSaveStatus("error");
-      });
+    saveNotes(debouncedNotes).then(() => {
+      if (cancelled) return;
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [debouncedNotes, encounterId]);
+  }, [debouncedNotes, encounterId, saveNotes]);
 
   const appendText = useCallback(
     (text: string) => {
       const current = notes;
       const updated = current ? `${current}\n${text}` : text;
       updateNotes(updated);
-      // Move cursor to end
       setTimeout(() => {
         if (textareaRef.current) {
           textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
@@ -103,11 +102,29 @@ export function NotesEditor() {
           onChange={(e) => updateNotes(e.target.value)}
         />
 
-        {!encounterId && (
-          <p className="text-xs text-warning">
-            Notes will auto-save once the encounter session is initialized.
-          </p>
-        )}
+        <div className="flex items-center justify-between pt-1">
+          {!encounterId ? (
+            <p className="text-xs text-warning">
+              Notes will auto-save once the encounter session is initialized.
+            </p>
+          ) : (
+            <span />
+          )}
+          <button
+            className="btn btn-sm btn-primary"
+            disabled={!encounterId || saveStatus === "saving"}
+            onClick={() => saveNotes(notes)}
+          >
+            {saveStatus === "saving" ? (
+              <>
+                <span className="loading loading-spinner loading-xs" />
+                Saving...
+              </>
+            ) : (
+              "Save Notes"
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
