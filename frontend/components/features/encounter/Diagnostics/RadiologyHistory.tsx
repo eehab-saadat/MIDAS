@@ -117,7 +117,7 @@ export function RadiologyHistory({ patientPk }: RadiologyHistoryProps) {
                   <span className="text-xs text-base-content/50 shrink-0">
                     {formatDate(rad.created_at)}
                   </span>
-                  {rad.is_under_processing && (
+                  {rad.locked && (
                     <StatusBadge
                       variant="processing"
                       label="Processing"
@@ -150,7 +150,7 @@ export function RadiologyHistory({ patientPk }: RadiologyHistoryProps) {
                       {rad.conclusion}
                     </div>
                   )}
-                  {rad.system_conclusion && !rad.is_under_processing && (
+                  {rad.system_conclusion && !rad.locked && (
                     <div className="p-2 bg-info/10 rounded">
                       <span className="font-medium text-info">
                         AI Conclusion:
@@ -158,7 +158,7 @@ export function RadiologyHistory({ patientPk }: RadiologyHistoryProps) {
                       {rad.system_conclusion}
                     </div>
                   )}
-                  {rad.is_under_processing && (
+                  {rad.locked && (
                     <div className="flex items-center gap-2 text-warning text-xs">
                       <span className="loading loading-spinner loading-xs" />
                       Record is being analyzed. AI conclusion will appear once

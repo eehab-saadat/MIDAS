@@ -120,6 +120,7 @@ class Medication(models.Model):
         related_name="prescriptions",
     )
     prescribed_on = models.DateField(null=True, blank=True)
+    active = models.BooleanField(default=True)
     active_agent_name = models.CharField(max_length=255, blank=True)
     medication_name = models.CharField(max_length=255)
     dosage = models.CharField(max_length=100, blank=True)

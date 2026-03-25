@@ -201,7 +201,7 @@ export interface Radiology {
   conclusion: string;
   system_conclusion: string;
   file_path: string;
-  is_under_processing: boolean;
+  locked: boolean;
   created_at: string;
   updated_at: string;
 }
