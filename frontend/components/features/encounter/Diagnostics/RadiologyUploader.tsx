@@ -7,60 +7,55 @@ import type { Radiology } from "@/types/api";
 
 export function RadiologyUploader() {
   const patientPk = useEncounterStore((s) => s.patientPk);
-  const patientMrno = useEncounterStore((s) => s.patientMrno);
   const refreshPatientData = useEncounterStore((s) => s.refreshPatientData);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
   const [cptName, setCptName] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files || files.length === 0 || !patientPk) return;
-      const file = files[0];
+  const stageFile = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setSelectedFile(files[0]);
+    setUploadMsg(null);
+  }, []);
 
-      setIsUploading(true);
-      setUploadMsg(null);
+  const clearFile = () => {
+    setSelectedFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
-      try {
-        const formData = new FormData();
-        formData.append("patient", String(patientPk));
-        formData.append("cpt_name", cptName || file.name);
-        formData.append("file", file);
+  const handleSubmit = useCallback(async () => {
+    if (!selectedFile || !patientPk) return;
 
-        await apiClient.postForm<Radiology>("/radiology/upload/", formData);
-        setUploadMsg("Image uploaded successfully. Processing started.");
-        setCptName("");
-        await refreshPatientData();
-      } catch {
-        // If the upload endpoint doesn't exist yet, fall back to basic create
-        try {
-          const { radiologyAPI } = await import("@/lib/api");
-          await radiologyAPI.create({
-            patient: patientPk,
-            cpt_name: cptName || file.name,
-            file_path: file.name,
-          });
-          setUploadMsg("Record created (file upload pending backend support).");
-          setCptName("");
-          await refreshPatientData();
-        } catch {
-          setUploadMsg("Failed to upload. Please try again.");
-        }
-      } finally {
-        setIsUploading(false);
-        if (fileRef.current) fileRef.current.value = "";
-      }
-    },
-    [patientPk, cptName, refreshPatientData],
-  );
+    setIsUploading(true);
+    setUploadMsg(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("patient", String(patientPk));
+      formData.append("cpt_name", cptName || selectedFile.name);
+      formData.append("file", selectedFile);
+
+      await apiClient.postForm<Radiology>("/radiology/upload/", formData);
+      setUploadMsg("Image uploaded successfully. Processing started.");
+      setCptName("");
+      setSelectedFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+      await refreshPatientData();
+    } catch {
+      setUploadMsg("Failed to upload. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  }, [patientPk, cptName, selectedFile, refreshPatientData]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    handleFiles(e.dataTransfer.files);
+    stageFile(e.dataTransfer.files);
   };
 
   return (
@@ -91,12 +86,34 @@ export function RadiologyUploader() {
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
-          onClick={() => fileRef.current?.click()}
+          onClick={() => !selectedFile && fileRef.current?.click()}
         >
-          {isUploading ? (
-            <div className="flex flex-col items-center gap-2">
-              <span className="loading loading-spinner loading-md text-primary" />
-              <p className="text-sm text-base-content/60">Uploading...</p>
+          {selectedFile ? (
+            <div className="flex items-center justify-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-success shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <span className="text-sm truncate max-w-[180px]">
+                {selectedFile.name}
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs btn-circle"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearFile();
+                }}
+              >
+                &times;
+              </button>
             </div>
           ) : (
             <>
@@ -123,9 +140,22 @@ export function RadiologyUploader() {
             type="file"
             accept="image/*,.dcm"
             className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
+            onChange={(e) => stageFile(e.target.files)}
           />
         </div>
+
+        {/* Submit button */}
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          disabled={!selectedFile || !patientPk || isUploading}
+          onClick={handleSubmit}
+        >
+          {isUploading && (
+            <span className="loading loading-spinner loading-xs" />
+          )}
+          Upload
+        </button>
 
         {uploadMsg && (
           <p
@@ -136,9 +166,7 @@ export function RadiologyUploader() {
         )}
 
         {!patientPk && (
-          <p className="text-xs text-warning">
-            Patient not loaded yet.
-          </p>
+          <p className="text-xs text-warning">Patient not loaded yet.</p>
         )}
       </div>
     </div>

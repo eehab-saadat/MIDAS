@@ -90,52 +90,51 @@ def process_radiology_image(self, radiology_id):
 
 
 def generate_system_conclusion(pipeline_result):
-    """
-    Generate a system conclusion from the image processing pipeline result.
-    
-    Args:
-        pipeline_result: Dictionary returned by the image preprocessor
-        
-    Returns:
-        str: Formatted system conclusion
+    """Generate a human-readable system conclusion from the pipeline output.
+
+    Combines modality/quality metadata with the clinical findings produced
+    by medgemma (``model_findings``) so the downstream UI shows both the
+    processing summary *and* the AI-generated clinical observations.
     """
     modality = pipeline_result.get("modality", "UNKNOWN")
     quality_report = pipeline_result.get("quality_report", {})
     quality_delta = pipeline_result.get("quality_delta", {})
     metadata = pipeline_result.get("metadata", {})
-    
-    # Extract quality metrics
+    model_findings = pipeline_result.get("model_findings")
+
     quality_improved = quality_delta.get("quality_improved", False)
     warnings = quality_report.get("warnings", [])
     preprocessing_steps = metadata.get("preprocessing_steps", [])
-    
-    # Build conclusion text
-    conclusion_parts = []
-    
-    conclusion_parts.append(f"MODALITY: {modality}")
-    
+
+    conclusion_parts = [f"MODALITY: {modality}"]
+
     if metadata.get("modality_confidence"):
-        confidence = metadata["modality_confidence"]
-        conclusion_parts.append(f"Detection Confidence: {confidence:.2%}")
-    
+        conclusion_parts.append(
+            f"Detection Confidence: {metadata['modality_confidence']:.2%}"
+        )
+
+    # ----- AI clinical findings (from medgemma) -----
+    if isinstance(model_findings, dict) and model_findings.get("findings"):
+        img_type = model_findings.get("image_type", "")
+        body_part = model_findings.get("body_part", "")
+        header = " - ".join(filter(None, [img_type, body_part]))
+        conclusion_parts.append(f"\nFINDINGS ({header}):" if header else "\nFINDINGS:")
+        for finding in model_findings["findings"]:
+            conclusion_parts.append(f"  - {finding}")
+
     if preprocessing_steps:
-        conclusion_parts.append(f"\nPREPROCESSING APPLIED:")
+        conclusion_parts.append("\nPREPROCESSING APPLIED:")
         for step in preprocessing_steps:
             conclusion_parts.append(f"  - {step}")
-    
+
     if quality_improved:
         conclusion_parts.append("\nQUALITY: Improved after preprocessing")
     elif quality_delta.get("reverted"):
         conclusion_parts.append("\nQUALITY: Processing reverted due to quality regression")
-    
+
     if warnings:
         conclusion_parts.append(f"\nWARNINGS ({len(warnings)}):")
-        for warning in warnings[:5]:  # Limit to first 5 warnings
+        for warning in warnings[:5]:
             conclusion_parts.append(f"  - {warning}")
-    
-    # Add LLM context path if available
-    llm_context_path = pipeline_result.get("llm_context_file")
-    if llm_context_path:
-        conclusion_parts.append(f"\nDetailed analysis available at: {llm_context_path}")
-    
+
     return "\n".join(conclusion_parts)
