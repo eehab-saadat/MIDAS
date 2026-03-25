@@ -131,6 +131,7 @@ class MedicationSerializer(serializers.ModelSerializer):
             "prescribed_by",
             "prescribed_by_name",
             "prescribed_on",
+            "active",
             "active_agent_name",
             "medication_name",
             "dosage",
