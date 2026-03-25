@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+drf-spectacular = "*"
 django = "*"
 djangorestframework = "*"
 django-cors-headers = "*"

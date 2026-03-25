@@ -18,6 +18,9 @@ class Radiology(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    locked = models.BooleanField(
+        default=False
+    )  # Access to the system conclusion is blocked until the processing is complete
 
     class Meta:
         verbose_name_plural = "radiology reports"

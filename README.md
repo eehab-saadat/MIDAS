@@ -24,7 +24,7 @@ Contemporary diagnosis depends on correlating information that often resides in 
 The following clarifies what the repository delivers today relative to the formal Software Requirement Specifications.
 
 | Area | Specification intent | Current repository state |
-|------|----------------------|---------------------------|
+| ------ | ---------------------- | --------------------------- |
 | Central patient repository | Longitudinal EHR-style records, search, CRUD | Implemented in Django models and REST ViewSets (`patients`, `clinical`, `diagnostics`). |
 | Clinical notes | Markdown encounter notes | `Encounter.notes` stored as plain text (Markdown-capable). |
 | Labs and imaging | Structured storage and chronology | `Lab` (JSON per panel) and `Radiology` models with patient linkage; list/filter/search via API. |

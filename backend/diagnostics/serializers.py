@@ -21,6 +21,7 @@ class RadiologySerializer(serializers.ModelSerializer):
             "file_path",
             "created_at",
             "updated_at",
+            "locked",
         ]
         read_only_fields = ["patient_mrno", "created_at", "updated_at"]
 

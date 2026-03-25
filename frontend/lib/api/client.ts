@@ -109,6 +109,23 @@ class APIClient {
     return this.handleResponse<T>(response);
   }
 
+  async postForm<T>(
+    endpoint: string,
+    formData: FormData,
+    params?: Record<string, any>,
+  ): Promise<T> {
+    const url = this.buildUrl(endpoint, params);
+    const headers: HeadersInit = {};
+    // No Content-Type header -- browser sets multipart boundary automatically
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
   async delete<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
     const url = this.buildUrl(endpoint, params);
     const response = await fetch(url, {
