@@ -30,8 +30,8 @@ The following clarifies what the repository delivers today relative to the forma
 | Labs and imaging | Structured storage and chronology | `Lab` (JSON per panel) and `Radiology` models with patient linkage; list/filter/search via API. |
 | Symptoms | Ontology-backed findings | `Symptom` records linked to `SnomedEntity`; optional `BodyPart` grouping for UI or filtering. |
 | Terminology | SNOMED CT concepts | `SnomedEntity` with management command for ingestion (`ingest_snomed_data`); API CRUD. |
-| AI diagnosis | Explainable inference; specification targets sub-ninety-second case turnaround | Partial: `get_complete_patient_details` aggregates a case bundle; `run_batch_diagnosis` management command calls local Ollama (MedGemma-class model); hosted endpoint path reserved. Experimental `diagnose_with_medgemma` view exists but is not merged into URL routing as written. |
-| Authentication and RBAC | Secure login, sessions, roles, audit logs | `djangorestframework-simplejwt` is listed in dependencies; Django REST Framework is not configured with default authentication or permission classes in `settings/base.py`, so API routes are open unless extended. |
+| AI diagnosis | Explainable inference; specification targets sub-ninety-second case turnaround | Partial: `get_complete_patient_details` builds the case bundle; `POST /api/diagnose/?mrno=` proxies to the FastAPI `POST /diagnose` endpoint (Ollama / MedGemma-class flow in `microservices/diagnosis`). `run_batch_diagnosis` management command batches cases to CSV via Ollama. |
+| Authentication and RBAC | Secure login, sessions, roles, audit logs | JWT is **enabled** by default: `JWTAuthentication` plus `IsAuthenticated` on the REST API. Pair obtain/refresh/verify at `/api/token/`, `/api/token/refresh/`, `/api/token/verify/`; `POST /api/register/` creates Django users (`AllowAny`). Session/basic auth remain available. Role-based access, audit trails, and multi-tenancy are not fully modeled. |
 | FHIR export | HL7 FHIR R4 exchange | Not implemented as an automated exporter in this codebase (specified as a target). |
 | SDoH | Captured in clinical sessions | Specified in documentation; not modeled as first-class entities in the current Django schema. |
 | Web application | Next.js clinician UI | `frontend/` exists but is **deprecated** and scheduled for replacement; do not treat it as the long-term client. |
@@ -86,13 +86,17 @@ The list below merges **specified** features (from the project documentation) wi
 - **Diagnostics:** Radiology reports (technique, result, human `conclusion`, separate `system_conclusion` for AI or system use, optional `file_path`); laboratory panels as JSON documents keyed by test name with `result`, `unit`, and `normal_range` structure per project conventions.
 - **Terminology:** `BodyPart` and `SnomedEntity` with many-to-many association; `Symptom` ties encounters to SNOMED concepts with optional clinician remarks.
 - **Aggregated patient snapshot:** `GET /api/patients/mrno/<mrno>/` returns a consolidated JSON document (demographics, latest vitals, recent labs and radiology, medications, recent encounters with symptoms).
-- **REST API:** Paginated list endpoints (`page` size 20 by default), `search` and `ordering` where configured per ViewSet.
+- **REST API:** Paginated list endpoints (default **page size 6** via `REST_FRAMEWORK["PAGE_SIZE"]` in `settings/base.py`), `search` and `ordering` where configured per ViewSet.
+- **OpenAPI:** Schema and interactive docs from **drf-spectacular** — `GET /api/schema/`, Swagger UI at `/api/docs/`, ReDoc at `/api/redoc/` (schema UI is `AllowAny`; API calls still require auth unless you override per view).
+- **User registration:** `core` app exposes `POST /api/register/` for Django `User` creation (used with JWT login).
 - **Django admin:** Standard admin site at `/admin/` for model maintenance.
+- **Uploaded media:** Radiology and similar file paths resolve under `backend/media/` (`MEDIA_ROOT` is one level above the inner `backend` package).
+- **Background imaging pipeline:** On new `Radiology` rows with `file_path`, `diagnostics/signals.py` dispatches `process_radiology_image` via **Celery** when the broker is reachable; otherwise it falls back to a **daemon thread** calling the microservice preprocess endpoint (see `diagnostics/tasks.py`, `diagnostics/utils.py`).
 - **FMH data pipeline:** Excel processors under `data/FMH/scripts/` and ORM-based loader `backend/ingest_fmh_data.py` with optional `--flush` and `--data-dir`.
 
 ### Microservice features (`microservices/`)
 
-- **FastAPI gateway** (`microservices/main.py`): `GET /health`; `POST /extract-report` (image upload, preprocessing, vision-language extraction, schema validation); `POST /preprocess-image` (DICOM or raster uploads, optional modality override, delegates to the image preprocessor pipeline).
+- **FastAPI gateway** (`microservices/main.py`): `GET /health`; `POST /diagnose` (JSON body with `patient_data`, Ollama-backed MedGemma-class inference); `POST /extract-report` (image upload, preprocessing, vision-language extraction, schema validation); `POST /preprocess-image` (DICOM or raster uploads, optional modality override, delegates to the image preprocessor pipeline).
 - **Image preprocessor:** Modality detection, modality-specific filters (CT, MRI, X-ray, ultrasound, histopathology, fundus, dermoscopy, and others), DICOM handling, quality assessment, LLM-oriented context formatting.
 - **Report extractor:** VLM-based structured extraction with Pydantic schema validation.
 
@@ -107,14 +111,19 @@ The documentation specifies performance (for example, full case processing under
 | Layer | Technology |
 |-------|------------|
 | Core API | Python 3.12+, Django 6.0.3, Django REST Framework 3.16.1 |
-| Database (development) | SQLite (`backend/db.sqlite3` via `backend.settings.dev`) |
+| API schema | drf-spectacular (OpenAPI 3) |
+| Filtering | django-filter (in `requirements.txt`; not enabled in `INSTALLED_APPS` until you wire `DjangoFilterBackend`) |
+| Database (development) | SQLite at `backend/backend/db.sqlite3` (`NAME = BASE_DIR / "db.sqlite3"` in `settings/dev.py`, with `BASE_DIR` = inner `backend/` package path) |
 | Database (production-oriented) | PostgreSQL supported via `psycopg2-binary` (configure in settings) |
 | HTTP CORS | `django-cors-headers` (`CORS_ALLOW_ALL_ORIGINS = True` in base settings—tighten for production) |
-| Optional auth package | `djangorestframework-simplejwt` (present in `requirements.txt`; wiring is project-dependent) |
+| Authentication | `djangorestframework-simplejwt` — JWT default on the API; registration via `core` |
+| Async tasks | Celery 5.x with Redis as default broker/result backend (`CELERY_BROKER_URL` / `CELERY_RESULT_BACKEND` in `settings/base.py`) |
+| LLM utilities (batch / tooling) | `google-generativeai` (e.g. `generate_gt` management command); Ollama client in microservices |
 | Data processing | pandas, openpyxl |
-| Microservices API | FastAPI, Pillow, optional GPU/ML stack for VLM pipeline |
-| Legacy frontend | Next.js (TypeScript) under `frontend/`—deprecated |
-| CI | GitHub Actions workflow `django.yml` (install dependencies, `manage.py check`, `manage.py test`) |
+| Microservices API | FastAPI, Uvicorn, Pillow, PyDICOM, MONAI-oriented stack per `microservices/requirements.txt` |
+| Legacy frontend | Next.js **16**, React **19**, Tailwind CSS **4**, daisyUI **5** under `frontend/`—deprecated |
+| Dev tooling | `django-debug-toolbar`, `black` (see `requirements.txt`) |
+| CI | GitHub Actions workflow `django.yml` (install `backend/requirements.txt`, `python backend/manage.py check`, `python backend/manage.py test`) |
 
 ---
 
@@ -127,11 +136,12 @@ MIDAS/
 │   ├── requirements.txt
 │   ├── ingest_fmh_data.py       # Bulk load processed FMH Excel files into the ORM
 │   ├── API_DOCUMENTATION.md     # Endpoint reference (maintain alongside code)
-│   ├── backend/                 # Project package
+│   ├── backend/                 # Project package (Django BASE_DIR for settings)
 │   │   ├── settings/
-│   │   │   ├── base.py          # Shared settings, INSTALLED_APPS, REST_FRAMEWORK, CORS
-│   │   │   └── dev.py           # Development database (SQLite path)
-│   │   ├── urls.py              # Routes: admin + api includes
+│   │   │   ├── base.py          # REST_FRAMEWORK (JWT, pagination, spectacular), CORS, Celery, MEDIA
+│   │   │   └── dev.py           # Development SQLite (`backend/backend/db.sqlite3`)
+│   │   ├── urls.py              # Admin, JWT, register, OpenAPI, api app includes
+│   │   ├── celery.py            # Celery app (task autodiscovery)
 │   │   ├── wsgi.py
 │   │   └── asgi.py
 │   ├── patients/                # App: Patient, Vitals; patient-centric utilities
@@ -141,7 +151,9 @@ MIDAS/
 │   │   ├── urls.py              # DefaultRouter: patients, vitals
 │   │   ├── utils.py             # get_complete_patient_details(mrno)
 │   │   └── management/commands/
-│   │       └── run_batch_diagnosis.py
+│   │       ├── run_batch_diagnosis.py
+│   │       ├── get_all_patients_in_csv.py
+│   │       └── generate_gt.py          # optional Gemini-assisted ground truth (API key)
 │   ├── clinical/                # App: BodyPart, SnomedEntity, Clinician, Encounter, Medication, Symptom
 │   │   ├── models.py
 │   │   ├── serializers.py
@@ -149,25 +161,36 @@ MIDAS/
 │   │   ├── urls.py
 │   │   ├── constants.py         # SNOMED entity type enums
 │   │   └── management/commands/
-│   │       └── ingest_snomed_data.py
-│   ├── diagnostics/             # App: Radiology, Lab
+│   │       ├── ingest_snomed_data.py
+│   │       ├── query_snomed.py
+│   │       └── map_snomed_to_bodyParts.py
+│   ├── diagnostics/             # App: Radiology, Lab; Celery tasks; post_save radiology pipeline
 │   │   ├── models.py
 │   │   ├── serializers.py
 │   │   ├── views.py
-│   │   └── urls.py
-│   └── core/                    # Placeholder app (models currently empty)
+│   │   ├── urls.py
+│   │   ├── signals.py
+│   │   ├── tasks.py
+│   │   ├── utils.py
+│   │   └── management/commands/
+│   │       └── unlock_existing_radiology.py
+│   └── core/                    # User registration API (`RegisterView`); empty models module
 ├── data/
-│   └── FMH/                     # Fatima Memorial Hospital derived datasets
-│       ├── files/
-│       │   ├── raw/             # Source spreadsheets
-│       │   └── processed/       # Normalized inputs for ingest_fmh_data.py
-│       └── scripts/           # Excel processors and orchestration (main.py)
+│   ├── FMH/                     # Fatima Memorial Hospital derived datasets
+│   │   ├── files/
+│   │   │   ├── raw/             # Source spreadsheets
+│   │   │   └── processed/       # Normalized inputs for ingest_fmh_data.py
+│   │   └── scripts/             # Excel processors and orchestration (main.py)
+│   ├── Output/                  # Optional evaluation exports (e.g. CSV ground truth)
+│   └── fake/                    # Sample JSON fixtures for testing or demos
 ├── microservices/               # FastAPI + image preprocessor + report extractor
 │   ├── main.py                  # ASGI app: health, extract-report, preprocess-image
 │   ├── image_preprocessor/      # Pipeline, filters, DICOM, quality, agents
 │   └── report_extractor/        # VLM engine, preprocessing, schema validation
 ├── frontend/                    # Legacy Next.js UI (deprecated; replacement planned)
+├── old-frontend/               # Earlier Next.js experiment (not the active client)
 ├── old-backend/                 # Earlier experimental backend (not the active API)
+├── media/                       # Created at runtime for uploaded clinical files (Django MEDIA_ROOT)
 ├── .github/workflows/         # CI definitions
 └── .cursor/rules/             # Editor-level project conventions (optional for contributors)
 ```
@@ -218,7 +241,19 @@ The physical schema is defined by Django migrations. The logical model is as fol
 
 ## HTTP API surface
 
-All JSON API routes are mounted under **`/api/`** unless noted. The browsable API is available in development when opening endpoints in a browser. Pagination follows Django REST Framework’s page-number style: `count`, `next`, `previous`, `results`; default **page size 20**; use `?page=<n>`.
+Most JSON API routes are mounted under **`/api/`**. **Authentication:** supply `Authorization: Bearer <access_token>` for protected endpoints after obtaining tokens (see below). The browsable API is available in development when opening endpoints in a browser. Pagination follows Django REST Framework’s page-number style: `count`, `next`, `previous`, `results`; default **page size 6**; use `?page=<n>`.
+
+### Authentication and OpenAPI
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/register/` | Create a Django user (`AllowAny`) |
+| POST | `/api/token/` | Obtain JWT pair (username / password) |
+| POST | `/api/token/refresh/` | Refresh access token |
+| POST | `/api/token/verify/` | Verify a token |
+| GET | `/api/schema/` | OpenAPI schema |
+| GET | `/api/docs/` | Swagger UI |
+| GET | `/api/redoc/` | ReDoc |
 
 ### Cross-cutting query parameters
 
@@ -227,6 +262,12 @@ All JSON API routes are mounted under **`/api/`** unless noted. The browsable AP
 | `?page=<n>` | Page index for list endpoints |
 | `?search=<term>` | Where `SearchFilter` is enabled (fields vary per ViewSet) |
 | `?ordering=<field>` | Sort; prefix with `-` for descending |
+
+### Diagnosis proxy (Django → microservice)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/diagnose/?mrno=<mrno>` | Loads the patient bundle via `get_complete_patient_details`, forwards JSON to FastAPI `POST /diagnose` (env **`MICROSERVICE_URL`**, default `http://localhost:8001`). Requires a running microservice and Ollama where configured. |
 
 ### Patients and vitals
 
@@ -290,6 +331,10 @@ All JSON API routes are mounted under **`/api/`** unless noted. The browsable AP
 |-----------|--------|-------|
 | Django admin | `GET /admin/` | Requires superuser |
 | Batch LLM inference | `python manage.py run_batch_diagnosis` | Writes CSV; uses Ollama or optional `HOSTED_ENDPOINT` |
+| Patient export | `python manage.py get_all_patients_in_csv` | Export patients for offline use |
+| Ground-truth generation | `python manage.py generate_gt` | Uses Google Generative AI (configure API credentials) |
+| SNOMED helpers | `query_snomed`, `map_snomed_to_bodyParts` | Query/mapping utilities |
+| Radiology maintenance | `python manage.py unlock_existing_radiology` | Diagnostics maintenance command |
 | FMH ingestion | `python ingest_fmh_data.py` | See Data ingestion below |
 
 Extended narrative examples and payload samples are maintained in `backend/API_DOCUMENTATION.md`.
@@ -299,10 +344,11 @@ Extended narrative examples and payload samples are maintained in `backend/API_D
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Liveness probe |
+| POST | `/diagnose` | JSON `{"patient_data": { ... }}`; runs Ollama-backed diagnosis (`microservices/diagnosis`) |
 | POST | `/extract-report` | Multipart image upload; returns validated structured report JSON |
 | POST | `/preprocess-image` | Upload DICOM or image; optional `modality` and `config_path` query parameters |
 
-Run with an ASGI server such as Uvicorn from the `microservices` directory (see Installation).
+Django calls this service using **`MICROSERVICES_URL`** (default `http://localhost:8001`) for radiology preprocessing tasks, and **`MICROSERVICE_URL`** (same default in `patients.views`) for the diagnose proxy—run Uvicorn on a matching host/port (see **Microservices (FastAPI)** under Installation).
 
 ---
 
@@ -361,8 +407,13 @@ python manage.py ingest_snomed_data --help
 
 4. Configure environment variables. The project loads `.env` via `python-dotenv`. At minimum, set:
 
-   - `SECRET_KEY` — Django secret key.
+   - `SECRET_KEY` — Django secret key (also used to sign JWTs).
    - `DEBUG` — use `1` for development; omit or set otherwise for production-like runs.
+
+   Optional integration:
+
+   - `MICROSERVICES_URL` / `MICROSERVICE_URL` — FastAPI base URL for radiology preprocessing and `/api/diagnose` proxy (defaults to `http://localhost:8001`).
+   - `CELERY_BROKER_URL` / `CELERY_RESULT_BACKEND` — Redis URLs for Celery (defaults in `settings/base.py`; worker required for async tasks).
 
 5. Point Django at development settings (required by project convention):
 
@@ -403,22 +454,33 @@ Replace the `DATABASES` definition in `backend/backend/settings/dev.py` (or add 
 
 ### Continuous integration
 
-The workflow `.github/workflows/django.yml` installs `backend/requirements.txt`, runs `python backend/manage.py check`, and `python backend/manage.py test` on pushes and pull requests to `main`. Ensure `DJANGO_SETTINGS_MODULE` is set in CI if you split settings further.
+The workflow `.github/workflows/django.yml` installs `backend/requirements.txt`, runs `python backend/manage.py check`, and `python backend/manage.py test` on pushes and pull requests to `main`. `backend/manage.py` sets `DJANGO_SETTINGS_MODULE` to `backend.settings.dev` by default, so CI does not need a separate env var unless you change that layout.
+
+### Celery worker (optional)
+
+If you want radiology image tasks to run through the broker instead of in-process threads:
+
+```bash
+cd backend
+celery -A backend worker -l info
+```
+
+Ensure Redis (or your configured broker) is running.
 
 ### Microservices (FastAPI)
 
-From the repository root, with dependencies installed for the `microservices` package:
+Install dependencies from `microservices/requirements.txt` (and `microservices/report_extractor/requirements.txt` if you use the full VLM stack). From the repository root:
 
 ```bash
 cd microservices
-uvicorn main:app --reload --host 0.0.0.0 --port 8080
+uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
-Verify `GET http://127.0.0.1:8080/health`. Image and VLM operations require appropriate model weights, API keys, and hardware as configured in `report_extractor` and `image_preprocessor`.
+Verify `GET http://127.0.0.1:8001/health`. Use the same port in `MICROSERVICES_URL` / `MICROSERVICE_URL` on the Django side. Image and VLM operations require appropriate model weights, API keys, and hardware as configured in `report_extractor` and `image_preprocessor`.
 
 ### Legacy frontend
 
-The `frontend/` Next.js application is deprecated. If you must run it for historical comparison, use its own `package.json` scripts (typically `npm install` then `npm run dev`) after installing Node.js. Do not extend it for new features.
+The `frontend/` Next.js application is deprecated. If you must run it for historical comparison, use its own `package.json` scripts (`pnpm install` / `npm install`, then `pnpm dev` or `npm run dev`) after installing Node.js. The stack is Next.js 16, React 19, Tailwind 4, and daisyUI 5. Point the client at your Django API and JWT flow as implemented. Do not extend it for new features. The `old-frontend/` directory is an older experiment and is not the maintained UI.
 
 ---
 
@@ -426,7 +488,8 @@ The `frontend/` Next.js application is deprecated. If you must run it for histor
 
 - **API details:** `backend/API_DOCUMENTATION.md`
 - **Formal project specification:** external document `F25-047-Documentation.pdf` (problem statement, SRS, design, and UI mockups)
-- **Editor rules:** `.cursor/rules/project-overview.mdc`, `.cursor/rules/backend-conventions.mdc`
+- **Editor rules:** `.cursor/rules/project-overview.mdc`, `.cursor/rules/backend-conventions.mdc`, `.cursor/rules/daisyui.mdc`, `.cursor/rules/daisyui-standards.mdc`
+- **Pipenv:** `backend/Pipfile` exists for alternative installs; CI and most docs assume `pip install -r backend/requirements.txt`.
 
 ---
 
