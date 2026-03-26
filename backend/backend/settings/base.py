@@ -103,6 +103,11 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+MEDIA_ROOT = BASE_DIR.parent / "media"
+MEDIA_URL = "/media/"
+
+MICROSERVICES_URL = os.getenv("MICROSERVICES_URL", "http://localhost:8001")
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",

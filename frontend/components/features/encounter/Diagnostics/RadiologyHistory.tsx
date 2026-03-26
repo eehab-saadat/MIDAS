@@ -151,11 +151,68 @@ export function RadiologyHistory({ patientPk }: RadiologyHistoryProps) {
                     </div>
                   )}
                   {rad.system_conclusion && !rad.locked && (
-                    <div className="p-2 bg-info/10 rounded">
-                      <span className="font-medium text-info">
+                    <div className="p-3 bg-info/10 rounded-md border border-info/20">
+                      <span className="font-medium text-info mb-2 block">
                         AI Conclusion:
-                      </span>{" "}
-                      {rad.system_conclusion}
+                      </span>
+                      {(() => {
+                        try {
+                          const parsed = JSON.parse(rad.system_conclusion);
+                          const findings =
+                            parsed.model_findings?.findings || [];
+                          const imageType = parsed.model_findings?.image_type;
+                          const bodyPart = parsed.model_findings?.body_part;
+                          const modality = parsed.modality;
+
+                          return (
+                            <div className="flex flex-col gap-3">
+                              {(imageType || bodyPart || modality) && (
+                                <div className="flex flex-wrap gap-2 text-xs">
+                                  {modality &&
+                                    modality !== "MODALITY_UNCERTAIN" && (
+                                      <span className="badge badge-info badge-outline badge-sm">
+                                        {modality.replace("MODALITY_", "")}
+                                      </span>
+                                    )}
+                                  {imageType && (
+                                    <span className="badge badge-accent badge-outline badge-sm">
+                                      {imageType}
+                                    </span>
+                                  )}
+                                  {bodyPart && (
+                                    <span className="badge badge-secondary badge-outline badge-sm">
+                                      {bodyPart}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              {findings.length > 0 ? (
+                                <ul className="list-disc pl-5 space-y-1 mt-1">
+                                  {findings.map((f: string, i: number) => (
+                                    <li
+                                      key={i}
+                                      className="text-base-content/80"
+                                    >
+                                      {f}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <pre className="whitespace-pre-wrap text-sm font-mono bg-base-200/50 p-2 rounded">
+                                  {JSON.stringify(parsed, null, 2)}
+                                </pre>
+                              )}
+                            </div>
+                          );
+                        } catch {
+                          return (
+                            <p className="whitespace-pre-wrap text-sm text-base-content/80">
+                              {rad.system_conclusion}
+                            </p>
+                          );
+                        }
+                      })()}
                     </div>
                   )}
                   {rad.locked && (
