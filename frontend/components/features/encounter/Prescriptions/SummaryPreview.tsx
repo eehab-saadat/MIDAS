@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useEncounterStore } from "@/store/encounterStore";
-import { summaryAPI } from "@/lib/api/summary";
+import { generatePatientSummaryPdf } from "@/lib/generatePatientPdf";
 
 interface SummaryPreviewProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+type PdfBtnState = "idle" | "generating" | "saved";
+
 export function SummaryPreview({ isOpen, onClose }: SummaryPreviewProps) {
   const patientDetails = useEncounterStore((s) => s.patientDetails);
   const customDiagnosis = useEncounterStore((s) => s.customDiagnosis);
   const notes = useEncounterStore((s) => s.notes);
-  const encounterId = useEncounterStore((s) => s.encounterId);
   const setSummaryGenerated = useEncounterStore((s) => s.setSummaryGenerated);
 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [btnState, setBtnState] = useState<PdfBtnState>("idle");
   const [error, setError] = useState<string | null>(null);
+
+  const handleGeneratePdf = useCallback(async () => {
+    if (!patientDetails) return;
+    setBtnState("generating");
+    setError(null);
+
+    try {
+      await generatePatientSummaryPdf({
+        patientDetails,
+        customDiagnosis,
+        notes,
+      });
+      setSummaryGenerated(true);
+      setBtnState("saved");
+      setTimeout(() => setBtnState("idle"), 2500);
+    } catch {
+      setError("Failed to generate PDF. Please try again.");
+      setBtnState("idle");
+    }
+  }, [patientDetails, customDiagnosis, notes, setSummaryGenerated]);
 
   if (!isOpen || !patientDetails) return null;
 
@@ -27,29 +47,10 @@ export function SummaryPreview({ isOpen, onClose }: SummaryPreviewProps) {
   const vitals = patientDetails.vitals;
   const hasVitals = vitals && Object.keys(vitals).length > 0;
 
-  const handleGeneratePdf = async () => {
-    if (!encounterId) return;
-    setIsGenerating(true);
-    setError(null);
-
-    try {
-      // First save the summary
-      await summaryAPI.generate(encounterId, {
-        custom_diagnosis: customDiagnosis,
-        notes,
-      });
-
-      // Then generate PDF
-      const res = await summaryAPI.generatePdf(encounterId);
-      setPdfUrl(res.pdf_url);
-      setSummaryGenerated(true);
-    } catch {
-      setError("PDF generation is not yet available. Summary has been saved.");
-      setSummaryGenerated(true);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  const btnClass =
+    btnState === "saved"
+      ? "btn btn-success btn-sm"
+      : "btn btn-primary btn-sm";
 
   return createPortal(
     <dialog className="modal modal-open">
@@ -152,34 +153,36 @@ export function SummaryPreview({ isOpen, onClose }: SummaryPreviewProps) {
           <p className="text-xs text-warning mt-2">{error}</p>
         )}
 
-        {/* PDF link */}
-        {pdfUrl && (
-          <div className="mt-3">
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-sm btn-success"
-            >
-              Download PDF
-            </a>
-          </div>
-        )}
-
         {/* Actions */}
         <div className="modal-action">
           <button className="btn btn-outline btn-sm" onClick={onClose}>
             Edit
           </button>
           <button
-            className="btn btn-primary btn-sm"
+            className={btnClass}
             onClick={handleGeneratePdf}
-            disabled={isGenerating}
+            disabled={btnState !== "idle"}
           >
-            {isGenerating && (
+            {btnState === "generating" && (
               <span className="loading loading-spinner loading-xs" />
             )}
-            Generate Shareable PDF
+            {btnState === "saved" && (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+            {btnState === "idle" && "Generate Shareable PDF"}
+            {btnState === "generating" && "Generating…"}
+            {btnState === "saved" && "Saved"}
           </button>
         </div>
       </div>
