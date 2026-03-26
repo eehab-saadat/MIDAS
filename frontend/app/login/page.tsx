@@ -4,12 +4,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { authAPI } from "@/lib/api";
+
 export default function LoginPage() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     // Trigger fade-in on mount
@@ -18,27 +21,31 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push("/dashboard");
+    setErrorMsg("");
 
     // Validate inputs
-    if (!email || !password) {
-      alert("Please fill in all fields");
+    if (!username || !password) {
+      setErrorMsg("Please fill in all fields");
       return;
     }
 
     if (password.length < 6) {
-      alert("Password must be at least 6 characters");
+      setErrorMsg("Password must be at least 6 characters");
       return;
     }
 
     setIsLoading(true);
 
-    // TODO: API call to authenticate user
-    // For now, just simulate a delay and redirect
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const res = await authAPI.login({ username, password });
+      localStorage.setItem("accessToken", res.access);
+      localStorage.setItem("refreshToken", res.refresh);
       router.push("/dashboard");
-    }, 500);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Invalid username or password");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -74,15 +81,26 @@ export default function LoginPage() {
             </p>
 
             <form className="fieldset gap-3" onSubmit={handleSubmit}>
-              {/* Email Input */}
+              {errorMsg && (
+                <div
+                  role="alert"
+                  className="alert alert-error text-sm p-3 rounded-md"
+                >
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Username Input */}
               <div>
-                <legend className="fieldset-legend font-semibold">Email</legend>
+                <legend className="fieldset-legend font-semibold">
+                  Username
+                </legend>
                 <input
-                  type="email"
+                  type="text"
                   className="input w-full"
-                  placeholder="doctor@hospital.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="johndoe"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   //   required
                 />
               </div>
@@ -115,12 +133,12 @@ export default function LoginPage() {
                   />
                   <span>Remember me</span>
                 </label>
-                <a
+                {/* <a
                   href="#"
                   className="link link-hover text-primary font-medium"
                 >
                   Forgot password?
-                </a>
+                </a> */}
               </div>
 
               {/* Submit Action */}
@@ -141,11 +159,10 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <div className="divider text-xs text-base-content/50 my-4">
+              {/* <div className="divider text-xs text-base-content/50 my-4">
                 OR
               </div>
 
-              {/* Alternate / Provider Login (Placeholder) */}
               <button
                 type="button"
                 className="btn btn-outline btn-block border-base-300"
@@ -174,7 +191,7 @@ export default function LoginPage() {
                   />
                 </svg>
                 Continue with Google
-              </button>
+              </button> */}
             </form>
           </div>
         </div>
