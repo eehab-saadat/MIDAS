@@ -145,7 +145,7 @@ class LabViewSet(viewsets.ModelViewSet):
             resp = http_requests.post(
                 f"{microservices_url}/extract-report",
                 files={"file": (file.name, file.read(), file.content_type)},
-                timeout=120,
+                # timeout=120,
             )
             resp.raise_for_status()
             report = resp.json()
