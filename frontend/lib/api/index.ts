@@ -16,6 +16,7 @@ export { symptomsAPI } from "./symptoms";
 export { bodyPartsAPI } from "./body-parts";
 export { diagnosisAPI } from "./diagnosis";
 export { summaryAPI } from "./summary";
+export { transcribeAPI } from "./transcribe";
 
 // Re-export types
 export type * from "@/types/api";

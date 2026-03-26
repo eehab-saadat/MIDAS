@@ -1,4 +1,12 @@
-from rest_framework import filters, viewsets
+import base64
+import logging
+import os
+
+import requests as http_requests
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
 
 from .models import BodyPart, Clinician, Encounter, Medication, SnomedEntity, Symptom
 from .serializers import (
@@ -9,6 +17,89 @@ from .serializers import (
     SnomedEntitySerializer,
     SymptomSerializer,
 )
+
+logger = logging.getLogger(__name__)
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/"
+    "models/gemini-2.5-flash-lite:generateContent"
+)
+
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser])
+def transcribe_audio(request):
+    """Accept an audio file upload and return a Gemini-powered transcription."""
+    if not GEMINI_API_KEY:
+        return Response(
+            {"detail": "GEMINI_API_KEY is not configured on the server."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    audio_file = request.FILES.get("file")
+    if not audio_file:
+        return Response(
+            {"detail": "No audio file provided. Send a 'file' field."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    audio_bytes = audio_file.read()
+    audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+    mime_type = audio_file.content_type or "audio/webm"
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": audio_b64,
+                        }
+                    },
+                    {
+                        "text": (
+                            "Transcribe this audio accurately. "
+                            "Return only the transcription text, nothing else."
+                        )
+                    },
+                ]
+            }
+        ]
+    }
+
+    try:
+        resp = http_requests.post(
+            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+            json=payload,
+            timeout=60,
+        )
+    except http_requests.RequestException as exc:
+        logger.exception("Gemini API request failed")
+        return Response(
+            {"detail": f"Gemini API request failed: {exc}"},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    if resp.status_code != 200:
+        logger.error("Gemini API error %s: %s", resp.status_code, resp.text[:500])
+        return Response(
+            {"detail": f"Gemini API error ({resp.status_code})."},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    try:
+        data = resp.json()
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError, ValueError) as exc:
+        logger.exception("Unexpected Gemini response structure")
+        return Response(
+            {"detail": f"Could not parse Gemini response: {exc}"},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    return Response({"transcription": text.strip()})
 
 
 class ClinicianViewSet(viewsets.ModelViewSet):

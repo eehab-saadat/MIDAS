@@ -1,14 +1,21 @@
 import io
 import importlib.util
 import json
+import logging
 import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 
+import requests
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.concurrency import run_in_threadpool
+from pydantic import BaseModel
 from PIL import Image, UnidentifiedImageError
+
+from diagnosis import generate_diagnosis
+
+logger = logging.getLogger(__name__)
 
 CURRENT_DIR = Path(__file__).resolve().parent
 IMAGE_PREPROCESSOR_DIR = CURRENT_DIR / "image_preprocessor"
@@ -34,10 +41,43 @@ _PROCESS_IMAGE = None
 
 
 app = FastAPI(
-    title="Report Extractor API",
+    title="MIDAS Microservices API",
     version="1.0.0",
-    description="FastAPI wrapper around microservices/report_extractor",
+    description="FastAPI microservices for MIDAS: report extraction, image preprocessing, and diagnosis",
 )
+
+# ---------------------------------------------------------------------------
+# Diagnosis
+# ---------------------------------------------------------------------------
+
+
+class DiagnoseRequest(BaseModel):
+    patient_data: dict
+
+
+@app.post("/diagnose")
+async def diagnose(body: DiagnoseRequest) -> dict:
+    """Run MedGemma diagnosis on patient data via Ollama."""
+    try:
+        result = await run_in_threadpool(generate_diagnosis, body.patient_data)
+        return result
+    except requests.exceptions.ConnectionError:
+        raise HTTPException(
+            status_code=503,
+            detail="Cannot connect to Ollama. Ensure it is running on port 11434.",
+        )
+    except requests.exceptions.Timeout:
+        raise HTTPException(
+            status_code=504,
+            detail="Ollama request timed out. The model may be loading — try again.",
+        )
+    except (json.JSONDecodeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=f"Failed to parse model response: {exc}")
+    except requests.exceptions.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"Ollama returned an error: {exc}")
+    except Exception as exc:
+        logger.exception("Unexpected error in /diagnose")
+        raise HTTPException(status_code=500, detail=f"Diagnosis failed: {exc}")
 
 
 @app.get("/health")

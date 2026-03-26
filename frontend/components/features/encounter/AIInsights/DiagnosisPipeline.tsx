@@ -158,22 +158,20 @@ function DiagnosisResultCard({
 
   return (
     <div className="flex flex-col gap-3 border border-success/30 rounded-lg p-4 bg-success/5">
-      {/* Diagnosis */}
       <div>
         <p className="text-xs font-semibold uppercase text-success mb-1">
           Diagnosis
         </p>
-        <p className="text-sm font-medium">{result.diagnosis}</p>
+        <p className="text-base font-medium">{result.diagnosis}</p>
       </div>
 
-      {/* Reasoning (expandable) */}
       {result.reasoning && (
         <div>
           <button
-            className="text-xs text-primary font-medium flex items-center gap-1"
+            className="text-xs font-semibold uppercase text-base-content/50 flex items-center gap-1"
             onClick={() => setShowReasoning(!showReasoning)}
           >
-            {showReasoning ? "Hide" : "Show"} Reasoning
+            Reasoning
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className={`h-3 w-3 transition-transform ${showReasoning ? "rotate-180" : ""}`}
@@ -186,14 +184,13 @@ function DiagnosisResultCard({
             </svg>
           </button>
           {showReasoning && (
-            <p className="text-sm text-base-content/70 mt-1 whitespace-pre-wrap">
+            <p className="text-sm text-base-content/70 whitespace-pre-wrap leading-relaxed mt-1">
               {result.reasoning}
             </p>
           )}
         </div>
       )}
 
-      {/* Advisory */}
       {result.advisory && (
         <div>
           <p className="text-xs font-semibold uppercase text-info mb-1">
@@ -203,7 +200,6 @@ function DiagnosisResultCard({
         </div>
       )}
 
-      {/* Pre-fill button */}
       <div className="flex justify-end">
         <button className="btn btn-sm btn-outline btn-success" onClick={onPrefill}>
           Use as Pre-fill for Summary
