@@ -29,7 +29,7 @@ def process_radiology_image(self, radiology_id):
             image_path = Path(radiology.file_path)
         else:
             # Assume relative to Django BASE_DIR or project root
-            base_dir = Path(settings.BASE_DIR).parent.parent  # Go up from backend/backend to project root
+            base_dir = Path(settings.BASE_DIR).parent  # Go up from backend/backend to backend
             image_path = base_dir / radiology.file_path
         
         if not image_path.exists():

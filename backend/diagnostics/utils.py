@@ -29,7 +29,7 @@ def process_radiology_image_sync(radiology_id):
         if Path(radiology.file_path).is_absolute():
             image_path = Path(radiology.file_path)
         else:
-            base_dir = Path(settings.BASE_DIR).parent.parent
+            base_dir = Path(settings.BASE_DIR).parent # This gives /Users/huzyefah/Projects/MIDAS/MIDAS/backend
             image_path = base_dir / radiology.file_path
         
         if not image_path.exists():
@@ -45,7 +45,7 @@ def process_radiology_image_sync(radiology_id):
             resp = requests.post(
                 f"{microservices_url}/preprocess-image",
                 files={"file": (image_path.name, f, content_type)},
-                timeout=300
+                # timeout=300
             )
         resp.raise_for_status()
         result = resp.json()

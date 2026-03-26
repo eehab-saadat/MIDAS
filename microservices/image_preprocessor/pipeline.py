@@ -250,11 +250,14 @@ def process_image(
                     img_base64 = base64.b64encode(f.read()).decode("utf-8")
 
                 prompt = (
-                    "Please analyze this medical image carefully and provide detailed and accurate clinical findings. "
-                    "Ensure the findings are precise as they will be directly reviewed by a doctor. "
-                    "Output a JSON object containing the image type, body part, and an array of plain text strings representing the findings. "
+                    "Please act as an expert radiologist and analyze this medical image carefully. "
+                    "Provide a detailed interpretation of the DIAGNOSTIC findings visible in the image. "
+                    "Do NOT focus on the technical image quality, resolution, or artifacts. "
+                    "Focus strictly on anatomic abnormalities, pathologies, lesions, and other clinical observations "
+                    "that would be relevant for patient diagnosis and treatment. "
+                    "Output a JSON object containing the image type, body part, and an array of plain text strings representing the diagnostic clinical findings. "
                     "You MUST wrap your response in ```json and ``` markdown tags. "
-                    'Example:\n```json\n{\n  "image_type": "X-ray",\n  "body_part": "Chest",\n  "findings": [\n    "First detailed finding here.",\n    "Second detailed finding here."\n  ]\n}\n```'
+                    'Example:\n```json\n{\n  "image_type": "X-ray",\n  "body_part": "Chest",\n  "findings": [\n    "There is a focal opacity in the right lower lobe consistent with pneumonia.",\n    "The cardiomediastinal silhouette is within normal limits."\n  ]\n}\n```'
                 )
                 if output_bundle.get("context_string"):
                     prompt += "\n\nImage Context:\n" + output_bundle["context_string"]
