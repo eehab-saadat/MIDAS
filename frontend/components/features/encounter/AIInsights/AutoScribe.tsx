@@ -17,7 +17,7 @@ export function AutoScribe() {
     setError(null);
     try {
       const data = await transcribeAPI.transcribe(blob);
-      const append = (window as Record<string, unknown>)
+      const append = (window as unknown as Record<string, unknown>)
         .__notesAppend as ((text: string) => void) | undefined;
       if (append && data.transcription) {
         append(data.transcription);

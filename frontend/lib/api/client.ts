@@ -40,16 +40,17 @@ class APIClient {
     return url.toString();
   }
 
-  private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
-    // TODO: Add authentication token to headers when auth is implemented
-    // const token = localStorage.getItem("authToken");
-    // if (token) {
-    //   headers["Authorization"] = `Bearer ${token}`;
-    // }
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
 
     return headers;
   }
@@ -115,7 +116,14 @@ class APIClient {
     params?: Record<string, any>,
   ): Promise<T> {
     const url = this.buildUrl(endpoint, params);
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
+
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
     // No Content-Type header -- browser sets multipart boundary automatically
     const response = await fetch(url, {
       method: "POST",
@@ -145,6 +153,17 @@ class APIClient {
     // Handle empty responses (e.g., 204 No Content)
     if (response.status === 204) {
       return null as T;
+    }
+
+    // Auth redirect could be handled here
+    if (
+      response.status === 401 &&
+      typeof window !== "undefined" &&
+      !window.location.pathname.startsWith("/login")
+    ) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/login";
     }
 
     // Try to parse JSON response

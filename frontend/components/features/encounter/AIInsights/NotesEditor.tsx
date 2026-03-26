@@ -64,9 +64,9 @@ export function NotesEditor() {
 
   // Expose appendText for AutoScribe
   useEffect(() => {
-    (window as Record<string, unknown>).__notesAppend = appendText;
+    (window as unknown as Record<string, unknown>).__notesAppend = appendText;
     return () => {
-      delete (window as Record<string, unknown>).__notesAppend;
+      delete (window as unknown as Record<string, unknown>).__notesAppend;
     };
   }, [appendText]);
 
