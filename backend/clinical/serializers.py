@@ -118,6 +118,25 @@ class EncounterSerializer(serializers.ModelSerializer):
         return obj.clinician.name if obj.clinician else None
 
 
+class EncounterSummarySerializer(serializers.ModelSerializer):
+    """Lightweight serializer for encounter lists — no notes or symptoms."""
+
+    clinician_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Encounter
+        fields = [
+            "id",
+            "patient",
+            "date",
+            "clinician",
+            "clinician_name",
+        ]
+
+    def get_clinician_name(self, obj) -> str | None:
+        return obj.clinician.name if obj.clinician else None
+
+
 class MedicationSerializer(serializers.ModelSerializer):
     patient_mrno = serializers.CharField(source="patient.mrno", read_only=True)
     prescribed_by_name = serializers.SerializerMethodField()
