@@ -1,18 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import SplashScreen from "@/components/ui/SplashScreen";
-import { useRouter } from "next/navigation";
+import HeroSection from "@/components/features/landing/HeroSection";
+import FeaturesSection from "@/components/features/landing/FeaturesSection";
+import HowItWorksSection from "@/components/features/landing/HowItWorksSection";
+import CTAFooter from "@/components/features/landing/CTAFooter";
 
 export default function Home() {
-  const router = useRouter();
+  const [splashDone, setSplashDone] = useState(false);
 
-  const handleSplashFinish = () => {
-    router.push("/login");
-  };
+  if (!splashDone) {
+    return <SplashScreen onFinish={() => setSplashDone(true)} />;
+  }
 
   return (
-    <>
-      <SplashScreen onFinish={handleSplashFinish} />
-    </>
+    <main className="animate-fade-in h-screen overflow-y-auto snap-y snap-mandatory">
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <CTAFooter />
+    </main>
   );
 }
