@@ -1,11 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { PatientList } from "@/components/features/PatientList";
+import { AddPatientModal } from "@/components/features/AddPatientModal";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handlePatientAdded = (mrno: string) => {
+    setRefreshTrigger((prev) => prev + 1);
+    router.push(`/encounter/${mrno}`);
+  };
 
   return (
     <div className="min-h-screen bg-base-100">
@@ -35,7 +45,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Add New Patient Button */}
-            <button className="btn btn-primary">
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsAddPatientModalOpen(true)}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -52,9 +65,18 @@ export default function DashboardPage() {
           </div>
 
           {/* Patient List */}
-          <PatientList searchQuery={searchQuery} />
+          <PatientList
+            searchQuery={searchQuery}
+            refreshTrigger={refreshTrigger}
+          />
         </div>
       </div>
+
+      <AddPatientModal
+        isOpen={isAddPatientModalOpen}
+        onClose={() => setIsAddPatientModalOpen(false)}
+        onPatientAdded={handlePatientAdded}
+      />
     </div>
   );
 }
