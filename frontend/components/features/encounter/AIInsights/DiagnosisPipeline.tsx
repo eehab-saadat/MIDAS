@@ -6,7 +6,13 @@ import { diagnosisAPI } from "@/lib/api";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import type { DiagnosisResult } from "@/types/api";
 
-type PipelineStep = "idle" | "gathering" | "diagnosing" | "reasoning" | "complete" | "error";
+type PipelineStep =
+  | "idle"
+  | "gathering"
+  | "diagnosing"
+  | "reasoning"
+  | "complete"
+  | "error";
 
 const STEP_ORDER: PipelineStep[] = [
   "gathering",
@@ -87,7 +93,9 @@ export function DiagnosisPipeline() {
         <div className="flex items-center gap-3">
           <div
             className={!canRun ? "tooltip" : ""}
-            data-tip={!canRun ? "Patient data required to run diagnosis" : undefined}
+            data-tip={
+              !canRun ? "Patient data required to run diagnosis" : undefined
+            }
           >
             <button
               className="btn btn-primary btn-sm"
@@ -97,7 +105,7 @@ export function DiagnosisPipeline() {
               {isRunning && (
                 <span className="loading loading-spinner loading-xs" />
               )}
-              {isRunning ? "Running..." : "Run Diagnostic Pipeline"}
+              {isRunning ? "Running..." : "Run"}
             </button>
           </div>
           {symptoms.length === 0 && (
@@ -131,9 +139,7 @@ export function DiagnosisPipeline() {
         )}
 
         {/* Error */}
-        {error && (
-          <ErrorAlert message={error} onRetry={runPipeline} />
-        )}
+        {error && <ErrorAlert message={error} onRetry={runPipeline} />}
 
         {/* Results */}
         {diagnosisResult && step === "complete" && (
@@ -201,7 +207,10 @@ function DiagnosisResultCard({
       )}
 
       <div className="flex justify-end">
-        <button className="btn btn-sm btn-outline btn-success" onClick={onPrefill}>
+        <button
+          className="btn btn-sm btn-outline btn-success"
+          onClick={onPrefill}
+        >
           Use as Pre-fill for Summary
         </button>
       </div>

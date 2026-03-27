@@ -7,7 +7,7 @@ import json
 import time
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
-MODEL = "amsaravi/medgemma-4b-it:q6"
+MODEL = "thiagomoraes/medgemma-4b-it:Q8_0"
 
 st.set_page_config(page_title="MIDAS", page_icon="🧠", layout="centered")
 

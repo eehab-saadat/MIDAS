@@ -6,7 +6,7 @@ import re
 import requests
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "amsaravi/medgemma-4b-it:q6"
+OLLAMA_MODEL = "thiagomoraes/medgemma-4b-it:Q8_0"
 
 SYSTEM_PROMPT = (
     "You are an expert medical AI assistant. "

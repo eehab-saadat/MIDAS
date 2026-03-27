@@ -25,7 +25,7 @@ def encode_image_to_base64(uploaded_file):
 
 def generate_diagnosis(data, image):
     OLLAMA_URL = "http://localhost:11434/api/chat"
-    MODEL = "amsaravi/medgemma-4b-it:q6"
+    MODEL = "thiagomoraes/medgemma-4b-it:Q8_0"
 
     logger.info(f"  Calling MedGemma model: {MODEL}")
     logger.info(f"  Ollama URL: {OLLAMA_URL}")
