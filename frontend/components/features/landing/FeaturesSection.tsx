@@ -28,7 +28,7 @@ const features = [
   {
     title: "AI-Powered Agents",
     description:
-      "Specialized processing per modality — NLP for clinical notes, analytics for labs & vitals, computer vision for imaging.",
+      "Specialized processing per modality — clinical notes, labs, vitals, radiology imaging and much more.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +70,7 @@ const features = [
   {
     title: "Standards-Ready",
     description:
-      "Designed with HL7 FHIR R4 interoperability as a long-term goal, ensuring seamless integration with hospital information systems.",
+      "Designed with HL7 FHIR interoperability as a long-term goal, ensuring seamless future integrations with hospital information systems.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
