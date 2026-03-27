@@ -2,6 +2,8 @@ import logging
 import os
 
 import requests
+from django.db.models import IntegerField, Max, OuterRef, Subquery
+from django.db.models.functions import Cast
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
@@ -19,9 +21,16 @@ class PatientViewSet(viewsets.ModelViewSet):
     and a full-detail lookup by MRNO.
 
     List / search / order:
-      GET  /api/patients/                        – paginated list
-      GET  /api/patients/?search=<term>          – search by mrno or name
-      GET  /api/patients/?ordering=<field>       – sort by mrno, name, dob
+      GET  /api/patients/                          – paginated list
+      GET  /api/patients/?search=<term>            – search by mrno or name
+      GET  /api/patients/?ordering=mrno_int        – sort by MRN numerically (asc)
+      GET  /api/patients/?ordering=-mrno_int       – sort by MRN numerically (desc)
+      GET  /api/patients/?ordering=name            – sort by name (asc)
+      GET  /api/patients/?ordering=-name           – sort by name (desc)
+      GET  /api/patients/?ordering=dob             – sort by dob asc (= age desc)
+      GET  /api/patients/?ordering=-dob            – sort by dob desc (= age asc)
+      GET  /api/patients/?ordering=last_visit      – sort by last encounter date (asc)
+      GET  /api/patients/?ordering=-last_visit     – sort by last encounter date (desc)
 
     Full patient snapshot (by MRNO):
       GET  /api/patients/mrno/<mrno>/            – complete patient details
@@ -34,12 +43,27 @@ class PatientViewSet(viewsets.ModelViewSet):
       GET  /api/patients/<id>/labs/
     """
 
-    queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["mrno", "name"]
-    ordering_fields = ["mrno", "name", "dob"]
-    ordering = ["mrno"]
+    # mrno_int  — annotated integer cast of mrno for correct numeric ordering.
+    # dob       — sortable proxy for age (age asc = dob desc).
+    # last_visit — annotated max encounter date per patient.
+    ordering_fields = ["mrno_int", "name", "dob", "last_visit"]
+    ordering = ["mrno_int"]
+
+    def get_queryset(self):
+        from clinical.models import Encounter
+
+        last_visit_subquery = (
+            Encounter.objects.filter(patient=OuterRef("pk"))
+            .order_by("-date")
+            .values("date")[:1]
+        )
+        return Patient.objects.annotate(
+            mrno_int=Cast("mrno", output_field=IntegerField()),
+            last_visit=Subquery(last_visit_subquery),
+        )
 
     # ── Full snapshot by MRNO ────────────────────────────────────────────────
 
@@ -107,14 +131,43 @@ class PatientViewSet(viewsets.ModelViewSet):
         serializer = LabSerializer(patient.lab_results.all(), many=True)
         return Response(serializer.data)
 
+    # ── Lightweight summary actions for patient details page ─────────────
+
+    @action(detail=True, methods=["get"], url_path="encounters-summary")
+    def encounters_summary(self, request, pk=None):
+        from clinical.serializers import EncounterSummarySerializer
+
+        patient = self.get_object()
+        qs = patient.encounters.select_related("clinician").order_by("-date")
+        serializer = EncounterSummarySerializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="labs-summary")
+    def labs_summary(self, request, pk=None):
+        from diagnostics.serializers import LabSummarySerializer
+
+        patient = self.get_object()
+        qs = patient.lab_results.order_by("-invoice_date")
+        serializer = LabSummarySerializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="radiology-summary")
+    def radiology_summary(self, request, pk=None):
+        from diagnostics.serializers import RadiologySummarySerializer
+
+        patient = self.get_object()
+        qs = patient.radiology_reports.order_by("-created_at")
+        serializer = RadiologySummarySerializer(qs, many=True)
+        return Response(serializer.data)
+
 
 class VitalsViewSet(viewsets.ModelViewSet):
     """
     CRUD endpoints for Vitals records.
 
     Query params:
-      ?patient=<patient_id> – filter by patient PK
-      ?ordering=<field>     – sort by timestamp
+      ?patient=<patient_id> - filter by patient PK
+      ?ordering=<field>     - sort by timestamp
     """
 
     queryset = Vitals.objects.select_related("patient")
@@ -175,6 +228,4 @@ def diagnose_with_medgemma(request):
         return Response({"error": detail}, status=resp.status_code)
     except Exception as e:
         logger.exception("Unexpected error in diagnose_with_medgemma")
-        return Response(
-            {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -333,6 +333,30 @@ export interface DiagnosisResult {
   advisory?: string;
 }
 
+/* ============ Summary Types (lightweight, for list views) ============ */
+
+export interface EncounterSummary {
+  id: number;
+  patient: number;
+  date: string;
+  clinician: number | null;
+  clinician_name: string | null;
+}
+
+export interface LabSummary {
+  id: number;
+  cpt_id: string;
+  cpt_name: string;
+  invoice_date: string | null;
+}
+
+export interface RadiologySummary {
+  id: number;
+  cpt_id: string;
+  cpt_name: string;
+  created_at: string;
+}
+
 /* ============ Query Parameters ============ */
 
 export interface ListQueryParams {

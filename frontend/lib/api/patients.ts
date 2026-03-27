@@ -14,6 +14,9 @@ import type {
   Medication,
   Radiology,
   Lab,
+  EncounterSummary,
+  LabSummary,
+  RadiologySummary,
 } from "@/types/api";
 
 export const patientsAPI = {
@@ -108,4 +111,26 @@ export const patientsAPI = {
    */
   getLabs: (patientId: number) =>
     apiClient.get<PaginatedResponse<Lab>>(`/patients/${patientId}/labs/`),
+
+  /**
+   * Lightweight encounter list (id, date, clinician_name only)
+   */
+  getEncountersSummary: (patientId: number) =>
+    apiClient.get<EncounterSummary[]>(
+      `/patients/${patientId}/encounters-summary/`,
+    ),
+
+  /**
+   * Lightweight lab list (id, cpt_name, invoice_date only)
+   */
+  getLabsSummary: (patientId: number) =>
+    apiClient.get<LabSummary[]>(`/patients/${patientId}/labs-summary/`),
+
+  /**
+   * Lightweight radiology list (id, cpt_name, created_at only)
+   */
+  getRadiologySummary: (patientId: number) =>
+    apiClient.get<RadiologySummary[]>(
+      `/patients/${patientId}/radiology-summary/`,
+    ),
 };

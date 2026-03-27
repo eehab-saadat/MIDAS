@@ -29,28 +29,26 @@ def process_radiology_image_sync(radiology_id):
         if Path(radiology.file_path).is_absolute():
             image_path = Path(radiology.file_path)
         else:
-            base_dir = Path(settings.BASE_DIR).parent
+            base_dir = Path(settings.BASE_DIR).parent # This gives /Users/huzyefah/Projects/MIDAS/MIDAS/backend
             image_path = base_dir / radiology.file_path
         
         if not image_path.exists():
             raise FileNotFoundError(f"Image file not found: {image_path}")
         
-        # Add microservices to path
-        base_dir = Path(settings.BASE_DIR).parent
-        microservices_path = base_dir / "microservices" / "image_preprocessor"
-        sys.path.insert(0, str(microservices_path))
-        
-        from pipeline import process_image
-        
-        # Create output directory
-        output_dir = base_dir / "data" / "processed_radiology" / f"radiology_{radiology_id}"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Process image
-        result = process_image(
-            input_path=str(image_path),
-            output_dir=str(output_dir)
+        microservices_url = getattr(
+            settings, "MICROSERVICES_URL", "http://localhost:8001"
         )
+        
+        import requests
+        with open(image_path, "rb") as f:
+            content_type = "image/jpeg" if image_path.suffix.lower() in [".jpg", ".jpeg"] else "application/octet-stream"
+            resp = requests.post(
+                f"{microservices_url}/preprocess-image",
+                files={"file": (image_path.name, f, content_type)},
+                # timeout=300
+            )
+        resp.raise_for_status()
+        result = resp.json()
         
         # Generate system conclusion
         from .tasks import generate_system_conclusion

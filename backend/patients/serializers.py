@@ -5,7 +5,9 @@ from .models import Patient, Vitals
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    # Computed from dob; not a DB column
+    # Computed from dob; not a DB column — cannot be used directly as an
+    # ordering field. Use ?ordering=dob (asc = oldest first / age desc) or
+    # ?ordering=-dob (desc = youngest first / age asc) instead.
     age = serializers.ReadOnlyField()
     # Most recent visit date computed from related records
     last_visit_date = serializers.SerializerMethodField()

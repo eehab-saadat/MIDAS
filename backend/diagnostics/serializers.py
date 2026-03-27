@@ -3,6 +3,32 @@ from rest_framework import serializers
 from .models import Lab, Radiology
 
 
+class RadiologySummarySerializer(serializers.ModelSerializer):
+    """Lightweight serializer for radiology lists — no result/conclusion text."""
+
+    class Meta:
+        model = Radiology
+        fields = [
+            "id",
+            "cpt_id",
+            "cpt_name",
+            "created_at",
+        ]
+
+
+class LabSummarySerializer(serializers.ModelSerializer):
+    """Lightweight serializer for lab lists — no results JSON."""
+
+    class Meta:
+        model = Lab
+        fields = [
+            "id",
+            "cpt_id",
+            "cpt_name",
+            "invoice_date",
+        ]
+
+
 class RadiologySerializer(serializers.ModelSerializer):
     patient_mrno = serializers.CharField(source="patient.mrno", read_only=True)
 

@@ -20,3 +20,5 @@ export { transcribeAPI } from "./transcribe";
 
 // Re-export types
 export type * from "@/types/api";
+export { authAPI } from "./auth";
+export type { LoginCredentials, TokenResponse } from "./auth";
