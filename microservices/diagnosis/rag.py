@@ -349,7 +349,7 @@ class VectorStore:
 _store: VectorStore | None = None
 
 
-def init_store(seed_path: str | Path = r"E:\FYP\MIDAS\data\Output\seed.csv") -> VectorStore:
+def init_store(seed_path: str | Path = None) -> VectorStore:
     """
     Initialise (or re-initialise) the singleton VectorStore.
 
@@ -357,6 +357,10 @@ def init_store(seed_path: str | Path = r"E:\FYP\MIDAS\data\Output\seed.csv") -> 
     over *seed_path*; otherwise ``retrieve_similar_cases`` will
     auto-init on first use with the default path.
     """
+    if seed_path is None:
+        seed_path = Path(__file__).resolve().parent.parent.parent / "data" / "Output" / "seed.csv"
+        if not seed_path.exists():
+            seed_path = Path(__file__).resolve().parent / "seed.csv"
     global _store
     _store = VectorStore(seed_path)
     return _store
@@ -365,7 +369,7 @@ def init_store(seed_path: str | Path = r"E:\FYP\MIDAS\data\Output\seed.csv") -> 
 def retrieve_similar_cases(
     patient_data: dict,
     k: int = 2,
-    seed_path: str | Path = r"E:\FYP\MIDAS\data\Output\seed.csv",
+    seed_path: str | Path = None,
 ) -> list[dict[str, Any]]:
     """
     Retrieve the *k* seed cases most similar to *patient_data*.
@@ -398,7 +402,7 @@ def add_to_store(
     diagnosis: str,
     reasoning: str,
     mrno: str = "FEEDBACK",
-    seed_path: str | Path = r"E:\FYP\MIDAS\data\Output\seed.csv",
+    seed_path: str | Path = None,
 ) -> None:
     """
     Add an approved diagnosis case to the singleton RAG store.

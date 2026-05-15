@@ -126,7 +126,7 @@ def _parse_response(raw: dict) -> dict:
 def generate_diagnosis(
     patient_data: dict,
     *,
-    seed_path: str = r"E:\FYP\MIDAS\data\Output\seed.csv",
+    seed_path: str = None,
     num_examples: int = 2,
     human_critique: str | None = None,
 ) -> dict:
