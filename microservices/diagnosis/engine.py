@@ -13,11 +13,16 @@ Changes from original
 
 import json
 import logging
+import os
 import re
 
 import requests
+from dotenv import load_dotenv
 
 from rag import _patient_to_text, retrieve_similar_cases
+
+# Load environment variables from .env file
+load_dotenv()
 
 log = logging.getLogger(__name__)
 
@@ -25,8 +30,8 @@ log = logging.getLogger(__name__)
 # Ollama configuration
 # ---------------------------------------------------------------------------
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "amsaravi/medgemma-4b-it:q6"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "amsaravi/medgemma-4b-it:q6")
 
 # ---------------------------------------------------------------------------
 # Prompt templates
