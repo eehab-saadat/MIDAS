@@ -50,8 +50,8 @@ logger = logging.getLogger(__name__)
 # Inference constants
 # ---------------------------------------------------------------------------
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "thiagomoraes/medgemma-4b-it:Q8_0"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "amsaravi/medgemma-4b-it:q6")
 
 # TODO: set the hosted endpoint URL once the hosted model is available
 HOSTED_ENDPOINT: str | None = os.getenv("HOSTED_ENDPOINT")

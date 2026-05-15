@@ -1,12 +1,13 @@
 """Core diagnosis logic: prompt construction, Ollama call, response parsing."""
 
 import json
+import os
 import re
 
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "amsaravi/medgemma-4b-it:q6"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "amsaravi/medgemma-4b-it:q6")
 
 SYSTEM_PROMPT = (
     "You are an expert medical AI assistant. "
