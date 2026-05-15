@@ -26,3 +26,6 @@ fastapi
 uvicorn
 instructor
 ollama
+sentence-transformers>=2.7.0
+scikit-learn>=1.4.0
+python-dotenv
