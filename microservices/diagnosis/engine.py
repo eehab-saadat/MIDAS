@@ -19,7 +19,7 @@ import re
 import requests
 from dotenv import load_dotenv
 
-from rag import _patient_to_text, retrieve_similar_cases
+from .rag import _patient_to_text, retrieve_similar_cases
 
 # Load environment variables from .env file
 load_dotenv()
