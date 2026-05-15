@@ -128,6 +128,7 @@ def generate_diagnosis(
     *,
     seed_path: str = r"E:\FYP\MIDAS\data\Output\seed.csv",
     num_examples: int = 2,
+    human_critique: str | None = None,
 ) -> dict:
     """
     Send *patient_data* to MedGemma via Ollama and return a parsed diagnosis.
@@ -198,6 +199,16 @@ def generate_diagnosis(
         parts.append(
             "Note: Limited patient data available. "
             "Please provide a general assessment based on the examples above."
+        )
+
+    # ── Optional: clinician critique from feedback loop ────────────────
+    if human_critique:
+        parts.append("\n\n=== CLINICIAN FEEDBACK ===\n")
+        parts.append(
+            "The previous diagnosis was rejected by the clinician with "
+            "the following critique. Please carefully address these "
+            "concerns and provide a revised diagnosis and reasoning.\n\n"
+            f"Critique: {human_critique}"
         )
 
     content = "".join(parts)

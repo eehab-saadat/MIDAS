@@ -298,6 +298,50 @@ class VectorStore:
         return results
 
 
+    # ── Dynamic insertion ─────────────────────────────────────────────────
+
+    def add_case(
+        self,
+        patient_data: dict,
+        diagnosis: str,
+        reasoning: str,
+        mrno: str = "FEEDBACK",
+    ) -> None:
+        """
+        Add a new case to the store at runtime (e.g. from clinician feedback).
+
+        The case is embedded immediately and appended to the index so it
+        becomes available for future k-shot retrievals without a restart.
+        """
+        text = _patient_to_text(patient_data)
+        case = {
+            "mrno": mrno,
+            "patient_data": patient_data,
+            "diagnosis": diagnosis.strip(),
+            "reasoning": reasoning.strip(),
+            "text": text,
+        }
+        self.cases.append(case)
+
+        if _USE_SBERT:
+            new_emb = self._encoder.encode(
+                [text],
+                normalize_embeddings=True,
+            )  # (1, D)
+        else:
+            raw = self._tfidf.transform([text]).toarray().astype(np.float32)
+            norm = np.linalg.norm(raw)
+            new_emb = raw / norm if norm > 0 else raw  # (1, D)
+
+        self.embeddings = np.vstack([self.embeddings, new_emb])
+        log.info(
+            "Added feedback case to store (mrno=%s, dx=%r). Total cases: %d",
+            mrno,
+            diagnosis,
+            len(self.cases),
+        )
+
+
 # ---------------------------------------------------------------------------
 # Singleton + public API
 # ---------------------------------------------------------------------------
@@ -347,3 +391,35 @@ def retrieve_similar_cases(
     if _store is None:
         init_store(seed_path)
     return _store.retrieve(patient_data, k)
+
+
+def add_to_store(
+    patient_data: dict,
+    diagnosis: str,
+    reasoning: str,
+    mrno: str = "FEEDBACK",
+    seed_path: str | Path = r"E:\FYP\MIDAS\data\Output\seed.csv",
+) -> None:
+    """
+    Add an approved diagnosis case to the singleton RAG store.
+
+    If the store has not been initialised yet, it is created first from
+    *seed_path* before the new case is appended.
+
+    Parameters
+    ----------
+    patient_data : dict
+        The patient JSON that produced the diagnosis.
+    diagnosis : str
+        The confirmed diagnosis string.
+    reasoning : str
+        The confirmed reasoning string.
+    mrno : str
+        Patient MRN (used as label only).
+    seed_path : str | Path
+        Fallback seed path for lazy initialisation.
+    """
+    global _store
+    if _store is None:
+        init_store(seed_path)
+    _store.add_case(patient_data, diagnosis, reasoning, mrno)

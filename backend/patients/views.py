@@ -189,7 +189,12 @@ MICROSERVICE_URL = os.getenv("MICROSERVICE_URL", "http://localhost:8001")
 
 @api_view(["POST"])
 def diagnose_with_medgemma(request):
-    """Proxy diagnosis request to the FastAPI microservice running MedGemma."""
+    """Proxy diagnosis request to the FastAPI microservice running MedGemma.
+    
+    Accepts an optional ``human_critique`` field in the request body.
+    When present the critique is forwarded to the microservice so it
+    can re-generate a revised diagnosis that addresses the feedback.
+    """
     mrno = request.query_params.get("mrno")
     if not mrno:
         return Response(
@@ -204,10 +209,19 @@ def diagnose_with_medgemma(request):
             status=status.HTTP_404_NOT_FOUND,
         )
 
+    # Optional critique from the feedback loop
+    human_critique = None
+    if request.data:
+        human_critique = request.data.get("human_critique")
+
     try:
+        payload = {"patient_data": patient_data}
+        if human_critique:
+            payload["human_critique"] = human_critique
+
         resp = requests.post(
             f"{MICROSERVICE_URL}/diagnose",
-            json={"patient_data": patient_data},
+            json=payload,
             timeout=(10, 600),
         )
         resp.raise_for_status()
@@ -229,3 +243,58 @@ def diagnose_with_medgemma(request):
     except Exception as e:
         logger.exception("Unexpected error in diagnose_with_medgemma")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+def diagnosis_feedback(request):
+    """Forward a clinician-approved diagnosis to the microservice RAG store.
+
+    Expects a JSON body with:
+      - mrno: str          — patient MRN
+      - diagnosis: str     — the approved diagnosis text
+      - reasoning: str     — the approved reasoning text
+
+    The view looks up the full patient data and sends it alongside the
+    diagnosis/reasoning to the microservice ``/diagnose/feedback`` endpoint
+    which inserts the case into the in-memory vector store.
+    """
+    mrno = request.data.get("mrno")
+    diagnosis = request.data.get("diagnosis")
+    reasoning = request.data.get("reasoning")
+
+    if not mrno or not diagnosis or not reasoning:
+        return Response(
+            {"error": "Fields 'mrno', 'diagnosis', and 'reasoning' are required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    patient_data = get_complete_patient_details(mrno)
+    if patient_data is None:
+        return Response(
+            {"error": f"No patient found with MRNO '{mrno}'."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        resp = requests.post(
+            f"{MICROSERVICE_URL}/diagnose/feedback",
+            json={
+                "patient_data": patient_data,
+                "diagnosis": diagnosis,
+                "reasoning": reasoning,
+                "mrno": mrno,
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return Response(resp.json(), status=status.HTTP_200_OK)
+
+    except requests.exceptions.ConnectionError:
+        return Response(
+            {"error": "Cannot reach the diagnosis microservice."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+    except Exception as e:
+        logger.exception("Unexpected error in diagnosis_feedback")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

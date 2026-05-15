@@ -13,7 +13,7 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from PIL import Image, UnidentifiedImageError
 
-from diagnosis import generate_diagnosis
+from diagnosis import generate_diagnosis, add_to_store
 
 logger = logging.getLogger(__name__)
 
@@ -53,13 +53,42 @@ app = FastAPI(
 
 class DiagnoseRequest(BaseModel):
     patient_data: dict
+    human_critique: str | None = None
+
+
+class FeedbackRequest(BaseModel):
+    patient_data: dict
+    diagnosis: str
+    reasoning: str
+    mrno: str = "FEEDBACK"
+
+
+@app.post("/diagnose/feedback")
+async def diagnose_feedback(body: FeedbackRequest) -> dict:
+    """Store an approved diagnosis in the RAG store for future k-shot retrieval."""
+    try:
+        await run_in_threadpool(
+            add_to_store,
+            body.patient_data,
+            body.diagnosis,
+            body.reasoning,
+            body.mrno,
+        )
+        return {"status": "ok", "message": "Case added to RAG store."}
+    except Exception as exc:
+        logger.exception("Failed to add feedback case to RAG store")
+        raise HTTPException(status_code=500, detail=f"Failed to store feedback: {exc}")
 
 
 @app.post("/diagnose")
 async def diagnose(body: DiagnoseRequest) -> dict:
     """Run MedGemma diagnosis on patient data via Ollama."""
     try:
-        result = await run_in_threadpool(generate_diagnosis, body.patient_data)
+        result = await run_in_threadpool(
+            generate_diagnosis,
+            body.patient_data,
+            human_critique=body.human_critique,
+        )
         return result
     except requests.exceptions.ConnectionError:
         raise HTTPException(
